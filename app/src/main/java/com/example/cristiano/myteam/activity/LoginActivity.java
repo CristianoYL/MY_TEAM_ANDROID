@@ -3,6 +3,7 @@ package com.example.cristiano.myteam.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -29,12 +30,24 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.example.cristiano.myteam.R;
+
+import util.Constant;
+import util.ParamFactory;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -190,7 +203,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // perform the user login attempt.
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            mAuthTask.execute();
         }
     }
 
@@ -298,10 +311,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<String, Void, String> {
 
         private final String mEmail;
         private final String mPassword;
+
+        class LoginCredential {
+            String email;
+            String password;
+            LoginCredential(String email, String password) {
+                this.email = email;
+                this.password = password;
+            }
+        }
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -309,41 +331,78 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected String doInBackground(String... params) {
             // TODO: attempt authentication against a network service.
 
+            HttpURLConnection httpURLConnection = null;
+            String response = null;
             try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    if ( pieces[1].equals(mPassword) ) {
-                        Log.d("TEST","Login succeeded!");
-                    } else {
-                        Log.d("TEST","Login failed!");
-                    }
-                    return pieces[1].equals(mPassword);
+                URL url = new URL(Constant.URL_LOGIN);
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setDoOutput(true);
+                OutputStream outputStream = httpURLConnection.getOutputStream();
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, Constant.SERVER_CHARSET));
+                ParamFactory.put("email",mEmail);
+                ParamFactory.put("password",mPassword);
+                String data = ParamFactory.parseParams();
+                bufferedWriter.write(data);
+                bufferedWriter.flush();
+                bufferedWriter.close();
+                InputStream inputStream = httpURLConnection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                StringBuilder stringBuilder = new StringBuilder();
+                while ( (response = reader.readLine()) != null ) {
+                    stringBuilder.append(response);
+                    stringBuilder.append("\n");
                 }
+                response = stringBuilder.toString();
+                Log.d("RESPONSE",stringBuilder.toString());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if ( httpURLConnection != null ) {
+                    httpURLConnection.disconnect();
+                }
+                Log.d("TEST","Send request");
             }
-
-            // TODO: register the new account here.
-            Log.d("TEST","Registering...");
-            return true;
+            return response;
+//            for (String credential : DUMMY_CREDENTIALS) {
+//                String[] pieces = credential.split(":");
+//                if (pieces[0].equals(mEmail)) {
+//                    // Account exists, return true if the password matches.
+//                    if ( pieces[1].equals(mPassword) ) {
+//                        Log.d("TEST","Login succeeded!");
+//                    } else {
+//                        Log.d("TEST","Login failed!");
+//                    }
+//                    return pieces[1].equals(mPassword);
+//                }
+//            }
+//
+//            // TODO: register the new account here.
+//            Log.d("TEST","Registering...");
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final String response) {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
-                finish();
+            if ( response != null && response.contains("login success")) {
+                Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
+                startActivity(intent);
+            } else if ( response != null && response.contains("does not exist") ) {
+                mEmailView.setError(getString(R.string.error_account_not_exists));
+                mEmailView.requestFocus();
+            } else if ( response != null && response.contains("not matching") ){
+                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                mPasswordView.requestFocus();
+            } else if ( response != null && response.contains("unable to connect") ){
+                mPasswordView.setError(getString(R.string.error_connection_fail));
+                mPasswordView.requestFocus();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();
