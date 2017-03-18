@@ -22,4 +22,22 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <!-- Strings related to user profile page -->
+    <string name="player_name">Name:</string>
+    <string name="player_role">Role:</string>
+    <string name="player_age">Age:</string>
+    <string name="player_height">Height:</string>
+    <string name="player_weight">Weight:</string>
+    <string name="player_foot">Strong Foot:</string>
+    <string name="player_club">Clubs:</string>
+    <string name="player_detail">View More</string>
+    <string name="player_gamePlayed">PLAYED</string>
+    <string name="player_win">WIN</string>
+    <string name="player_draw">DRAW</string>
+    <string name="player_loss">LOSS</string>
+    <string name="player_goal">GOAL</string>
+    <string name="player_assist">ASSIST</string>
+    <string name="player_yellow">YELLOW</string>
+    <string name="player_red">RED</string>
+    <string name="player_cleanSheet">CLEAN SHEET</string>
 </resources>
