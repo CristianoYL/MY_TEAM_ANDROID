@@ -46,8 +46,8 @@ import java.util.List;
 
 import com.example.cristiano.myteam.R;
 
-import util.Constant;
-import util.ParamFactory;
+import com.example.cristiano.myteam.util.Constant;
+import com.example.cristiano.myteam.util.ParamFactory;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
