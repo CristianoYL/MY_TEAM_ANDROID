@@ -359,8 +359,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 response = stringBuilder.toString();
                 Log.d("RESPONSE",stringBuilder.toString());
             } catch (MalformedURLException e) {
+                Log.d("problem", "p");
                 e.printStackTrace();
             } catch (IOException e) {
+                Log.d("problem2", "p");
                 e.printStackTrace();
             } finally {
                 if ( httpURLConnection != null ) {

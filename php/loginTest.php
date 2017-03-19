@@ -1,6 +1,6 @@
 <?PHP
 $username = "root";
-$password = "dedicatedtomyundergrad";
+$password = "";
 $url = "localhost";
 $database = "myteam";
 $connection =  mysqli_connect($url, $username, $password, $database);
