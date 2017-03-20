@@ -78,16 +78,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private EditText mPasswordConfirmView;
+    private Button mEmailSignInButton;
+    private Button mEmailRegisterButton;
+    private boolean isLogin;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.et_email);
         populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
+        isLogin = true;
+        mPasswordView = (EditText) findViewById(R.id.et_password);
+        mPasswordConfirmView =  (EditText) findViewById(R.id.et_confirm);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -99,14 +106,36 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                if (isLogin) {
+                    attemptLogin();
+                } else {
+                    //TODO register
+                }
             }
         });
 
+        mEmailRegisterButton = (Button) findViewById(R.id.email_register_button);
+        mEmailRegisterButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //SET CONFIRM & Login button
+                if (isLogin) {
+                    mPasswordConfirmView.setVisibility(View.VISIBLE);
+                    mEmailRegisterButton.setText(R.string.title_activity_cancel);
+                    mEmailSignInButton.setText(R.string.action_register);
+                } else {
+                    mPasswordConfirmView.setVisibility(View.GONE);
+                    mEmailRegisterButton.setText(R.string.action_register);
+                    mEmailSignInButton.setText(R.string.action_sign_in);
+                }
+
+                isLogin = !isLogin;
+            }
+        });
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }
