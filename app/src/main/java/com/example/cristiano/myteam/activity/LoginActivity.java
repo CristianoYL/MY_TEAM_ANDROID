@@ -124,9 +124,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             public void onClick(View view) {
                 //SET CONFIRM & Login button
                 if (isLogin) {
-                    mPasswordConfirmView.setVisibility(View.VISIBLE);
                     mEmailRegisterButton.setText(R.string.title_activity_cancel);
                     mEmailSignInButton.setText(R.string.action_register);
+                    mPasswordConfirmView.setVisibility(View.VISIBLE);
                 } else {
                     mPasswordConfirmView.setVisibility(View.GONE);
                     mEmailRegisterButton.setText(R.string.action_register);
