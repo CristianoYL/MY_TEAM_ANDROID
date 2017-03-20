@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.example.cristiano.myteam.R;
 
@@ -24,7 +25,6 @@ public class PlayerActivity extends AppCompatActivity
         setContentView(R.layout.activity_player);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_profile);
         setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_editProfile);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,6 +42,8 @@ public class PlayerActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view_profile);
         navigationView.setNavigationItemSelectedListener(this);
+        String[][] sampleData = { {"PLAYED","10"},{"WIN","7"},{"DRAW","2"},{"LOSS","1"},{"GOAL","8"},{"ASSIST","3"},{"YELLOW","1"},{"RED","0"} };
+        renderPlayerStats(sampleData);
     }
 
     @Override
@@ -95,5 +97,29 @@ public class PlayerActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void renderPlayerStats(String[][] stats) {
+        if ( stats == null ) {
+            return;
+        }
+        View[] cards = new View[8];
+        cards[0] = findViewById(R.id.card1);
+        cards[1] = findViewById(R.id.card2);
+        cards[2] = findViewById(R.id.card3);
+        cards[3] = findViewById(R.id.card4);
+        cards[4] = findViewById(R.id.card5);
+        cards[5] = findViewById(R.id.card6);
+        cards[6] = findViewById(R.id.card7);
+        cards[7] = findViewById(R.id.card8);
+        View view;
+        TextView tv_title, tv_stats;
+        for ( int i = 0; i < stats.length; i++ ) {
+            view = cards[i];
+            tv_title = (TextView) view.findViewById(R.id.tv_cardTitle);
+            tv_stats = (TextView) view.findViewById(R.id.tv_cardContent);
+            tv_title.setText(stats[i][0]);
+            tv_stats.setText(stats[i][1]);
+        }
     }
 }
