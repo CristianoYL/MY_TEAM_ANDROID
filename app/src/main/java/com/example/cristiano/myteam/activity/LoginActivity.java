@@ -116,6 +116,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     attemptLogin();
                 } else {
                     //TODO: register
+                    attemtRegister();
                 }
             }
         });
@@ -191,6 +192,51 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
+
+    private void attemtRegister() {
+        if (mAuthTask != null) {
+            return;
+        }
+
+        // Reset errors.
+        et_email.setError(null);
+        et_password.setError(null);
+
+        String email = et_email.getText().toString();
+        String password = et_password.getText().toString();
+        String confirm_pwd = et_passwordConfirm.getText().toString();
+
+
+        boolean cancel = false;
+        View focusView = null;
+
+        // Check for a valid password, if the user entered one.
+        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+            et_password.setError(getString(R.string.error_invalid_password));
+            focusView = et_password;
+            cancel = true;
+        }
+
+        // Check for a valid email address.
+        if (TextUtils.isEmpty(email)) {
+            et_email.setError(getString(R.string.error_field_required));
+            focusView = et_email;
+            cancel = true;
+        } else if (!isEmailValid(email)) {
+            et_email.setError(getString(R.string.error_invalid_email));
+            focusView = et_email;
+            cancel = true;
+        }
+
+        //check password matchup
+        if (!password.equals(confirm_pwd)) {
+            et_passwordConfirm.setError(getString(R.string.error_match_failed));
+            focusView = et_passwordConfirm;
+            cancel = true;
+        }
+
+    }
+
     private void attemptLogin() {
         if (mAuthTask != null) {
             return;

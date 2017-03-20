@@ -27,6 +27,9 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+
+    <!--Strings related to registration -->
+    <string name="error_match_failed">Password does not match</string>
     <!-- Strings related to user profile page -->
     <string name="player_name">Name</string>
     <string name="player_first_name">First Name</string>
