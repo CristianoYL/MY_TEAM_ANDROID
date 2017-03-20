@@ -20,14 +20,28 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_player" />
+    <include layout="@layout/profile_layout"
+        android:id="@+id/layout_profile"
+        />
+
+    <include layout="@layout/player_reg_layout"
+        android:id="@+id/layout_registration"
+        android:visibility="gone"/>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_editProfile"
+        android:id="@+id/fab_right"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@android:drawable/ic_menu_edit" />
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="@dimen/fab_margin"
+        android:visibility="invisible"
+        app:srcCompat="@android:drawable/ic_menu_close_clear_cancel" />
 
 </android.support.design.widget.CoordinatorLayout>

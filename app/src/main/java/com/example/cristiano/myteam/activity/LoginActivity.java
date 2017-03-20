@@ -42,6 +42,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.example.cristiano.myteam.R;
@@ -82,6 +83,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View pb_progress;
     private View mLoginFormView;
     private boolean isLogin;
+    HashMap<String,String> playerInfo = new HashMap<>();
 
 
     @Override
@@ -124,7 +126,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             public void onClick(View view) {
                 if (isLogin) {
                     // go to registration page, set button to "Register" and "Cancel"
-                    btn_register.setText(R.string.title_activity_cancel);
+                    btn_register.setText(R.string.cancel);
                     btn_signIn.setText(R.string.action_register);
                     et_passwordConfirm.setVisibility(View.VISIBLE);
                 } else {
@@ -199,6 +201,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         et_password.setError(null);
 
         // Store values at the time of the login attempt.
+        playerInfo.clear();
         String email = et_email.getText().toString();
         String password = et_password.getText().toString();
 
@@ -230,6 +233,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
+            playerInfo.put(Constant.PLAYER_EMAIL,email);
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute();
@@ -421,9 +425,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected void onPostExecute(final String response) {
             mAuthTask = null;
             showProgress(false);
-
+            // use sample data to display TODO: use user data retrieved from server
             if ( response != null && response.contains("login success")) {
+                playerInfo.put(Constant.PLAYER_DISPLAY_NAME,"Peter Griffin");
+                playerInfo.put(Constant.PLAYER_ROLE,"Forward");
+                playerInfo.put(Constant.PLAYER_CLUB,"New England");
+                playerInfo.put(Constant.PLAYER_AGE,"40");
+                playerInfo.put(Constant.PLAYER_WEIGHT,"250");
+                playerInfo.put(Constant.PLAYER_HEIGHT,"180");
+                playerInfo.put(Constant.STATS_APPEARANCE,"10");
+                playerInfo.put(Constant.STATS_WIN,"0");
+                playerInfo.put(Constant.STATS_DRAW,"0");
+                playerInfo.put(Constant.STATS_LOSS,"10");
+                playerInfo.put(Constant.STATS_GOAL,"0");
+                playerInfo.put(Constant.STATS_ASSIST,"0");
+                playerInfo.put(Constant.STATS_YELLOW,"6");
+                playerInfo.put(Constant.STATS_RED,"10");
+                ArrayList<String> selectedStats = new ArrayList<>(8);
+                selectedStats.add(Constant.STATS_APPEARANCE);
+                selectedStats.add(Constant.STATS_WIN);
+                selectedStats.add(Constant.STATS_DRAW);
+                selectedStats.add(Constant.STATS_LOSS);
+                selectedStats.add(Constant.STATS_GOAL);
+                selectedStats.add(Constant.STATS_ASSIST);
+                selectedStats.add(Constant.STATS_YELLOW);
+                selectedStats.add(Constant.STATS_RED);
+                // put sample data into Intent and navigate to PlayerActivity
                 Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
+                intent.putExtra(Constant.PLAYER_SELECTED_STATS,selectedStats);
+                intent.putExtra(Constant.PLAYER_INFO, playerInfo);
                 startActivity(intent);
             } else if ( response != null && response.contains("does not exist") ) {
                 et_email.setError(getString(R.string.error_account_not_exists));
