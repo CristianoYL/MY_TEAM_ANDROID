@@ -5,8 +5,8 @@ package com.example.cristiano.myteam.util;
  */
 
 public class Constant {
-    public static final String URL_LOGIN = "http://172.31.99.50/myteam/loginTest.php";
-    public static final String URL_REGISTER = "http://172.31.99.50/myteam/registerTest.php";
+    public static final String URL_LOGIN = "http://192.168.1.9/myteam/loginTest.php";
+    public static final String URL_REGISTER = "http://192.168.1.9/myteam/registerTest.php";
     public static final String SERVER_CHARSET = "UTF-8";
 
     public static final String PLAYER_INFO = "playerInfo";

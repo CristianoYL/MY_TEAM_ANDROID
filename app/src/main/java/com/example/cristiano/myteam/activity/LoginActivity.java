@@ -406,7 +406,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     public class UserLoginTask extends AsyncTask<String, Void, String> {
 
-        boolean isLogin;
         @Override
         protected String doInBackground(String... params) {
             // TODO: attempt authentication against a network service.
@@ -414,28 +413,31 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             HttpURLConnection httpURLConnection = null;
             String response = null;
             String requestType = params[0];
+            Log.d("para0",params[0]);
+            Log.d("para1",params[1]);
+            Log.d("para2",params[2]);
             try {
                 URL url;
                 if (requestType.equals(Constant.REQUEST_LOGIN)) {
-                    isLogin = true;
+                    Log.d("TEST","login...");
                     url = new URL(Constant.URL_LOGIN);
                 } else {
-                    isLogin = false;
                     url = new URL(Constant.URL_REGISTER);
                 }
                 httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.setRequestMethod("POST");
                 httpURLConnection.setDoOutput(true);
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 OutputStream outputStream = httpURLConnection.getOutputStream();
                 BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, Constant.SERVER_CHARSET));
                 ParamFactory.put("email",params[1]);
                 ParamFactory.put("password",params[2]);
                 String data = ParamFactory.parseParams();
+                Log.d("TEST","POSTING: " + data);
                 bufferedWriter.write(data);
                 bufferedWriter.flush();
                 bufferedWriter.close();
+                InputStream inputStream = httpURLConnection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 StringBuilder stringBuilder = new StringBuilder();
                 while ( (response = reader.readLine()) != null ) {
                     stringBuilder.append(response);
@@ -475,11 +477,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected void onPostExecute(String response) {
-
+            mAuthTask = null;
+            showProgress(false);
             // use sample data to display TODO: use user data retrieved from server
             if (isLogin) {
-                mAuthTask = null;
-                showProgress(false);
                 if ( response != null && response.contains("login success")) {
                     playerInfo.put(Constant.PLAYER_DISPLAY_NAME,"Peter Griffin");
                     playerInfo.put(Constant.PLAYER_ROLE,"Forward");
@@ -523,11 +524,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     et_password.requestFocus();
                 }
             } else {
-                if (response != null && response.contains("registration success")) {
+                if (response != null && response.contains("Register succeeded")) {
                     et_passwordConfirm.setVisibility(View.GONE);
                     btn_register.setText(R.string.action_register);
                     btn_signIn.setText(R.string.action_sign_in);
-                } else if (response != null && response.contains("emails already exists")) {
+                    isLogin = true;
+                } else if (response != null && response.contains("Register failed")) {
                     et_email.setError(getString(R.string.error_email_registered));
                     et_email.requestFocus();
                 } else {
