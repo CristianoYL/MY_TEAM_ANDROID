@@ -29,6 +29,7 @@
     </string>
 
     <!--Strings related to registration -->
+    <string name="error_email_registered">Email already registered</string>
     <string name="error_match_failed">Password does not match</string>
     <!-- Strings related to user profile page -->
     <string name="player_name">Name</string>
