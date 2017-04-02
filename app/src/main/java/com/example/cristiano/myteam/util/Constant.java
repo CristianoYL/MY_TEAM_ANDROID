@@ -5,9 +5,27 @@ package com.example.cristiano.myteam.util;
  */
 
 public class Constant {
-    public static final String URL_LOGIN = "http://192.168.1.9/myteam/loginTest.php";
-    public static final String URL_REGISTER = "http://192.168.1.9/myteam/registerTest.php";
+    public static final String URL = "http://192.168.1.9:5000";
+    public static final String URL_LOGIN = URL + "/auth";
+    public static final String URL_REGISTER = URL + "/user";
+    public static final String URL_GET_PLAYER = URL + "/player/";
+
     public static final String SERVER_CHARSET = "UTF-8";
+
+    public static final int CODE_OK = 200;
+    public static final int CODE_CREATED = 201;
+    public static final int CODE_BAD_REQUEST = 400;
+    public static final int CODE_UNAUTHORIZED = 401;
+    public static final int CODE_NOT_FOUND = 404;
+    public static final int CODE_INTERNAL_SERVER_ERROR = 500;
+
+    public static final String KEY_DESC = "description";
+    public static final String KEY_MSG = "message";
+
+    public static final String METHOD_POST = "POST";
+    public static final String METHOD_GET = "GET";
+    public static final String METHOD_PUT = "PUT";
+    public static final String METHOD_DELETE = "DELETE";
 
     public static final String PLAYER_INFO = "playerInfo";
     public static final String PLAYER_SELECTED_STATS = "selectedStats";

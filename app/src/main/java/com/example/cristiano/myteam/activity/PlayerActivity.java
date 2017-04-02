@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,7 +18,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.cristiano.myteam.R;
+import com.example.cristiano.myteam.request.BackgroundTaskHelper;
+import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.util.Constant;
+import com.example.cristiano.myteam.request.RequestHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,6 +89,60 @@ public class PlayerActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         Bundle bundle = getIntent().getExtras();
+        if ( !bundle.containsKey(Constant.PLAYER_EMAIL) ) {
+            return;
+        }
+        String url = Constant.URL_GET_PLAYER + bundle.getString(Constant.PLAYER_EMAIL);
+        RequestAction actionGetPlayer = new RequestAction() {
+            @Override
+            public void actOnPre() {
+
+            }
+
+            @Override
+            public void actOnPost(int responseCode, String response) {
+                if ( responseCode == 200 ) {    // player found, render player profile
+                    playerInfo = new HashMap<>();
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        playerInfo.put(Constant.PLAYER_DISPLAY_NAME,jsonObject.getString(Constant.PLAYER_DISPLAY_NAME));
+                        playerInfo.put(Constant.PLAYER_ROLE,"Forward");
+                        playerInfo.put(Constant.PLAYER_CLUB,jsonObject.getString(Constant.PLAYER_CLUB));
+                        playerInfo.put(Constant.PLAYER_AGE,jsonObject.getString(Constant.PLAYER_AGE));
+                        playerInfo.put(Constant.PLAYER_WEIGHT,"250");
+                        playerInfo.put(Constant.PLAYER_HEIGHT,"180");
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
+                    playerInfo.put(Constant.STATS_APPEARANCE,"10");
+                    playerInfo.put(Constant.STATS_WIN,"0");
+                    playerInfo.put(Constant.STATS_DRAW,"0");
+                    playerInfo.put(Constant.STATS_LOSS,"10");
+                    playerInfo.put(Constant.STATS_GOAL,"0");
+                    playerInfo.put(Constant.STATS_ASSIST,"0");
+                    playerInfo.put(Constant.STATS_YELLOW,"6");
+                    playerInfo.put(Constant.STATS_RED,"10");
+                    ArrayList<String> selectedStats = new ArrayList<>(8);
+                    selectedStats.add(Constant.STATS_APPEARANCE);
+                    selectedStats.add(Constant.STATS_WIN);
+                    selectedStats.add(Constant.STATS_DRAW);
+                    selectedStats.add(Constant.STATS_LOSS);
+                    selectedStats.add(Constant.STATS_GOAL);
+                    selectedStats.add(Constant.STATS_ASSIST);
+                    selectedStats.add(Constant.STATS_YELLOW);
+                    selectedStats.add(Constant.STATS_RED);
+                    showProfilePage(playerInfo,selectedStats);
+                } else if ( responseCode == 404 ) { // player not found, go to registration page
+                    showRegistrationPage();
+                } else {    // unknown error
+                    Log.e("PlayerActivity","Error in loading player profile.\nError Message:\n" + response);
+                }
+            }
+        };
+        RequestHelper.sendGetRequest(url,actionGetPlayer);
         if ( !bundle.containsKey(Constant.PLAYER_INFO) ) {
             showRegistrationPage();
         } else {
@@ -201,7 +262,7 @@ public class PlayerActivity extends AppCompatActivity
      * @param playerInfo user's info stored in HashMap
      * @param selectedStats keys of user's selected stats entries
      */
-    private void showProfilePage(HashMap<String,String> playerInfo, ArrayList selectedStats){
+    private void showProfilePage(HashMap<String,String> playerInfo, ArrayList<String> selectedStats){
         layout_registration.setVisibility(View.GONE);
         layout_profile.setVisibility(View.VISIBLE);
         fab_left.setVisibility(View.INVISIBLE);

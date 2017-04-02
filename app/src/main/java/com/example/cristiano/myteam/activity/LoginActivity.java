@@ -14,7 +14,6 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -30,25 +29,21 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import com.example.cristiano.myteam.R;
 
+import com.example.cristiano.myteam.request.RequestAction;
+import com.example.cristiano.myteam.structure.Account;
+import com.example.cristiano.myteam.structure.UserCredential;
 import com.example.cristiano.myteam.util.Constant;
-import com.example.cristiano.myteam.util.ParamFactory;
+import com.example.cristiano.myteam.request.RequestHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -72,7 +67,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
+    private RequestAction requestAction = null;
 
     // UI references.
     private AutoCompleteTextView et_email;
@@ -83,7 +78,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View pb_progress;
     private View mLoginFormView;
     private boolean isLogin;
-    HashMap<String,String> playerInfo = new HashMap<>();
+    private String email, password;
 
 
     @Override
@@ -194,7 +189,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
 
     private void attemptRegister() {
-        if (mAuthTask != null) {
+        if (requestAction != null) {
+            Log.d("REGISTER","another request in being sent...");
             return;
         }
 
@@ -202,8 +198,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         et_email.setError(null);
         et_password.setError(null);
 
-        String email = et_email.getText().toString();
-        String password = et_password.getText().toString();
+        this.email = et_email.getText().toString();
+        this.password = et_password.getText().toString();
         String confirm_pwd = et_passwordConfirm.getText().toString();
 
 
@@ -218,17 +214,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(this.email)) {
             et_email.setError(getString(R.string.error_field_required));
             focusView = et_email;
             cancel = true;
-        } else if (!isEmailValid(email)) {
+        } else if (!isEmailValid(this.email)) {
             et_email.setError(getString(R.string.error_invalid_email));
             focusView = et_email;
             cancel = true;
         }
 
-        //check password matchup
+        //check password match up
         if (!password.equals(confirm_pwd)) {
             et_passwordConfirm.setError(getString(R.string.error_match_failed));
             focusView = et_passwordConfirm;
@@ -242,16 +238,49 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask();
-            String[] credentials = {Constant.REQUEST_REGISTER, email, password};
-            mAuthTask.execute(credentials);
+            Account account = new Account(this.email,this.password);
+            String credentials = account.toJson();
+            requestAction = new RequestAction() {
+                @Override
+                public void actOnPre() {
+                    showProgress(true);
+                }
+
+                @Override
+                public void actOnPost(int responseCode, String response) {
+                    Log.d("Register response",response);
+                    if ( responseCode == Constant.CODE_CREATED ) {
+                        isLogin = true;
+                        et_passwordConfirm.setVisibility(View.GONE);
+                        btn_register.setText(R.string.action_register);
+                        btn_signIn.setText(R.string.action_sign_in);
+                        et_password.requestFocus();
+                        Toast.makeText(LoginActivity.this,"Registration Succeeded!",Toast.LENGTH_SHORT).show();
+                    } else {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            String message = jsonObject.getString(Constant.KEY_MSG);
+                            et_email.setError(message);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.e("LOGIN","unexpected response");
+                            et_email.setError(response);
+                        }
+                        et_email.requestFocus();
+                    }
+                    showProgress(false);
+                    requestAction = null;
+                }
+            };
+            Log.d("LOGIN_TEST","registering...");
+            RequestHelper.sendPostRequest(Constant.URL_REGISTER,credentials,requestAction);
         }
 
     }
 
     private void attemptLogin() {
-        if (mAuthTask != null) {
+        if (requestAction != null) {
+            Log.d("LOGIN","another request in being sent...");
             return;
         }
 
@@ -260,26 +289,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         et_password.setError(null);
 
         // Store values at the time of the login attempt.
-        playerInfo.clear();
-        String email = et_email.getText().toString();
-        String password = et_password.getText().toString();
+        this.email = et_email.getText().toString();
+        this.password = et_password.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (!TextUtils.isEmpty(this.password) && !isPasswordValid(this.password)) {
             et_password.setError(getString(R.string.error_invalid_password));
             focusView = et_password;
             cancel = true;
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(this.email)) {
             et_email.setError(getString(R.string.error_field_required));
             focusView = et_email;
             cancel = true;
-        } else if (!isEmailValid(email)) {
+        } else if (!isEmailValid(this.email)) {
             et_email.setError(getString(R.string.error_invalid_email));
             focusView = et_email;
             cancel = true;
@@ -292,11 +320,39 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            playerInfo.put(Constant.PLAYER_EMAIL,email);
-            showProgress(true);
-            String[] credentials = {Constant.REQUEST_LOGIN, email, password};
-            mAuthTask = new UserLoginTask();
-            mAuthTask.execute(credentials);
+            UserCredential userCredential = new UserCredential(this.email,this.password);
+            String credentials = userCredential.toJson();
+            requestAction = new RequestAction() {
+                @Override
+                public void actOnPre() {
+                    showProgress(true);
+                }
+
+                @Override
+                public void actOnPost(int responseCode, String response) {
+                    Log.d("Response",response);
+                    if ( responseCode == 200 ) {
+                        Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
+                        intent.putExtra(Constant.PLAYER_EMAIL,email);
+                        startActivity(intent);
+                    } else {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            String message = jsonObject.getString(Constant.KEY_DESC);
+                            et_password.setError(message);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.e("LOGIN","unexpected response");
+                            et_password.setError(response);
+                        }
+                        et_password.requestFocus();
+                    }
+                    showProgress(false);
+                    requestAction = null;
+                }
+            };
+            Log.d("LOGIN_TEST","login...");
+            RequestHelper.sendPostRequest(Constant.URL_LOGIN,credentials,requestAction);
         }
     }
 
@@ -399,152 +455,4 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
     }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... params) {
-            // TODO: attempt authentication against a network service.
-
-            HttpURLConnection httpURLConnection = null;
-            String response = null;
-            String requestType = params[0];
-            Log.d("para0",params[0]);
-            Log.d("para1",params[1]);
-            Log.d("para2",params[2]);
-            try {
-                URL url;
-                if (requestType.equals(Constant.REQUEST_LOGIN)) {
-                    Log.d("TEST","login...");
-                    url = new URL(Constant.URL_LOGIN);
-                } else {
-                    url = new URL(Constant.URL_REGISTER);
-                }
-                httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoOutput(true);
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, Constant.SERVER_CHARSET));
-                ParamFactory.put("email",params[1]);
-                ParamFactory.put("password",params[2]);
-                String data = ParamFactory.parseParams();
-                Log.d("TEST","POSTING: " + data);
-                bufferedWriter.write(data);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                StringBuilder stringBuilder = new StringBuilder();
-                while ( (response = reader.readLine()) != null ) {
-                    stringBuilder.append(response);
-                    stringBuilder.append("\n");
-                }
-                response = stringBuilder.toString();
-                Log.d("RESPONSE",stringBuilder.toString());
-            } catch (MalformedURLException e) {
-                Log.d("login activity", "wrong url");
-                e.printStackTrace();
-            } catch (IOException e) {
-                Log.d("login activity", "io exception");
-                e.printStackTrace();
-            } finally {
-                if ( httpURLConnection != null ) {
-                    httpURLConnection.disconnect();
-                }
-                Log.d("TEST","Send request");
-            }
-            return response;
-//            for (String credential : DUMMY_CREDENTIALS) {
-//                String[] pieces = credential.split(":");
-//                if (pieces[0].equals(mEmail)) {
-//                    // Account exists, return true if the password matches.
-//                    if ( pieces[1].equals(mPassword) ) {
-//                        Log.d("TEST","Login succeeded!");
-//                    } else {
-//                        Log.d("TEST","Login failed!");
-//                    }
-//                    return pieces[1].equals(mPassword);
-//                }
-//            }
-//
-//            // TODO: register the new account here.
-//            Log.d("TEST","Registering...");
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            mAuthTask = null;
-            showProgress(false);
-            // use sample data to display TODO: use user data retrieved from server
-            if (isLogin) {
-                if ( response != null && response.contains("login success")) {
-                    playerInfo.put(Constant.PLAYER_DISPLAY_NAME,"Peter Griffin");
-                    playerInfo.put(Constant.PLAYER_ROLE,"Forward");
-                    playerInfo.put(Constant.PLAYER_CLUB,"New England");
-                    playerInfo.put(Constant.PLAYER_AGE,"40");
-                    playerInfo.put(Constant.PLAYER_WEIGHT,"250");
-                    playerInfo.put(Constant.PLAYER_HEIGHT,"180");
-                    playerInfo.put(Constant.STATS_APPEARANCE,"10");
-                    playerInfo.put(Constant.STATS_WIN,"0");
-                    playerInfo.put(Constant.STATS_DRAW,"0");
-                    playerInfo.put(Constant.STATS_LOSS,"10");
-                    playerInfo.put(Constant.STATS_GOAL,"0");
-                    playerInfo.put(Constant.STATS_ASSIST,"0");
-                    playerInfo.put(Constant.STATS_YELLOW,"6");
-                    playerInfo.put(Constant.STATS_RED,"10");
-                    ArrayList<String> selectedStats = new ArrayList<>(8);
-                    selectedStats.add(Constant.STATS_APPEARANCE);
-                    selectedStats.add(Constant.STATS_WIN);
-                    selectedStats.add(Constant.STATS_DRAW);
-                    selectedStats.add(Constant.STATS_LOSS);
-                    selectedStats.add(Constant.STATS_GOAL);
-                    selectedStats.add(Constant.STATS_ASSIST);
-                    selectedStats.add(Constant.STATS_YELLOW);
-                    selectedStats.add(Constant.STATS_RED);
-                    // put sample data into Intent and navigate to PlayerActivity
-                    Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
-                    intent.putExtra(Constant.PLAYER_SELECTED_STATS,selectedStats);
-                    intent.putExtra(Constant.PLAYER_INFO, playerInfo);
-                    startActivity(intent);
-                } else if ( response != null && response.contains("does not exist") ) {
-                    et_email.setError(getString(R.string.error_account_not_exists));
-                    et_email.requestFocus();
-                } else if ( response != null && response.contains("not matching") ){
-                    et_password.setError(getString(R.string.error_incorrect_password));
-                    et_password.requestFocus();
-                } else if ( response != null && response.contains("unable to connect") ){
-                    et_password.setError(getString(R.string.error_connection_fail));
-                    et_password.requestFocus();
-                } else {
-                    et_password.setError(getString(R.string.error_incorrect_password));
-                    et_password.requestFocus();
-                }
-            } else {
-                if (response != null && response.contains("Register succeeded")) {
-                    et_passwordConfirm.setVisibility(View.GONE);
-                    btn_register.setText(R.string.action_register);
-                    btn_signIn.setText(R.string.action_sign_in);
-                    isLogin = true;
-                } else if (response != null && response.contains("Register failed")) {
-                    et_email.setError(getString(R.string.error_email_registered));
-                    et_email.requestFocus();
-                } else {
-                    et_email.setError(getString(R.string.error_connection_fail));
-                    et_email.requestFocus();
-                }
-            }
-
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
 }
-
