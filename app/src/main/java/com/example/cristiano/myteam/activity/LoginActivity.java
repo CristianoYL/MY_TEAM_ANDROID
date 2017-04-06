@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -27,6 +28,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,7 +39,7 @@ import java.util.List;
 import com.example.cristiano.myteam.R;
 
 import com.example.cristiano.myteam.request.RequestAction;
-import com.example.cristiano.myteam.structure.Account;
+import com.example.cristiano.myteam.structure.User;
 import com.example.cristiano.myteam.structure.UserCredential;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.request.RequestHelper;
@@ -71,14 +73,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     // UI references.
     private AutoCompleteTextView et_email;
-    private EditText et_password;
-    private EditText et_passwordConfirm;
-    private Button btn_signIn;
-    private Button btn_register;
-    private View pb_progress;
-    private View mLoginFormView;
-    private boolean isLogin;
+    private EditText et_password,et_passwordConfirm;
+    private Button btn_signIn,btn_register;
+    private View pb_progress, mLoginView;
+    private boolean isLogin, rememberUsername,autoLogin;
+    private CheckBox cb_remember, cb_auto;
+
     private String email, password;
+    SharedPreferences sharedPreferences;
 
 
     @Override
@@ -134,8 +136,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 isLogin = !isLogin;
             }
         });
-        mLoginFormView = findViewById(R.id.login_form);
+        mLoginView = findViewById(R.id.layout_login);
         pb_progress = findViewById(R.id.login_progress);
+        cb_remember = (CheckBox) findViewById(R.id.cb_remember);
+        cb_auto = (CheckBox) findViewById(R.id.cb_autoLogin);
+
+        sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
+        rememberUsername = sharedPreferences.getBoolean(Constant.KEY_REMEMBER,false);
+        autoLogin = sharedPreferences.getBoolean(Constant.KEY_AUTO_LOGIN,false);
+        cb_remember.setChecked(rememberUsername);
+        cb_auto.setChecked(autoLogin);
+        if ( autoLogin ) {
+            et_email.setText(sharedPreferences.getString(Constant.KEY_USERNAME,""));
+            et_password.setText(sharedPreferences.getString(Constant.KEY_PASSWORD,""));
+            attemptLogin();
+        } else if (rememberUsername) {
+            et_email.setText(sharedPreferences.getString(Constant.KEY_USERNAME,""));
+            et_password.requestFocus();
+        }
+
     }
 
     private void populateAutoComplete() {
@@ -238,8 +257,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            Account account = new Account(this.email,this.password);
-            String credentials = account.toJson();
+            User user = new User(this.email,this.password);
+            String credentials = user.toJson();
             requestAction = new RequestAction() {
                 @Override
                 public void actOnPre() {
@@ -249,7 +268,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 @Override
                 public void actOnPost(int responseCode, String response) {
                     Log.d("Register response",response);
-                    if ( responseCode == Constant.CODE_CREATED ) {
+                    showProgress(false);
+                    if ( responseCode == 201 ) {
                         isLogin = true;
                         et_passwordConfirm.setVisibility(View.GONE);
                         btn_register.setText(R.string.action_register);
@@ -268,7 +288,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         }
                         et_email.requestFocus();
                     }
-                    showProgress(false);
                     requestAction = null;
                 }
             };
@@ -318,8 +337,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // form field with an error.
             focusView.requestFocus();
         } else {
+            // remember user's choice and input
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(Constant.KEY_REMEMBER,cb_remember.isChecked());
+            editor.putBoolean(Constant.KEY_AUTO_LOGIN,cb_auto.isChecked());
+            if ( cb_auto.isChecked() ) {
+                editor.putString(Constant.KEY_USERNAME,email);
+                editor.putString(Constant.KEY_PASSWORD,password);
+            } else if (cb_remember.isChecked() ) {
+                editor.putString(Constant.KEY_USERNAME,email);
+            }
+            editor.apply();
             UserCredential userCredential = new UserCredential(this.email,this.password);
             String credentials = userCredential.toJson();
             requestAction = new RequestAction() {
@@ -331,6 +361,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 @Override
                 public void actOnPost(int responseCode, String response) {
                     Log.d("Response",response);
+                    showProgress(false);
                     if ( responseCode == 200 ) {
                         Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
                         intent.putExtra(Constant.PLAYER_EMAIL,email);
@@ -347,7 +378,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         }
                         et_password.requestFocus();
                     }
-                    showProgress(false);
                     requestAction = null;
                 }
             };
@@ -377,12 +407,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+            mLoginView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mLoginView.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                    mLoginView.setVisibility(show ? View.GONE : View.VISIBLE);
                 }
             });
 
@@ -398,7 +428,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             pb_progress.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mLoginView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 

@@ -6,9 +6,9 @@ import com.google.gson.Gson;
  * Created by Cristiano on 2017/4/1.
  */
 
-public class Account {
+public class User {
     private String email,password;
-    public Account(String email, String password) {
+    public User(String email, String password) {
         this.email = email;
         this.password = password;
     }
