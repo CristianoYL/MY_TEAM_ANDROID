@@ -70,7 +70,7 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             }
         });
         sp_position.setAdapter(this.positionAdapter);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_club);
         setSupportActionBar(toolbar);
         Bundle bundle = getIntent().getExtras();
         if ( bundle == null || !bundle.containsKey(Constant.PLAYER_EMAIL) ) {

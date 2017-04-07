@@ -1,14 +1,15 @@
 package com.example.cristiano.myteam.activity;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
@@ -20,24 +21,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
-import android.widget.ExpandableListAdapter;
-import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
+import com.example.cristiano.myteam.fragment.PieChartFragment;
 import com.example.cristiano.myteam.request.RequestAction;
+import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.request.RequestHelper;
+import com.example.cristiano.myteam.util.CustomPagerAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,7 +57,8 @@ public class PlayerActivity extends AppCompatActivity
     private NavigationView navigationView;
 
     private String email;
-    private String[] clubs,info;
+    private String[] clubs;
+    private Club[] myClubs;
     private Player player;
 
     private int pageID = PAGE_PROFILE;
@@ -72,7 +72,7 @@ public class PlayerActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_profile);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_player);
         setSupportActionBar(toolbar);
         layout_profile = (ConstraintLayout) findViewById(R.id.layout_profile);
         layout_club = (ConstraintLayout) findViewById(R.id.layout_club_list);
@@ -89,7 +89,7 @@ public class PlayerActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view_profile);
+        navigationView = (NavigationView) findViewById(R.id.nav_view_player);
         navigationView.setNavigationItemSelectedListener(this);
 
         Bundle bundle = getIntent().getExtras();
@@ -129,9 +129,12 @@ public class PlayerActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            showSettingsPage();
+            return true;
+        } else if (id == R.id.action_logout) {
+            showLogoutPage();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -147,39 +150,12 @@ public class PlayerActivity extends AppCompatActivity
             }
         } else if (id == R.id.nav_club) {
             if ( pageID != PAGE_CLUB ) {
-                showClubPage();
+                showPlayerClubPage();
             }
         } else if (id == R.id.nav_logout) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(PlayerActivity.this,0);
-            builder.setTitle("Warning");
-            builder.setMessage("Are you sure to logout?");
-            builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Intent intent = new Intent(PlayerActivity.this,LoginActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    SharedPreferences sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean(Constant.KEY_AUTO_LOGIN,false);
-                    editor.apply();
-                    startActivity(intent);
-                }
-            });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                   if( pageID == PAGE_PROFILE ){
-                       navigationView.setCheckedItem(R.id.nav_profile);
-                   } else if ( pageID == PAGE_CLUB) {
-                       navigationView.setCheckedItem(R.id.nav_club);
-                   } else if ( pageID == PAGE_SETTINGS ) {
-                       navigationView.setCheckedItem(R.id.nav_settings);
-                   }
-                }
-            });
-            builder.show();
+            showLogoutPage();
         } else if (id == R.id.nav_settings) {
-//            pageID = PAGE_SETTINGS;
+            showSettingsPage();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -262,7 +238,7 @@ public class PlayerActivity extends AppCompatActivity
         btn_club.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showClubPage();
+                showPlayerClubPage();
             }
         });
         switch ( player.avatar ) {
@@ -278,40 +254,62 @@ public class PlayerActivity extends AppCompatActivity
         }
         tv_name.setText(player.displayName);
         tv_role.setText(player.role);
-        if ( selectedStats == null ) {
-            selectedStats = new HashMap<>(8);
-            selectedStats.put(Constant.STATS_WIN,10);
-            selectedStats.put(Constant.STATS_DRAW,2);
-            selectedStats.put(Constant.STATS_LOSS,1);
-            selectedStats.put(Constant.STATS_ATTENDANCE,10);
-            selectedStats.put(Constant.STATS_APPEARANCE,10);
-            selectedStats.put(Constant.STATS_START,4);
-            selectedStats.put(Constant.STATS_GOAL,2);
-            selectedStats.put(Constant.STATS_ASSIST,6);
-//            return;
+
+        View view = findViewById(R.id.layout_playerStats);
+        final ViewPager viewPager = (ViewPager) view.findViewById(R.id.viewPager);
+        final TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
+
+        tabLayout.addOnTabSelectedListener( new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                viewPager.setCurrentItem(tab.getPosition());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+        });
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                tabLayout.getTabAt(position).select();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        String[] titles = {"Game Results","Penalty History","Attendance"};
+        String[] centerText = {"Games Played","Penalty Taken","Total Games"};
+        ArrayList<String[]> dataX = new ArrayList<>();
+        dataX.add(new String[]{"WIN","DRAW","LOSS"});
+        dataX.add(new String[]{"Penalty Scored", "Penalty Missed"});
+        dataX.add(new String[]{"SHOW","NO SHOW"});
+        ArrayList<float[]> dataY = new ArrayList<>();
+        dataY.add(new float[]{21,2,5});
+        dataY.add(new float[]{5,1});
+        dataY.add(new float[]{28,2});
+        Fragment[] fragments = new Fragment[titles.length];
+        for ( int i = 0; i < fragments.length; i++ ) {
+            tabLayout.addTab(tabLayout.newTab().setText(titles[i]));
+            fragments[i] = PieChartFragment.newInstance(titles[i],centerText[i],true,dataX.get(i),dataY.get(i));
         }
-        View[] cards = new View[8];
-        cards[0] = findViewById(R.id.card1);
-        cards[1] = findViewById(R.id.card2);
-        cards[2] = findViewById(R.id.card3);
-        cards[3] = findViewById(R.id.card4);
-        cards[4] = findViewById(R.id.card5);
-        cards[5] = findViewById(R.id.card6);
-        cards[6] = findViewById(R.id.card7);
-        cards[7] = findViewById(R.id.card8);
-        View view;
-        TextView tv_title, tv_stats;
-        int counter = 0;
-        for ( String statsKey : selectedStats.keySet() ) {
-            view = cards[counter++];
-            tv_title = (TextView) view.findViewById(R.id.tv_cardTitle);
-            tv_stats = (TextView) view.findViewById(R.id.tv_cardContent);
-            tv_title.setText(statsKey);
-            tv_stats.setText(selectedStats.get(statsKey)+"");
-        }
+        CustomPagerAdapter adapter = new CustomPagerAdapter(getSupportFragmentManager());
+        adapter.setFragments(fragments);
+        viewPager.setAdapter(adapter);
     }
 
-    private void showClubPage(){
+    private void showPlayerClubPage(){
         pageID = PAGE_CLUB;
         layout_profile.setVisibility(View.GONE);
         layout_club.setVisibility(View.VISIBLE);
@@ -337,15 +335,22 @@ public class PlayerActivity extends AppCompatActivity
                         JSONObject jsonObject = new JSONObject(response);
                         JSONArray jsonArray = jsonObject.getJSONArray(Constant.TABLE_TEAMSHEET);
                         clubs = new String[jsonArray.length()];
+                        myClubs = new Club[jsonArray.length()];
+                        int clubID;
+                        String clubName, clubInfo;
                         for ( int i = 0; i < jsonArray.length(); i++ ) {
-                            clubs[i] = jsonArray.getJSONObject(i).getString(Constant.COLUMN_CLUB_NAME);
+                            clubs[i] = jsonArray.getJSONObject(i).getString(Constant.CLUB_NAME);
+                            clubID = jsonArray.getJSONObject(i).getInt(Constant.CLUB_ID);
+                            clubName = jsonArray.getJSONObject(i).getString(Constant.CLUB_NAME);
+                            clubInfo = jsonArray.getJSONObject(i).getString(Constant.CLUB_INFO);
+                            myClubs[i] = new Club(clubID,clubName,clubInfo);
                         }
                         lv_club.setAdapter(new ArrayAdapter<String>(PlayerActivity.this,
                                 android.R.layout.simple_spinner_dropdown_item, clubs));
                         lv_club.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                Toast.makeText(PlayerActivity.this,clubs[i],Toast.LENGTH_SHORT).show();
+                                viewClub(i);
                             }
                         });
 
@@ -365,5 +370,43 @@ public class PlayerActivity extends AppCompatActivity
         };
         String url = Constant.URL_GET_PLAYER_CLUBS + player.id;
         RequestHelper.sendGetRequest(url,actionGetClubs);
+    }
+
+    private void showLogoutPage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(PlayerActivity.this,0);
+        builder.setTitle("Warning");
+        builder.setMessage("Are you sure to logout?");
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent = new Intent(PlayerActivity.this,LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                SharedPreferences sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(Constant.KEY_AUTO_LOGIN,false);
+                editor.apply();
+                startActivity(intent);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if( pageID == PAGE_PROFILE ){
+                    navigationView.setCheckedItem(R.id.nav_profile);
+                } else if ( pageID == PAGE_CLUB) {
+                    navigationView.setCheckedItem(R.id.nav_club);
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void showSettingsPage() {
+        showRegistrationPage(email,player);
+    }
+
+    private void viewClub(int clubID) {
+        Intent intent = new Intent(PlayerActivity.this,ClubActivity.class);
+        startActivity(intent);
     }
 }

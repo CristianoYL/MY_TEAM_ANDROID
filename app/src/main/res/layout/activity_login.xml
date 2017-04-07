@@ -34,7 +34,7 @@
                 android:id="@+id/email_login_form"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/edge_grey"
+                android:background="@drawable/edge_thin_grey"
                 android:orientation="vertical">
 
                 <android.support.design.widget.TextInputLayout

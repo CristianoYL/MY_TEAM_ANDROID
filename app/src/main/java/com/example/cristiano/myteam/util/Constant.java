@@ -23,9 +23,6 @@ public class Constant {
     public static final String TABLE_TEAMSHEET = "teamsheet";
     public static final String TABLE_STATS = "stats";
 
-    public static final String COLUMN_CLUB_NAME = "name";
-    public static final String COLUMN_CLUB_INFO = "info";
-
     public static final String KEY_USER_PREF = "user preference";
     public static final String KEY_USERNAME = "username";
     public static final String KEY_EMAIL = "email";
@@ -56,6 +53,10 @@ public class Constant {
     public static final String PLAYER_ROLE = "role";
     public static final String PLAYER_PHONE = "phone";
     public static final String PLAYER_AVATAR = "avatar";
+
+    public static final String CLUB_ID = "id";
+    public static final String CLUB_NAME = "name";
+    public static final String CLUB_INFO = "info";
 
     public static final String STRONG_FOOT = "Strong Foot";
     public static final String PLAYER_POSITION = "position";

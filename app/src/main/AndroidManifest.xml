@@ -17,10 +17,10 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".activity.LoginActivity"
+            android:clearTaskOnLaunch="true"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTask"
-            android:clearTaskOnLaunch="true">
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,6 +34,11 @@
         <activity
             android:name=".activity.PlayerRegistrationActivity"
             android:label="@string/title_activity_player_registration"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activity.ClubActivity"
+            android:label="@string/title_activity_club"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
