@@ -12,7 +12,10 @@
         app:tabIndicatorColor="@color/colorBlue"
         app:tabSelectedTextColor="@color/colorBlue"
         app:tabMode="scrollable"
-        app:tabGravity="fill">
+        app:tabGravity="fill"
+        android:background="@drawable/card_border"
+        app:tabBackground="@drawable/tab_border"
+        >
 
     </android.support.design.widget.TabLayout>
 

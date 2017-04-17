@@ -1,32 +1,30 @@
 package com.example.cristiano.myteam.fragment;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.cristiano.myteam.R;
-import com.example.cristiano.myteam.chart.PieChartHelper;
-import com.github.mikephil.charting.charts.PieChart;
+import com.example.cristiano.myteam.activity.PlayerActivity;
+import com.example.cristiano.myteam.chart.BarChartHelper;
+import com.github.mikephil.charting.charts.BarChart;
 
-public class PieChartFragment extends Fragment {
+public class BarChartFragment extends Fragment {
 
     private static final String ARG_TITLE = "title";
-    private static final String ARG_CENTER_TEXT = "center";
     private static final String ARG_DATA_X = "dateX";
     private static final String ARG_DATA_Y = "dateY";
     private static final String ARG_IS_DATA_INT = "isInt";
 
-    private String title, centerText;
+    private String title;
     private String[] dataX;
     private float[] dataY;
     private boolean isDataInt;
 
-    public PieChartFragment() {
+
+    public BarChartFragment() {
         // Required empty public constructor
     }
 
@@ -34,17 +32,15 @@ public class PieChartFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      * @param title
-     * @param centerText
      * @param dataX
      * @param dataY
+     * @param isDataInt
      * @return A new instance of fragment PieChartFragment.
      */
-    public static PieChartFragment newInstance(String title, String centerText,
-                                               String[] dataX, float[] dataY, boolean isDataInt) {
-        PieChartFragment fragment = new PieChartFragment();
+    public static BarChartFragment newInstance(String title, String[] dataX, float[] dataY, boolean isDataInt) {
+        BarChartFragment fragment = new BarChartFragment();
         Bundle args = new Bundle();
         args.putString(ARG_TITLE,title);
-        args.putString(ARG_CENTER_TEXT,centerText);
         args.putStringArray(ARG_DATA_X,dataX);
         args.putFloatArray(ARG_DATA_Y,dataY);
         args.putBoolean(ARG_IS_DATA_INT,isDataInt);
@@ -55,12 +51,11 @@ public class PieChartFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (this.getArguments() != null) {
-            this.title = this.getArguments().getString(ARG_TITLE);
-            this.centerText = this.getArguments().getString(ARG_CENTER_TEXT);
-            this.dataX = this.getArguments().getStringArray(ARG_DATA_X);
-            this.dataY = this.getArguments().getFloatArray(ARG_DATA_Y);
-            this.isDataInt = getArguments().getBoolean(ARG_IS_DATA_INT);
+        if (getArguments() != null) {
+            title = getArguments().getString(ARG_TITLE);
+            dataX = getArguments().getStringArray(ARG_DATA_X);
+            dataY = getArguments().getFloatArray(ARG_DATA_Y);
+            isDataInt = getArguments().getBoolean(ARG_IS_DATA_INT);
         }
     }
 
@@ -68,18 +63,17 @@ public class PieChartFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_piechart, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_barchart, container, false);
 
-        PieChart pieChart = (PieChart) rootView.findViewById(R.id.pieChart);
-        PieChartHelper pieChartHelper = new PieChartHelper(pieChart,title,centerText,this.getActivity());
+        BarChart barChart = (BarChart) rootView.findViewById(R.id.barChart);
+        BarChartHelper barChartHelper = new BarChartHelper(barChart,title, this.getActivity());
         if ( dataX.length != dataY.length ) {
             return null;
         }
         for ( int i = 0; i < dataX.length; i++ ) {
-            pieChartHelper.addData(dataX[i],dataY[i]);
+            barChartHelper.addData(dataX[i],dataY[i]);
         }
-        pieChartHelper.setDataInteger(isDataInt);
-        pieChartHelper.draw();
+        barChartHelper.draw();
         return rootView;
     }
 }

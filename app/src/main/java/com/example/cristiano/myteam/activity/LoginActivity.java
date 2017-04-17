@@ -43,6 +43,7 @@ import com.example.cristiano.myteam.structure.User;
 import com.example.cristiano.myteam.structure.UserCredential;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.request.RequestHelper;
+import com.example.cristiano.myteam.util.UrlHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -148,7 +149,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         cb_auto.setChecked(autoLogin);
         if ( autoLogin ) {
             et_email.setText(sharedPreferences.getString(Constant.KEY_USERNAME,""));
-            et_password.setText(sharedPreferences.getString(Constant.KEY_PASSWORD,""));
+            et_password.setText(sharedPreferences.getString(Constant.USER_PASSWORD,""));
             attemptLogin();
         } else if (rememberUsername) {
             et_email.setText(sharedPreferences.getString(Constant.KEY_USERNAME,""));
@@ -292,7 +293,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             };
             Log.d("LOGIN_TEST","registering...");
-            RequestHelper.sendPostRequest(Constant.URL_REGISTER,credentials,requestAction);
+            String url = UrlHelper.urlRegister();
+            RequestHelper.sendPostRequest(url,credentials,requestAction);
         }
 
     }
@@ -345,7 +347,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             editor.putBoolean(Constant.KEY_AUTO_LOGIN,cb_auto.isChecked());
             if ( cb_auto.isChecked() ) {
                 editor.putString(Constant.KEY_USERNAME,email);
-                editor.putString(Constant.KEY_PASSWORD,password);
+                editor.putString(Constant.USER_PASSWORD,password);
             } else if (cb_remember.isChecked() ) {
                 editor.putString(Constant.KEY_USERNAME,email);
             }
@@ -369,7 +371,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     } else {
                         try {
                             JSONObject jsonObject = new JSONObject(response);
-                            String message = jsonObject.getString(Constant.KEY_DESC);
+                            String message = "Unknown Error!";
+                            if ( jsonObject.has(Constant.KEY_DESC) ) {
+                                message = jsonObject.getString(Constant.KEY_DESC);
+                            } else if ( jsonObject.has(Constant.KEY_MSG) ) {
+                                message = jsonObject.getString(Constant.KEY_MSG);
+                            }
                             et_password.setError(message);
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -382,7 +389,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             };
             Log.d("LOGIN_TEST","login...");
-            RequestHelper.sendPostRequest(Constant.URL_LOGIN,credentials,requestAction);
+            String url = UrlHelper.urlLogin();
+            RequestHelper.sendPostRequest(url,credentials,requestAction);
         }
     }
 

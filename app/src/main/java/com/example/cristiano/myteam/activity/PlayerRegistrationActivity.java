@@ -19,6 +19,7 @@ import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
+import com.example.cristiano.myteam.util.UrlHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -169,7 +170,8 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                 }
             }
         };
-        RequestHelper.sendPutRequest(Constant.URL_POST_PLAYER + email, player.toJson() ,actionPutPlayer);
+        String url = UrlHelper.urlPutPlayer(email);
+        RequestHelper.sendPutRequest(url, player.toJson() ,actionPutPlayer);
         finish();
     }
 }

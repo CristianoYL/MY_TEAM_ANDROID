@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 /**
@@ -69,9 +70,11 @@ public class BackgroundTaskHelper extends AsyncTask<String, Object, String> {
         try {
             httpURLConnection = (HttpURLConnection) (new URL(url)).openConnection();
             httpURLConnection.setRequestMethod(method);
-            if ( jsonData != null ) {
-                httpURLConnection.setRequestProperty("content-type","application/json");
+            if (jsonData != null) {
+                httpURLConnection.setRequestProperty("content-type", "application/json");
                 httpURLConnection.setDoOutput(true);
+                httpURLConnection.setConnectTimeout(5000);
+                httpURLConnection.setReadTimeout(5000);
                 this.outputStream = httpURLConnection.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, Constant.SERVER_CHARSET));
                 writer.write(jsonData);
@@ -79,7 +82,7 @@ public class BackgroundTaskHelper extends AsyncTask<String, Object, String> {
                 writer.close();
             }
             this.responseCode = httpURLConnection.getResponseCode();
-            if ( this.responseCode < 400 ) {
+            if (this.responseCode < 400) {
                 this.inputStream = httpURLConnection.getInputStream();
             } else {
                 this.inputStream = httpURLConnection.getErrorStream();
@@ -89,17 +92,19 @@ public class BackgroundTaskHelper extends AsyncTask<String, Object, String> {
             StringBuilder stringBuilder = new StringBuilder();
             String line;
             line = reader.readLine();
-            if ( line != null ) {
-                stringBuilder.append(line );
+            if (line != null) {
+                stringBuilder.append(line);
                 while ((line = reader.readLine()) != null) {
                     stringBuilder.append("\n");
                     stringBuilder.append(line);
-                    Log.d("REQUEST_SENDER","readLine="+line+";");
+                    Log.d("REQUEST_SENDER", "readLine=" + line + ";");
                 }
             }
             inputStream.close();
             response = stringBuilder.toString();
-            Log.d("RESPONSE",response+";");
+            Log.d("RESPONSE", response + ";");
+        } catch (SocketTimeoutException e) {
+            response = Constant.MSG_TIME_OUT;
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
