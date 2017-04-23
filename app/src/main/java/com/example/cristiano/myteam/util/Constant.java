@@ -20,20 +20,25 @@ public class Constant {
     public static final String KEY_DESC = "description";
     public static final String KEY_MSG = "message";
     public static final String KEY_CLUB_ID = "clubID";
+    public static final String KEY_PLAYER_ID = "playerID";
+    public static final String KEY_TOURNAMENT_ID= "tournamentID";
+    public static final String KEY_IS_VISITOR = "isVisitor";
 
     public static final String METHOD_POST = "POST";
     public static final String METHOD_GET = "GET";
     public static final String METHOD_PUT = "PUT";
     public static final String METHOD_DELETE = "DELETE";
 
-    public static final String PLAYER_INFO = "playerInfo";
+    public static final String KEY_PLAYER_INFO = "playerInfo";
+    public static final String KEY_CLUB_INFO = "clubInfo";
     public static final String PLAYER_INFO_PLAYER = "player";
     public static final String PLAYER_INFO_CLUBS = "clubs";
     public static final String PLAYER_INFO_TOTAL_STATS = "totalStats";
-    public static final String PLAYER_INFO_GAME_PERFORMANCE = "gamePerformance";
+    public static final String KEY_GAME_PERFORMANCE = "gamePerformance";
     public static final String PERFORMANCE_WIN = "win";
     public static final String PERFORMANCE_DRAW = "draw";
     public static final String PERFORMANCE_LOSS = "loss";
+    public static final String PERFORMANCE_GOALS_CONCEDED = "goalsConceded";
 
 
     // table player
@@ -77,6 +82,7 @@ public class Constant {
     public static final String STATS_START = "start";
     public static final String STATS_GOAL = "goal";
     public static final String STATS_PEN = "penalty";
+    public static final String STATS_FREEKICK = "freekick";
     public static final String STATS_PEN_SHOOTOUT = "penaltyShootout";
     public static final String STATS_PEN_TAKEN = "penaltyTaken";
     public static final String STATS_OG = "ownGoal";
@@ -146,6 +152,12 @@ public class Constant {
 
     // table teamsheet
     public static final String TABLE_TEAMSHEET = "teamsheet";
+    // teamsheet columns
+    public static final String TEAMSHEET_P_ID = "playerID";
+    public static final String TEAMSHEET_C_ID = "clubID";
+    public static final String TEAMSHEET_MEMBER_SINCE = "memberSince";
+    public static final String TEAMSHEET_IS_ACTIVE = "isActive";
+    public static final String TEAMSHEET_IS_ADMIN = "isAdmin";
 
 
     public static final String ROLE_PLAYER = "Player";
@@ -186,4 +198,9 @@ public class Constant {
     public static final String[] LABEL_PENALTY_HISTORY = {"Scored","Missed"};
     public static final String[] LABEL_GOAL_DISTRIBUTION = {"Strong Foot","Weak Foot","Header","Other"};
     public static final String[] LABEL_PLAYER_TOTAL_STATS = {"played","start","goal","assist","yellow","red"};
+
+    public static final String FRAGMENT_CLUB_PROFILE = "fragment_club_profile";
+    public static final String FRAGMENT_CLUB_TOURNAMENT_LIST = "fragment_club_tournament_list";
+    public static final String FRAGMENT_CLUB_TOURNAMENT_DETAIL = "fragment_club_tournament_detail";
+    public static final String FRAGMENT_CLUB_TEAMSHEET = "fragment_club_teamsheet";
 }

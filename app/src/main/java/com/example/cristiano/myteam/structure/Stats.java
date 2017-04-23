@@ -8,12 +8,12 @@ import com.google.gson.Gson;
 
 public class Stats {
     private int tournamentID, clubID, playerID;
-    private int win,draw,loss;
-    public int attendance, appearance, start, goal, penalty, penaltyShootout, penaltyTaken,
+    private int win,draw,loss,goalsConceded;
+    public int attendance, appearance, start, goal, penalty,freekick, penaltyShootout, penaltyTaken,
             ownGoal, header, weakFootGoal, otherGoal, assist, yellow, red, cleanSheet, penaltySaved;
 
     public Stats(int tournamentID, int clubID, int playerID, int attendance, int appearance,
-                 int start, int goal, int penalty, int penaltyShootout, int penaltyTaken,
+                 int start, int goal, int penalty, int freekick,int penaltyShootout, int penaltyTaken,
                  int ownGoal, int header, int weakFootGoal, int otherGoal,int assist, int yellow,
                  int red, int cleanSheet, int penaltySaved) {
         this.tournamentID = tournamentID;
@@ -24,6 +24,7 @@ public class Stats {
         this.start = start;
         this.goal = goal;
         this.penalty = penalty;
+        this.freekick = freekick;
         this.penaltyShootout = penaltyShootout;
         this.penaltyTaken = penaltyTaken;
         this.ownGoal = ownGoal;
@@ -76,5 +77,13 @@ public class Stats {
 
     public void setLoss(int loss) {
         this.loss = loss;
+    }
+
+    public int getGoalsConceded() {
+        return goalsConceded;
+    }
+
+    public void setGoalsConceded(int goalsConceded) {
+        this.goalsConceded = goalsConceded;
     }
 }

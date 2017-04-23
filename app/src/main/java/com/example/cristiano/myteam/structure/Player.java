@@ -9,18 +9,18 @@ import java.io.Serializable;
  */
 
 public class Player implements Serializable{
-    public int id;
+    private int id;
     private String email;
-    public String firstName;
-    public String lastName;
-    public String displayName;
-    public String role;
-    public String phone;
-    public int age;
-    public float weight;
-    public float height;
-    public boolean leftFooted;
-    public int avatar;
+    private String firstName;
+    private String lastName;
+    private String displayName;
+    private String role;
+    private String phone;
+    private int age;
+    private float weight;
+    private float height;
+    private boolean leftFooted;
+    private int avatar;
 
     public Player(int id, String email, String firstName, String lastName, String displayName, String role,
                   String phone, int age, float weight, float height, boolean leftFooted, int avatar) {
@@ -41,5 +41,53 @@ public class Player implements Serializable{
     public String toJson() {
         Gson gson = new Gson();
         return gson.toJson(this);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public float getWeight() {
+        return weight;
+    }
+
+    public float getHeight() {
+        return height;
+    }
+
+    public boolean isLeftFooted() {
+        return leftFooted;
+    }
+
+    public int getAvatar() {
+        return avatar;
     }
 }

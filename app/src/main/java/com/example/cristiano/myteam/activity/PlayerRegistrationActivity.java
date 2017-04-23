@@ -74,33 +74,33 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_club);
         setSupportActionBar(toolbar);
         Bundle bundle = getIntent().getExtras();
-        if ( bundle == null || !bundle.containsKey(Constant.PLAYER_EMAIL) ) {
-            Log.e("PlayerRegActivity","Missing player email bundle");
+        if ( bundle == null ) {
+            Log.e("PlayerRegActivity","Missing player bundle");
             return;
         }
-        this.email = bundle.getString(Constant.PLAYER_EMAIL);
-        if ( bundle.containsKey(Constant.PLAYER_INFO) ) {
+        this.email = bundle.getString(Constant.PLAYER_EMAIL,null);
+        if ( bundle.containsKey(Constant.KEY_PLAYER_INFO) ) {
             setTitle("Update Profile");
-            this.player = (Player) bundle.get(Constant.PLAYER_INFO);
+            this.player = (Player) bundle.get(Constant.KEY_PLAYER_INFO);
             if ( this.player == null ) {
                 Log.e("PlayerRegActivity","Missing player info bundle");
                 return;
             }
-            et_firstName.setText(this.player.firstName);
-            et_lastName.setText(this.player.lastName);
-            et_displayName.setText(this.player.displayName);
-            et_age.setText(player.age+"");
-            et_phone.setText(this.player.phone);
-            et_height.setText(player.height+"");
-            et_weight.setText(player.weight+"");
-            sw_leftFooted.setChecked(this.player.leftFooted);
-            if ( this.player.role.equals(Constant.ROLE_MANAGER) ) {
+            et_firstName.setText(this.player.getFirstName());
+            et_lastName.setText(this.player.getLastName());
+            et_displayName.setText(this.player.getDisplayName());
+            et_age.setText(player.getAge()+"");
+            et_phone.setText(this.player.getPhone());
+            et_height.setText(player.getHeight()+"");
+            et_weight.setText(player.getWeight()+"");
+            sw_leftFooted.setChecked(this.player.isLeftFooted());
+            if ( this.player.getRole().equals(Constant.ROLE_MANAGER) ) {
                 sp_role.setSelection(roleAdapter.getPosition(Constant.ROLE_MANAGER));
                 sp_position.setVisibility(View.INVISIBLE);
             } else {
                 sp_role.setSelection(roleAdapter.getPosition(Constant.ROLE_PLAYER));
                 sp_position.setVisibility(View.VISIBLE);
-                sp_position.setSelection(positionAdapter.getPosition(this.player.role));
+                sp_position.setSelection(positionAdapter.getPosition(this.player.getRole()));
             }
         }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_upload);
@@ -117,14 +117,26 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
         String firstName = et_firstName.getText().toString();
         String lastName = et_lastName.getText().toString();
         String displayName = et_displayName.getText().toString();
+        if ( displayName.length() == 0 ) {
+            displayName = firstName + " " + lastName;
+        }
         String role = sp_role.getSelectedItem().toString();
         if ( role.equals(Constant.ROLE_PLAYER) ) {
             role =  sp_position.getSelectedItem().toString();
         }
         String phone = et_phone.getText().toString();
-        int age = Integer.parseInt(et_age.getText().toString());
-        float weight = Float.parseFloat(et_weight.getText().toString());
-        float height = Float.parseFloat(et_height.getText().toString());
+        int age = 0;
+        if ( et_age.getText().length() > 0 ) {
+            age = Integer.parseInt(et_age.getText().toString());
+        }
+        float weight = 0;
+        if ( et_weight.getText().length() > 0 ) {
+            weight = Float.parseFloat(et_weight.getText().toString());
+        }
+        float height = 0;
+        if ( et_height.getText().length() > 0 ) {
+            height = Float.parseFloat(et_height.getText().toString());
+        }
         if ( sw_unit.isChecked() ) {
             weight = (weight / 1.6f);
             height = height * 30.3f;

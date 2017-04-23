@@ -20,8 +20,6 @@ import com.example.cristiano.myteam.util.UrlHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
 /**
  * Created by Cristiano on 2017/4/17.
  */
@@ -29,16 +27,17 @@ import java.util.ArrayList;
 public class ClubStatsFragment extends Fragment {
     private int clubID, tournamentID;
     private Stats clubStats;
+    View view;
 
     public ClubStatsFragment() {
         // Required empty public constructor
     }
 
-    public static ClubStatsFragment newInstance(int clubID, int tournamentID) {
+    public static ClubStatsFragment newInstance(int tournamentID, int clubID) {
         ClubStatsFragment fragment = new ClubStatsFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(Constant.CLUB_ID,clubID);
-        bundle.putInt(Constant.TOURNAMENT_ID,tournamentID);
+        bundle.putInt(Constant.KEY_CLUB_ID,clubID);
+        bundle.putInt(Constant.KEY_TOURNAMENT_ID,tournamentID);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -48,8 +47,8 @@ public class ClubStatsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            clubID = bundle.getInt(Constant.CLUB_ID);
-            tournamentID = bundle.getInt(Constant.TOURNAMENT_ID);
+            clubID = bundle.getInt(Constant.KEY_CLUB_ID);
+            tournamentID = bundle.getInt(Constant.KEY_TOURNAMENT_ID);
         }
     }
 
@@ -57,12 +56,12 @@ public class ClubStatsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_club_stats, container, false);
-        loadStats(view);
+        view = inflater.inflate(R.layout.fragment_club_stats, container, false);
+        loadStats();
         return view;
     }
 
-    private void loadStats(final View view) {
+    private void loadStats() {
         RequestAction actionGetClubStats = new RequestAction() {
             @Override
             public void actOnPre() {
@@ -74,23 +73,33 @@ public class ClubStatsFragment extends Fragment {
                 if ( responseCode == 200 ) {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
-                        int goal = jsonObject.getInt(Constant.STATS_GOAL);
-                        int penalty = jsonObject.getInt(Constant.STATS_PEN);
-                        int penaltyShootout = jsonObject.getInt(Constant.STATS_PEN_SHOOTOUT);
-                        int penaltyTaken = jsonObject.getInt(Constant.STATS_PEN_TAKEN);
-                        int ownGoal = jsonObject.getInt(Constant.STATS_OG);
-                        int header = jsonObject.getInt(Constant.STATS_HEADER);
-                        int weakFootGoal = jsonObject.getInt(Constant.STATS_WEAK_FOOT_GOAL);
-                        int otherGoal = jsonObject.getInt(Constant.STATS_OTHER_GOAL);
-                        int assist = jsonObject.getInt(Constant.STATS_ASSIST);
-                        int yellow = jsonObject.getInt(Constant.STATS_YELLOW);
-                        int red = jsonObject.getInt(Constant.STATS_RED);
-                        int cleanSheet = jsonObject.getInt(Constant.STATS_CLEAN_SHEET);
-                        int penaltySaved = jsonObject.getInt(Constant.STATS_PEN_SAVED);
-                        // TODO: calculate clean sheet
-                        clubStats = new Stats(tournamentID,clubID,-1,-1,-1,-1,goal,penalty,
+                        JSONObject jsonStats = jsonObject.getJSONObject(Constant.TABLE_STATS);
+                        int goal = jsonStats.getInt(Constant.STATS_GOAL);
+                        int penalty = jsonStats.getInt(Constant.STATS_PEN);
+                        int freekick = jsonStats.getInt(Constant.STATS_FREEKICK);
+                        int penaltyShootout = jsonStats.getInt(Constant.STATS_PEN_SHOOTOUT);
+                        int penaltyTaken = jsonStats.getInt(Constant.STATS_PEN_TAKEN);
+                        int ownGoal = jsonStats.getInt(Constant.STATS_OG);
+                        int header = jsonStats.getInt(Constant.STATS_HEADER);
+                        int weakFootGoal = jsonStats.getInt(Constant.STATS_WEAK_FOOT_GOAL);
+                        int otherGoal = jsonStats.getInt(Constant.STATS_OTHER_GOAL);
+                        int assist = jsonStats.getInt(Constant.STATS_ASSIST);
+                        int yellow = jsonStats.getInt(Constant.STATS_YELLOW);
+                        int red = jsonStats.getInt(Constant.STATS_RED);
+                        int penaltySaved = jsonStats.getInt(Constant.STATS_PEN_SAVED);
+                        JSONObject jsonPerformance = jsonObject.getJSONObject(Constant.KEY_GAME_PERFORMANCE);
+                        int win = jsonPerformance.getInt(Constant.PERFORMANCE_WIN);
+                        int draw = jsonPerformance.getInt(Constant.PERFORMANCE_DRAW);
+                        int loss = jsonPerformance.getInt(Constant.PERFORMANCE_LOSS);
+                        int cleanSheet = jsonPerformance.getInt(Constant.STATS_CLEAN_SHEET);
+                        int goalsConceded = jsonPerformance.getInt(Constant.PERFORMANCE_GOALS_CONCEDED);
+                        clubStats = new Stats(tournamentID,clubID,-1,-1,-1,-1,goal,penalty, freekick,
                                 penaltyShootout,penaltyTaken,ownGoal,header,weakFootGoal,otherGoal,
                                 assist,yellow,red,cleanSheet,penaltySaved);
+                        clubStats.setWin(win);
+                        clubStats.setDraw(draw);
+                        clubStats.setLoss(loss);
+                        clubStats.setGoalsConceded(goalsConceded);
                         showStats(view);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -120,29 +129,24 @@ public class ClubStatsFragment extends Fragment {
         Fragment[] fragments = new Fragment[Constant.CLUB_STATS_TABS.length];
         tab_clubStats.removeAllTabs();
 
-        for ( int i = 0; i < Constant.CLUB_STATS_TABS.length; i++ ) {
-            tab_clubStats.addTab(tab_clubStats.newTab().setText(Constant.CLUB_STATS_TABS[i]));
-        }
-
-        // count W-D-L
+        tab_clubStats.addTab(tab_clubStats.newTab().setText("Game Performance"));
         String[] resultLabels = Constant.LABEL_GAME_PERFORMANCE;
-        float[] resultValues = new float[]{7,4,3};
-        ArrayList<float[]> dataY = new ArrayList<>(2);
-        dataY.add(resultValues);
+        float[] resultValues = new float[]{clubStats.getWin(),clubStats.getDraw(),clubStats.getLoss()};
         fragments[0] = PieChartFragment.newInstance(Constant.CLUB_STATS_TABS[0],
-                Constant.CLUB_STATS_CENTER_TEXT[0],resultLabels,dataY.get(0),Constant.CLUB_STATS_IS_INT[0]);
+                Constant.CLUB_STATS_CENTER_TEXT[0],resultLabels,resultValues,Constant.CLUB_STATS_IS_INT[0]);
 
-        resultLabels = new String[]{"goal","penalty","penaltyShootout","penaltyTaken",
-                "ownGoal", "header","weakFootGoal","otherGoal","assist","yellow", "red","cleanSheet","penaltySaved"};
-        dataY.add(new float[]{clubStats.goal,clubStats.penalty,clubStats.penaltyShootout,
-                clubStats.penaltyTaken,clubStats.ownGoal,clubStats.header,clubStats.weakFootGoal,
-                clubStats.otherGoal,clubStats.assist,clubStats.yellow,clubStats.red,
-                clubStats.cleanSheet,clubStats.penaltySaved});
+        tab_clubStats.addTab(tab_clubStats.newTab().setText("Team Stats"));
+        resultLabels = new String[]{"goal","goalsConceded","penalty","freekick",
+                "header","yellow", "red","cleanSheet"};
+        resultValues = new float[]{clubStats.goal,clubStats.getGoalsConceded(),clubStats.penalty,
+                clubStats.freekick,clubStats.header,clubStats.yellow,clubStats.red,
+                clubStats.cleanSheet};
         fragments[1] = BarChartFragment.newInstance(Constant.CLUB_STATS_TABS[1],
-                resultLabels,dataY.get(1),Constant.CLUB_STATS_IS_INT[1]);
+                resultLabels,resultValues,Constant.CLUB_STATS_IS_INT[1]);
 
+        tab_clubStats.addTab(tab_clubStats.newTab().setText("Player Stats"));
         fragments[2] = BarChartFragment.newInstance(Constant.CLUB_STATS_TABS[2],
-                resultLabels,dataY.get(1),Constant.CLUB_STATS_IS_INT[2]);
+                resultLabels,resultValues,Constant.CLUB_STATS_IS_INT[2]);
 
         tab_clubStats.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

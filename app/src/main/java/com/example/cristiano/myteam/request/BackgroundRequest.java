@@ -23,14 +23,14 @@ import java.net.URL;
  *  sends the request and process the response in the background
  */
 
-public class BackgroundTaskHelper extends AsyncTask<String, Object, String> {
+public class BackgroundRequest extends AsyncTask<String, Object, String> {
 
     private int responseCode = 400;
     private InputStream inputStream;
     private OutputStream outputStream;
     private RequestAction action = null;
 
-    public BackgroundTaskHelper(RequestAction action){
+    public BackgroundRequest(RequestAction action){
         this.action = action;
     }
 
@@ -49,7 +49,6 @@ public class BackgroundTaskHelper extends AsyncTask<String, Object, String> {
 
     @Override
     protected void onPreExecute() {
-//        Log.d("BackgroundTaskHelper","onPre()");
         if (action != null) {
             action.actOnPre();
         }

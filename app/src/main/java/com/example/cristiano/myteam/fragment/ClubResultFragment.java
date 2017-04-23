@@ -1,17 +1,25 @@
 package com.example.cristiano.myteam.fragment;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
+import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Event;
 import com.example.cristiano.myteam.structure.Result;
 import com.example.cristiano.myteam.util.Constant;
@@ -26,20 +34,21 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ResultFragment extends Fragment {
-
-    private int clubID, tournamentID;
+public class ClubResultFragment extends Fragment {
+    private Club club;
+    private int tournamentID;
     private Result[] results;
+    View view;
 
-    public ResultFragment() {
+    public ClubResultFragment() {
         // Required empty public constructor
     }
 
-    public static ResultFragment newInstance(int clubID, int tournamentID) {
-        ResultFragment fragment = new ResultFragment();
+    public static ClubResultFragment newInstance(int tournamentID, Club club) {
+        ClubResultFragment fragment = new ClubResultFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(Constant.CLUB_ID,clubID);
-        bundle.putInt(Constant.TOURNAMENT_ID,tournamentID);
+        bundle.putString(Constant.TABLE_CLUB,club.toJson());
+        bundle.putInt(Constant.KEY_TOURNAMENT_ID,tournamentID);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -49,8 +58,8 @@ public class ResultFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            clubID = bundle.getInt(Constant.CLUB_ID);
-            tournamentID = bundle.getInt(Constant.TOURNAMENT_ID);
+            club = new Gson().fromJson(bundle.getString(Constant.TABLE_CLUB),Club.class);
+            tournamentID = bundle.getInt(Constant.KEY_TOURNAMENT_ID);
         }
     }
 
@@ -58,12 +67,12 @@ public class ResultFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_result, container, false);
-        getResult(view);
+        view = inflater.inflate(R.layout.fragment_result, container, false);
+        getResult();
         return view;
     }
 
-    private void getResult(final View view){
+    private void getResult(){
         RequestAction actionGetClubResults = new RequestAction() {
             @Override
             public void actOnPre() {
@@ -133,7 +142,7 @@ public class ResultFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetClubResults(clubID);
+        String url = UrlHelper.urlGetClubTournamentResults(tournamentID,club.id);
         RequestHelper.sendGetRequest(url,actionGetClubResults);
     }
 
@@ -163,6 +172,14 @@ public class ResultFragment extends Fragment {
         }
         ResultListAdapter resultListAdapter = new ResultListAdapter(getActivity(),R.layout.layout_card_result,resultItems);
         lv_result.setAdapter(resultListAdapter);
+
+        Button btn_addResult = (Button) view.findViewById(R.id.btn_addResult);
+        btn_addResult.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAddResultDialog();
+            }
+        });
     }
 
     private void setEventIcon(HashMap<String,Object> eventMap, String eventType) {
@@ -213,5 +230,77 @@ public class ResultFragment extends Fragment {
         return new SimpleAdapter(getActivity(), eventListItems, R.layout.layout_event_detail,
                 new String[]{Constant.EVENT_TYPE, Constant.EVENT_PLAYER, Constant.EVENT_TIME},
                 new int[]{R.id.iv_eventIcon, R.id.tv_eventPlayer, R.id.tv_eventTime});
+    }
+
+    private void showAddResultDialog() {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View dialogView = inflater.inflate(R.layout.layout_record_match,null);
+
+        FloatingActionButton fab_addEvent = (FloatingActionButton) dialogView.findViewById(R.id.fab_addEvent);
+        fab_addEvent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showEventDialog();
+            }
+        });
+
+        final TextView tv_home = (TextView) dialogView.findViewById(R.id.tv_homeName);
+        tv_home.setText(club.name);
+        final TextView tv_away = (TextView) dialogView.findViewById(R.id.tv_awayName);
+        final String opponentName = "Opponent";
+        tv_away.setText(opponentName);
+
+        Switch sw_homeAway = (Switch) dialogView.findViewById(R.id.sw_homeAway);
+        sw_homeAway.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if ( isChecked ) {
+                    tv_home.setText(opponentName);
+                    tv_away.setText(club.name);
+                } else {
+                    tv_home.setText(club.name);
+                    tv_away.setText(opponentName);
+                }
+            }
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setView(dialogView);
+        builder.setTitle("Upload a new game result.");
+        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getContext(),"Add result!",Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.setCancelable(true);
+        builder.show();
+    }
+
+    private void showEventDialog() {
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View eventView = inflater.inflate(R.layout.layout_event_dialog,null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setView(eventView);
+        builder.setTitle("Event");
+        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getContext(),"Add Event!",Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.setCancelable(true);
+        builder.show();
     }
 }

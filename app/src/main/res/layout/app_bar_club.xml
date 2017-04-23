@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.cristiano.myteam.activity.ClubActivity">
@@ -9,7 +10,8 @@
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:theme="@style/AppTheme.AppBarOverlay"
+        >
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar_club"
@@ -20,11 +22,19 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/layout_club_tournament_list"
-        android:id="@+id/layout_tournamentList"/>
+    <FrameLayout
+        android:id="@+id/fragment_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <!--<include layout="@layout/fragment_club_profile"-->
+        <!--android:id="@+id/layout_clubProfile" />-->
 
-    <include layout="@layout/layout_club_tournament"
-        android:visibility="gone"
-        android:id="@+id/layout_tournamentDetail"/>
+    <!--<include layout="@layout/fragment_tournament_list"-->
+        <!--android:id="@+id/layout_tournamentList"-->
+        <!--android:visibility="gone"/>-->
 
-</android.support.design.widget.CoordinatorLayout>
+    <!--<include layout="@layout/layout_club_tournament"-->
+        <!--android:visibility="gone"-->
+        <!--android:id="@+id/layout_tournamentDetail"/>-->
+
+</LinearLayout>

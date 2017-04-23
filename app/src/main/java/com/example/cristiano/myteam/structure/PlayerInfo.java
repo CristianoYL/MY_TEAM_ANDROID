@@ -31,11 +31,21 @@ public class PlayerInfo {
         return clubs;
     }
 
-    public boolean hasClubStats(int clubID) {
+    public Club[] addClub(Club club) {
+        Club[] clubs = new Club[this.clubs.length+1];
+        for ( int i = 0; i < this.clubs.length; i++ ) {
+            clubs[i] = this.clubs[i];
+        }
+        clubs[clubs.length-1] = club;
+        this.clubs = clubs;
+        return this.clubs;
+    }
+
+    public boolean hasClubStats(Integer clubID) {
         return this.clubStats.containsKey(clubID);
     }
 
-    public boolean hasTournamentStats(int tournamentID) {
+    public boolean hasTournamentStats(Integer tournamentID) {
         return this.tournamentStats.containsKey(tournamentID);
     }
 
@@ -52,7 +62,7 @@ public class PlayerInfo {
     }
 
     public void addTournamentStats(int tournamentID, Stats stats) {
-        this.clubStats.put(tournamentID,stats);
+        this.tournamentStats.put(tournamentID,stats);
     }
 
     public Stats getClubStats(int clubID) {

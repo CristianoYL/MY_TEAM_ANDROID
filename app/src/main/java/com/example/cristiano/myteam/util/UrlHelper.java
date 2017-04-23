@@ -24,8 +24,36 @@ public class UrlHelper {
         return URL + "/player_info/email/" + playerEmail;
     }
 
+    public static String urlGetPlayerClubInfo(int clubID, int playerID){
+        return URL + "/player_info/" + playerID + "/club/" + clubID;
+    }
+
     public static String urlPutPlayer(String playerEmail){
         return URL + "/player/" + playerEmail;
+    }
+
+    public static String urlPostRegPlayer(int clubID){
+        return URL + "/player/club/" + clubID;
+    }
+
+    public static String urlGetClubInfo(int clubID){
+        return URL + "/club_info/id/" + clubID;
+    }
+
+    public static String urlPostRegClub(int playerID){
+        return URL + "/club/player/" + playerID;
+    }
+
+    public static String urlGetClubTeamsheet(int clubID){
+        return URL + "/teamsheet/club/" + clubID;
+    }
+
+    public static String urlPostRegTournament(int clubID, int playerID){
+        return URL + "/tournament/club/" + clubID + "/player/" + playerID;
+    }
+
+    public static String urlPostTournament(){
+        return URL + "/tournament/register";
     }
 
     public static String urlGetPlayerTournamentStats(int tournamentID, int clubID, int playerID){
@@ -34,6 +62,10 @@ public class UrlHelper {
 
     public static String urlGetClubResults(int clubID){
         return URL + "/result/club/" + clubID;
+    }
+
+    public static String urlGetClubTournamentResults(int tournamentID, int clubID){
+        return URL + "/result/tournament/"+tournamentID+"/club/" + clubID;
     }
 
     public static String urlGetClubTournaments(int clubID){
@@ -47,4 +79,5 @@ public class UrlHelper {
     public static String urlGetTournamentClubSquad (int tournamentID, int clubID) {
         return URL + "/squad/tournament/" + tournamentID + "/club/" + clubID;
     }
+
 }

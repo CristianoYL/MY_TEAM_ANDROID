@@ -1,9 +1,13 @@
 package com.example.cristiano.myteam.activity;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,22 +21,26 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
 
+import com.example.cristiano.myteam.fragment.ClubProfileFragment;
 import com.example.cristiano.myteam.fragment.ClubStatsFragment;
-import com.example.cristiano.myteam.fragment.ResultFragment;
-import com.example.cristiano.myteam.fragment.SquadFragment;
+import com.example.cristiano.myteam.fragment.ClubResultFragment;
+import com.example.cristiano.myteam.fragment.ClubSquadFragment;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Event;
 import com.example.cristiano.myteam.structure.Result;
 import com.example.cristiano.myteam.structure.Tournament;
+import com.example.cristiano.myteam.structure.TournamentRegistration;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
 import com.example.cristiano.myteam.adapter.ResultListAdapter;
@@ -54,10 +62,12 @@ public class ClubActivity extends AppCompatActivity
     private LinearLayout layout_result;
     private ViewPager viewPager,viewPager_tournament;
     private TabLayout tab_clubStats,tab_tournament;
+    private Button btn_addTournament;
+    private View profilePage, tournamentListPage,tournamentPage;
 
     private Result[] results;
     private Tournament[] tournaments;
-    private int clubID;
+    private int clubID, playerID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,13 +86,18 @@ public class ClubActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         Bundle bundle = getIntent().getExtras();
-        if ( !bundle.containsKey(Constant.KEY_CLUB_ID) ) {
-            Log.e("ClubActivity","Club ID not specified!");
+        if ( !bundle.containsKey(Constant.KEY_CLUB_ID) ||
+                !bundle.containsKey(Constant.KEY_PLAYER_ID) ) {
+            Log.e("ClubActivity","clubID/playerID not specified!");
             return;
         }
         this.clubID = bundle.getInt(Constant.KEY_CLUB_ID);
+        this.playerID = bundle.getInt(Constant.KEY_PLAYER_ID);
         Log.d("CLUB_ID","="+this.clubID);
-        showTournamentList();
+//        profilePage = findViewById(R.id.layout_clubProfile);
+//        tournamentListPage = findViewById(R.id.layout_tournamentList);
+//        tournamentPage = findViewById(R.id.layout_tournamentDetail);
+        showProfilePage();
 
     }
 
@@ -92,7 +107,13 @@ public class ClubActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            Fragment fragment = fragmentManager.findFragmentByTag(Constant.FRAGMENT_CLUB_PROFILE);
+            if ( fragment != null && fragment.isVisible() ) {
+                super.onBackPressed();
+            } else {
+                showProfilePage();
+            }
         }
     }
 
@@ -141,7 +162,20 @@ public class ClubActivity extends AppCompatActivity
         return true;
     }
 
+    private void showProfilePage(){
+        ClubProfileFragment clubProfileFragment = ClubProfileFragment.newInstance(clubID,playerID);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_content,clubProfileFragment,Constant.FRAGMENT_CLUB_PROFILE);
+        fragmentTransaction.commit();
+
+    }
+
     private void showTournamentList() {
+        profilePage.setVisibility(View.GONE);
+        tournamentListPage.setVisibility(View.VISIBLE);
+        tournamentPage.setVisibility(View.GONE);
+        btn_addTournament = (Button) findViewById(R.id.btn_addTournament);
         lv_tournament = (ListView) findViewById(R.id.lv_clubTournaments);
         RequestAction actionGetClubTournaments = new RequestAction() {
             @Override
@@ -182,14 +216,77 @@ public class ClubActivity extends AppCompatActivity
         };
         String url = UrlHelper.urlGetClubTournaments(clubID);
         RequestHelper.sendGetRequest(url,actionGetClubTournaments);
+        btn_addTournament.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCreateTournamentPage();
+            }
+        });
+    }
+
+    private void showCreateTournamentPage() {
+        LayoutInflater inflater = LayoutInflater.from(ClubActivity.this);
+        View v_event = inflater.inflate(R.layout.layout_reg_name_info, null);
+        final TextView tv_name = (TextView) v_event.findViewById(R.id.tv_name);
+        final TextView tv_info = (TextView) v_event.findViewById(R.id.tv_info);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setTitle("Create a new Tournament");
+        dialogBuilder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String tournamentName = tv_name.getText().toString();
+                String tournamentInfo = tv_info.getText().toString();
+                if ( tournamentName.equals("") ) {
+                    Toast.makeText(ClubActivity.this, "Tournament Name cannot be empty!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if ( tournamentInfo.equals("") ) {
+                    Toast.makeText(ClubActivity.this, "Tournament Info cannot be empty!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                TournamentRegistration tournamentReg = new TournamentRegistration(clubID,tournamentName,tournamentInfo);
+                RequestAction actionPostClub = new RequestAction() {
+                    @Override
+                    public void actOnPre() {
+
+                    }
+
+                    @Override
+                    public void actOnPost(int responseCode, String response) {
+                        if ( responseCode == 201 ) {
+                            showTournamentList();
+                        } else {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response);
+                                String message = jsonObject.getString(Constant.KEY_MSG);
+                                Toast.makeText(ClubActivity.this,message,Toast.LENGTH_LONG).show();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                Toast.makeText(ClubActivity.this,response,Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+                };
+                String url = UrlHelper.urlPostTournament();
+                RequestHelper.sendPostRequest(url,tournamentReg.toJson(),actionPostClub);
+            }
+        });
+        dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+//                dialog.cancel();
+            }
+        });
+        dialogBuilder.setView(v_event);
+        dialogBuilder.setCancelable(true);
+        dialogBuilder.show();
     }
 
     private void showTournamentPage(int tournamentID){
-        View tournamentList = findViewById(R.id.layout_tournamentList);
-        View tournamentDetail = findViewById(R.id.layout_tournamentDetail);
-        tournamentList.setVisibility(View.GONE);
-        tournamentDetail.setVisibility(View.VISIBLE);
-        View tournamentView = tournamentDetail.findViewById(R.id.tabViewPager_tournament);
+        profilePage.setVisibility(View.GONE);
+        tournamentListPage.setVisibility(View.GONE);
+        tournamentPage.setVisibility(View.VISIBLE);
+        View tournamentView = tournamentPage.findViewById(R.id.tabViewPager_tournament);
         tab_tournament = (TabLayout) tournamentView.findViewById(R.id.tabLayout);
         viewPager_tournament = (ViewPager) tournamentView.findViewById(R.id.viewPager);
         tab_tournament.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -232,14 +329,14 @@ public class ClubActivity extends AppCompatActivity
         tab_tournament.addTab(tab_tournament.newTab().setText("Squad"));
         tab_tournament.setTabMode(TabLayout.MODE_FIXED);
         Fragment[] fragments = new Fragment[3];
-        ResultFragment resultFragment = ResultFragment.newInstance(clubID,tournamentID);
-        fragments[0] = resultFragment;
+        ClubResultFragment clubResultFragment = ClubResultFragment.newInstance(tournamentID,null);
+        fragments[0] = clubResultFragment;
 
         ClubStatsFragment clubStatsFragment = ClubStatsFragment.newInstance(clubID,tournamentID);
         fragments[1] = clubStatsFragment;
 
-        SquadFragment squadFragment = SquadFragment.newInstance(clubID,tournamentID);
-        fragments[2] = squadFragment;
+        ClubSquadFragment clubSquadFragment = ClubSquadFragment.newInstance(clubID,tournamentID);
+        fragments[2] = clubSquadFragment;
 
         CustomFragmentAdapter adapter = new CustomFragmentAdapter(getSupportFragmentManager());
         adapter.setFragments(fragments);

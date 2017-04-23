@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/layout_opponentName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/btn_chooseClub"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <EditText
+            android:id="@+id/et_opponentName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Oponent Name"
+            android:inputType="text" />
+    </android.support.design.widget.TextInputLayout>
+
+
+    <Button
+        android:id="@+id/btn_chooseClub"
+        style="@style/BlueButton"
+        android:layout_width="88dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Choose"
+        app:layout_constraintBottom_toBottomOf="@+id/layout_opponentName"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/layout_opponentName"
+        android:layout_marginEnd="8dp" />
+
+    <TextView
+        android:id="@+id/tv_score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Full Time Score"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="5dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0.51"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/sw_homeAway"
+        android:layout_marginEnd="8dp" />
+
+    <TextView
+        android:id="@+id/tv_homeName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Home"
+        android:textAlignment="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
+        app:layout_constraintRight_toLeftOf="@+id/tv_homeScore"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintTop_toTopOf="@+id/tv_homeScore"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_homeScore"
+        android:maxLines="1"
+        />
+
+    <TextView
+        android:id="@+id/tv_homeScore"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:ems="10"
+        android:inputType="number"
+        android:text="0"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_column"
+        app:layout_constraintRight_toLeftOf="@+id/tv_column"
+        app:layout_constraintTop_toTopOf="@+id/tv_column" />
+
+    <TextView
+        android:id="@+id/tv_column"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=":"
+        android:textAlignment="center"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_goneMarginStart="0dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@+id/tv_score"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_awayScore"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:ems="10"
+        android:inputType="number"
+        android:text="0"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_column"
+        app:layout_constraintLeft_toRightOf="@+id/tv_column"
+        app:layout_constraintTop_toTopOf="@+id/tv_column" />
+
+    <TextView
+        android:id="@+id/tv_awayName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Away"
+        android:maxLines="1"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_homeName"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginEnd="5dp"
+        android:layout_marginRight="5dp"
+        app:layout_constraintTop_toTopOf="@+id/tv_homeName"
+        app:layout_constraintLeft_toRightOf="@+id/tv_awayScore"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_addEvent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:clickable="true"
+        android:tint="@color/colorLightGrey"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toBottomOf="@+id/listView"
+        app:layout_constraintRight_toRightOf="@+id/listView"
+        app:srcCompat="@android:drawable/ic_input_add"
+        android:layout_marginEnd="8dp" />
+
+    <Switch
+        android:id="@+id/sw_homeAway"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:checked="false"
+        android:showText="true"
+        android:splitTrack="false"
+        android:text="Home/Away"
+        android:textOff="H"
+        android:textOn="A"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/layout_opponentName"
+        android:layout_marginStart="8dp" />
+
+    <LinearLayout
+        android:id="@+id/layout_penScore"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/tv_column"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="("
+            />
+
+        <TextView
+            android:id="@+id/tv_penHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="5dp"
+            android:paddingEnd="5dp"
+            android:paddingLeft="5dp"
+            android:paddingStart="5dp"
+            android:text="0"
+            />
+
+        <TextView
+            android:id="@+id/tv_penColumn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=":"
+            />
+
+        <TextView
+            android:id="@+id/tv_penAway"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:paddingRight="5dp"
+            android:paddingEnd="5dp"
+            android:paddingLeft="5dp"
+            android:paddingStart="5dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" )"
+            />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_penScore"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
+</android.support.constraint.ConstraintLayout>

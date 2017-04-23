@@ -28,20 +28,20 @@ import java.util.Comparator;
  * Created by Cristiano on 2017/4/17.
  */
 
-public class SquadFragment extends Fragment {
+public class ClubSquadFragment extends Fragment {
     private int clubID, tournamentID;
     private ArrayList<Squad> squadList;
     View rootView;
 
-    public SquadFragment() {
+    public ClubSquadFragment() {
         // Required empty public constructor
     }
 
-    public static SquadFragment newInstance(int clubID, int tournamentID) {
-        SquadFragment fragment = new SquadFragment();
+    public static ClubSquadFragment newInstance(int tournamentID, int clubID) {
+        ClubSquadFragment fragment = new ClubSquadFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(Constant.CLUB_ID,clubID);
-        bundle.putInt(Constant.TOURNAMENT_ID,tournamentID);
+        bundle.putInt(Constant.KEY_CLUB_ID,clubID);
+        bundle.putInt(Constant.KEY_TOURNAMENT_ID,tournamentID);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -51,8 +51,8 @@ public class SquadFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            clubID = bundle.getInt(Constant.CLUB_ID);
-            tournamentID = bundle.getInt(Constant.TOURNAMENT_ID);
+            clubID = bundle.getInt(Constant.KEY_CLUB_ID);
+            tournamentID = bundle.getInt(Constant.KEY_TOURNAMENT_ID);
         }
     }
 

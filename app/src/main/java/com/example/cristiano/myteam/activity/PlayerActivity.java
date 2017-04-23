@@ -8,8 +8,10 @@ import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -56,15 +58,20 @@ public class PlayerActivity extends AppCompatActivity
     private ImageView iv_avatar;
     private ConstraintLayout layout_profile,layout_club;
     private ListView lv_club;
-    private Button btn_club;
+    private Button btn_club,btn_addClub;
     private NavigationView navigationView;
     private ViewPager viewPager;
     private TabLayout tabLayout;
     private Spinner sp_playerClub, sp_playerTournament;
+    private DrawerLayout drawer;
+    private ActionBarDrawerToggle toggle;
+    private Toolbar toolbar;
 
     private String email;
+    private int playerID;
     private PlayerInfo playerInfo;
-    private int selectedClubID = 0, selectedTournamentID = 0;
+    private boolean isVisitor = false;
+    private int selectedClubID = 0;
     private ArrayList<String> clubNames, tournamentNames;
 
     private int pageID = PAGE_PROFILE;
@@ -78,7 +85,7 @@ public class PlayerActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_player);
+        toolbar = (Toolbar) findViewById(R.id.toolbar_player);
         setSupportActionBar(toolbar);
         layout_profile = (ConstraintLayout) findViewById(R.id.layout_profile);
         layout_club = (ConstraintLayout) findViewById(R.id.layout_club_list);
@@ -86,22 +93,33 @@ public class PlayerActivity extends AppCompatActivity
         tv_role = (TextView) findViewById(R.id.tv_role);
         iv_avatar = (ImageView) findViewById(R.id.iv_avatar);
         btn_club = (Button) findViewById(R.id.btn_club);
+        btn_addClub = (Button) findViewById(R.id.btn_addClub);
         lv_club = (ListView) findViewById(R.id.lv_club);
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view_player);
         navigationView.setNavigationItemSelectedListener(this);
 
         Bundle bundle = getIntent().getExtras();
-        if ( bundle == null || !bundle.containsKey(Constant.PLAYER_EMAIL) ) {
-            Log.e("PlayerActivity","Missing player email bundle");
+        if ( bundle == null ) {
             return;
         }
-        this.email = bundle.getString(Constant.PLAYER_EMAIL);
+        if ( !bundle.containsKey(Constant.PLAYER_EMAIL) && !bundle.containsKey(Constant.KEY_PLAYER_ID) ) {
+            Log.e("PlayerActivity","Missing player email / id");
+            return;
+        }
+        if ( bundle.containsKey(Constant.KEY_IS_VISITOR) ) {
+            this.isVisitor = bundle.getBoolean(Constant.KEY_IS_VISITOR);
+            if ( isVisitor ) {
+                setVisitorMode();
+            }
+        }
+        this.email = bundle.getString(Constant.PLAYER_EMAIL,null);
+        this.playerID = bundle.getInt(Constant.KEY_PLAYER_ID,0);
         loadPlayerInfo();
     }
 
@@ -112,8 +130,9 @@ public class PlayerActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         }else if( pageID != PAGE_PROFILE ){
             showPlayerProfilePage();
-        } else {
-            super.onBackPressed();
+        }else {
+//            super.onBackPressed();
+//            showLogoutPage();
         }
     }
 
@@ -173,8 +192,8 @@ public class PlayerActivity extends AppCompatActivity
         setTitle(R.string.title_activity_profile);
         layout_profile.setVisibility(View.VISIBLE);
         layout_club.setVisibility(View.GONE);
-        tv_name.setText(playerInfo.getPlayer().displayName);
-        tv_role.setText(playerInfo.getPlayer().role);
+        tv_name.setText(playerInfo.getPlayer().getDisplayName());
+        tv_role.setText(playerInfo.getPlayer().getRole());
         View view = findViewById(R.id.layout_playerStats);
         viewPager = (ViewPager) view.findViewById(R.id.viewPager);
         tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
@@ -200,34 +219,14 @@ public class PlayerActivity extends AppCompatActivity
         sp_playerClub.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if ( position == 0 ) {  // hide tournament spinner, show player total stats
-                    sp_playerTournament.setVisibility(View.GONE);
-                    tv_playerTournament.setVisibility(View.GONE);
-                    showStats(playerInfo.getTotalStats());
-                } else {    // show sp_playerTournament
-                    sp_playerTournament.setVisibility(View.VISIBLE);
-                    tv_playerTournament.setVisibility(View.VISIBLE);
+                if ( position == 0 ) {  // position[0] == All Clubs
+                    showPlayerTotalStats();
+                } else {    // show sp_playerTournament and let the user choose
                     for ( Club club : playerInfo.getClubs() ) {
                         if ( club.name.equals(parent.getSelectedItem().toString()) ) {
                             selectedClubID = club.id;
+                            renderTournamentList(selectedClubID);
                             break;
-                        }
-                    }
-                    if ( selectedClubID != 0 ) {
-                        if ( playerInfo.hasClubStats(selectedClubID) ) {    // if cached, use cache to set adapter and render stats
-                            tournamentNames = new ArrayList<String>();
-                            tournamentNames.add(Constant.OPTION_ALL_TOURNAMENTS);
-                            for ( Tournament tournament : playerInfo.getClubTournaments(selectedClubID) ) {
-                                tournamentNames.add(tournament.name);
-                            }
-                            sp_playerTournament.setAdapter(new ArrayAdapter<String>(
-                                    PlayerActivity.this,
-                                    android.R.layout.simple_spinner_dropdown_item,
-                                    tournamentNames));
-                            Stats clubTotalStats = playerInfo.getClubStats(selectedClubID);
-//                            showStats(clubTotalStats);
-                        } else {    // not cached, send request to get the stats
-                            loadPlayerClubStats(selectedClubID);
                         }
                     }
                 }
@@ -235,31 +234,25 @@ public class PlayerActivity extends AppCompatActivity
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
         sp_playerTournament.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if ( position == 0 ) {  // show player's club total stats
-                    Stats playerClubStats = playerInfo.getClubStats(selectedClubID);
-                } else {    // show player's tournament stats
-                    Tournament[] tournaments = playerInfo.getClubTournaments(selectedClubID);
-                    for ( int i = 0; i < tournaments.length; i++ ) {
-                        if ( tournaments[i].name.equals(parent.getSelectedItem().toString()) ) {
-                            selectedTournamentID = tournaments[i].id;
+                if (position == 0) {  // show player's club total stats
+                    showPlayerClubStats(selectedClubID);
+                } else if (position > 0) {    // show player's tournament stats
+                    for (Tournament tournament : playerInfo.getClubTournaments(selectedClubID)) {
+                        if (tournament.name.equals(parent.getSelectedItem().toString())) {
+                            showPlayerTournamentStats(tournament.id);
                             break;
                         }
-                    }
-                    if ( selectedTournamentID != 0) {
-                        loadPlayerTournamentStats(selectedTournamentID);
                     }
                 }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
@@ -301,7 +294,7 @@ public class PlayerActivity extends AppCompatActivity
         });
 
         // initialize avatar
-        switch ( playerInfo.getPlayer().avatar ) {
+        switch ( playerInfo.getPlayer().getAvatar() ) {
             case 0:
                 iv_avatar.setImageResource(R.drawable.avatar_scholes);
                 break;
@@ -320,7 +313,7 @@ public class PlayerActivity extends AppCompatActivity
         Intent intent = new Intent(PlayerActivity.this,PlayerRegistrationActivity.class);
         intent.putExtra(Constant.PLAYER_EMAIL,email);
         if ( player != null ) {
-            intent.putExtra(Constant.PLAYER_INFO,player);
+            intent.putExtra(Constant.KEY_PLAYER_INFO,player);
         }
         startActivity(intent);
     }
@@ -345,6 +338,83 @@ public class PlayerActivity extends AppCompatActivity
                 viewClub(playerInfo.getClubs()[i].id);
             }
         });
+        btn_addClub.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCreateClubPage();
+            }
+        });
+    }
+
+    private void showCreateClubPage() {
+        LayoutInflater inflater = LayoutInflater.from(PlayerActivity.this);
+        View v_event = inflater.inflate(R.layout.layout_reg_name_info, null);
+        final TextView tv_name = (TextView) v_event.findViewById(R.id.tv_name);
+        final TextView tv_info = (TextView) v_event.findViewById(R.id.tv_info);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setTitle("Create a club");
+        dialogBuilder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String clubName = tv_name.getText().toString();
+                String clubInfo = tv_info.getText().toString();
+                if ( clubName.equals("") ) {
+                    Toast.makeText(PlayerActivity.this, "Club Name cannot be empty!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if ( clubInfo.equals("") ) {
+                    Toast.makeText(PlayerActivity.this, "Club Info cannot be empty!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                int clubID = 0;
+                Club regClub = new Club(clubID,clubName,clubInfo);
+                RequestAction actionPostClub = new RequestAction() {
+                    @Override
+                    public void actOnPre() {
+
+                    }
+
+                    @Override
+                    public void actOnPost(int responseCode, String response) {
+                        if ( responseCode == 201 ) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response);
+                                int clubID = jsonObject.getInt(Constant.CLUB_ID);
+                                String name = jsonObject.getString(Constant.CLUB_NAME);
+                                String info = jsonObject.getString(Constant.CLUB_INFO);
+                                Club newClub = new Club(clubID,name,info);
+                                playerInfo.addClub(newClub);
+                                Toast.makeText(PlayerActivity.this,"Club Created!",Toast.LENGTH_LONG).show();
+                                showPlayerClubPage();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                Toast.makeText(PlayerActivity.this,response,Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response);
+                                String message = jsonObject.getString(Constant.KEY_MSG);
+                                Toast.makeText(PlayerActivity.this,message,Toast.LENGTH_LONG).show();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                Toast.makeText(PlayerActivity.this,response,Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+                };
+                String url = UrlHelper.urlPostRegClub(playerInfo.getPlayer().getId());
+                RequestHelper.sendPostRequest(url,regClub.toJson(),actionPostClub);
+            }
+        });
+        dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+//                dialog.cancel();
+            }
+        });
+        dialogBuilder.setView(v_event);
+        dialogBuilder.setCancelable(true);
+        dialogBuilder.show();
     }
 
     private void showLogoutPage() {
@@ -383,6 +453,7 @@ public class PlayerActivity extends AppCompatActivity
     private void viewClub(int clubID) {
         Intent intent = new Intent(PlayerActivity.this,ClubActivity.class);
         intent.putExtra(Constant.KEY_CLUB_ID,clubID);
+        intent.putExtra(Constant.KEY_PLAYER_ID,playerInfo.getPlayer().getId());
         startActivity(intent);
     }
 
@@ -402,7 +473,7 @@ public class PlayerActivity extends AppCompatActivity
 
                         // get player's profile info
                         JSONObject jsonPlayer = jsonPlayerInfo.getJSONObject(Constant.PLAYER_INFO_PLAYER);
-                        int playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
+                        playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
                         String firstName = jsonPlayer.getString(Constant.PLAYER_FIRST_NAME);
                         String lastName = jsonPlayer.getString(Constant.PLAYER_LAST_NAME);
                         String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
@@ -436,6 +507,7 @@ public class PlayerActivity extends AppCompatActivity
                         int start = jsonPlayerTotalStats.getInt(Constant.STATS_START);
                         int goal = jsonPlayerTotalStats.getInt(Constant.STATS_GOAL);
                         int penalty = jsonPlayerTotalStats.getInt(Constant.STATS_PEN);
+                        int freekick = jsonPlayerTotalStats.getInt(Constant.STATS_FREEKICK);
                         int penaltyShootout = jsonPlayerTotalStats.getInt(Constant.STATS_PEN_SHOOTOUT);
                         int penaltyTaken = jsonPlayerTotalStats.getInt(Constant.STATS_PEN_TAKEN);
                         int ownGoal = jsonPlayerTotalStats.getInt(Constant.STATS_OG);
@@ -448,9 +520,9 @@ public class PlayerActivity extends AppCompatActivity
                         int cleanSheet = jsonPlayerTotalStats.getInt(Constant.STATS_CLEAN_SHEET);
                         int penaltySaved = jsonPlayerTotalStats.getInt(Constant.STATS_PEN_SAVED);
                         Stats totalStats = new Stats(tournamentID, clubID, playerID, attendance, appearance,
-                                start, goal, penalty, penaltyShootout, penaltyTaken, ownGoal, header,
+                                start, goal, penalty,freekick, penaltyShootout, penaltyTaken, ownGoal, header,
                                 weakFootGoal,otherGoal, assist, yellow, red, cleanSheet, penaltySaved);
-                        JSONObject jsonPlayerGamePerformance = jsonPlayerInfo.getJSONObject(Constant.PLAYER_INFO_GAME_PERFORMANCE);
+                        JSONObject jsonPlayerGamePerformance = jsonPlayerInfo.getJSONObject(Constant.KEY_GAME_PERFORMANCE);
                         int win = jsonPlayerGamePerformance.getInt(Constant.PERFORMANCE_WIN);
                         int draw = jsonPlayerGamePerformance.getInt(Constant.PERFORMANCE_DRAW);
                         int loss = jsonPlayerGamePerformance.getInt(Constant.PERFORMANCE_LOSS);
@@ -462,6 +534,8 @@ public class PlayerActivity extends AppCompatActivity
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                } else if ( responseCode == 404 ){
+                    showRegistrationPage(email,null);
                 } else {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
@@ -474,7 +548,12 @@ public class PlayerActivity extends AppCompatActivity
                 }
             }
         };
-        String url = UrlHelper.urlGetPlayerInfo(email);
+        String url;
+        if ( playerID != 0) {
+            url = UrlHelper.urlGetPlayerInfo(playerID);
+        } else {
+            url = UrlHelper.urlGetPlayerInfo(email);
+        }
         RequestHelper.sendGetRequest(url,actionGetPlayerInfo);
     }
 
@@ -486,31 +565,71 @@ public class PlayerActivity extends AppCompatActivity
 
             @Override
             public void actOnPost(int responseCode, String response) {
-
-                // get club tournaments
-//                Tournament[] tournaments;
-//                playerInfo.addClubTournament(selectedClubID,tournaments);
-//                // set sp_playerTournament adapter
-//                tournamentNames = new ArrayList<String>();
-//                tournamentNames.add(Constant.OPTION_ALL_TOURNAMENTS);
-//                for ( Tournament tournament : tournaments ) {
-//                    tournamentNames.add(tournament.name);
-//                }
-//                sp_playerTournament.setAdapter(new ArrayAdapter<String>(
-//                        PlayerActivity.this,
-//                        android.R.layout.simple_spinner_dropdown_item,
-//                        tournamentNames));
-
-                // get player club total stats
-//                Stats playerClubStats;
-//                playerInfo.addClubStats(selectedClubID,playerClubStats);
-                // render view pager
-//                showStats(playerClubStats);
+                if ( responseCode == 200 ) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        // get club tournaments
+                        JSONArray jsonTournaments = jsonObject.getJSONArray(Constant.TOURNAMENT_LIST);
+                        Tournament[] tournaments = new Tournament[jsonTournaments.length()];
+                        tournamentNames = new ArrayList<String>();
+                        tournamentNames.add(Constant.OPTION_ALL_TOURNAMENTS);
+                        for ( int i = 0; i < jsonTournaments.length(); i++ ) {
+                            JSONObject jsonTournament = jsonTournaments.getJSONObject(i);
+                            int tournamentID = jsonTournament.getInt(Constant.TOURNAMENT_ID);
+                            String tournamentName = jsonTournament.getString(Constant.TOURNAMENT_NAME);
+                            String tournamentInfo = jsonTournament.getString(Constant.TOURNAMENT_INFO);
+                            tournaments[i] = new Tournament(tournamentID,tournamentName,tournamentInfo);
+                            tournamentNames.add(tournamentName);
+                        }
+                        playerInfo.addClubTournament(selectedClubID,tournaments);
+                        // set sp_playerTournament adapter
+                        sp_playerTournament.setAdapter(new ArrayAdapter<String>(
+                                PlayerActivity.this,
+                                android.R.layout.simple_spinner_dropdown_item,
+                                tournamentNames));
+                        // get player club total stats
+                        JSONObject jsonPlayerClubStats = jsonObject.getJSONObject(Constant.TABLE_STATS);
+                        int tournamentID = -1;
+                        int clubID = selectedClubID;
+                        int attendance = jsonPlayerClubStats.getInt(Constant.STATS_ATTENDANCE);
+                        int appearance = jsonPlayerClubStats.getInt(Constant.STATS_APPEARANCE);
+                        int start = jsonPlayerClubStats.getInt(Constant.STATS_START);
+                        int goal = jsonPlayerClubStats.getInt(Constant.STATS_GOAL);
+                        int penalty = jsonPlayerClubStats.getInt(Constant.STATS_PEN);
+                        int freekick = jsonPlayerClubStats.getInt(Constant.STATS_FREEKICK);
+                        int penaltyShootout = jsonPlayerClubStats.getInt(Constant.STATS_PEN_SHOOTOUT);
+                        int penaltyTaken = jsonPlayerClubStats.getInt(Constant.STATS_PEN_TAKEN);
+                        int ownGoal = jsonPlayerClubStats.getInt(Constant.STATS_OG);
+                        int header = jsonPlayerClubStats.getInt(Constant.STATS_HEADER);
+                        int weakFootGoal = jsonPlayerClubStats.getInt(Constant.STATS_WEAK_FOOT_GOAL);
+                        int otherGoal = jsonPlayerClubStats.getInt(Constant.STATS_OTHER_GOAL);
+                        int assist = jsonPlayerClubStats.getInt(Constant.STATS_ASSIST);
+                        int yellow = jsonPlayerClubStats.getInt(Constant.STATS_YELLOW);
+                        int red = jsonPlayerClubStats.getInt(Constant.STATS_RED);
+                        int cleanSheet = jsonPlayerClubStats.getInt(Constant.STATS_CLEAN_SHEET);
+                        int penaltySaved = jsonPlayerClubStats.getInt(Constant.STATS_PEN_SAVED);
+                        Stats playerClubStats = new Stats(tournamentID, clubID, playerID, attendance, appearance,
+                                start, goal, penalty, freekick, penaltyShootout, penaltyTaken, ownGoal, header,
+                                weakFootGoal,otherGoal, assist, yellow, red, cleanSheet, penaltySaved);
+                        JSONObject jsonPlayerGamePerformance = jsonObject.getJSONObject(Constant.KEY_GAME_PERFORMANCE);
+                        int win = jsonPlayerGamePerformance.getInt(Constant.PERFORMANCE_WIN);
+                        int draw = jsonPlayerGamePerformance.getInt(Constant.PERFORMANCE_DRAW);
+                        int loss = jsonPlayerGamePerformance.getInt(Constant.PERFORMANCE_LOSS);
+                        playerClubStats.setWin(win);
+                        playerClubStats.setDraw(draw);
+                        playerClubStats.setLoss(loss);
+                        playerInfo.addClubStats(selectedClubID,playerClubStats);
+                        // render view pager
+                        showStats(playerClubStats);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
 
             }
         };
-//        String url;
-//        RequestHelper.sendGetRequest(url,actionGetPlayerClubStats);
+        String url = UrlHelper.urlGetPlayerClubInfo(selectedClubID,playerInfo.getPlayer().getId());
+        RequestHelper.sendGetRequest(url,actionGetPlayerClubStats);
     }
 
     private void loadPlayerTournamentStats(int tournamentID){
@@ -534,6 +653,7 @@ public class PlayerActivity extends AppCompatActivity
                         int start = jsonPlayerTournamentStats.getInt(Constant.STATS_START);
                         int goal = jsonPlayerTournamentStats.getInt(Constant.STATS_GOAL);
                         int penalty = jsonPlayerTournamentStats.getInt(Constant.STATS_PEN);
+                        int freekick = jsonPlayerTournamentStats.getInt(Constant.STATS_FREEKICK);
                         int penaltyShootout = jsonPlayerTournamentStats.getInt(Constant.STATS_PEN_SHOOTOUT);
                         int penaltyTaken = jsonPlayerTournamentStats.getInt(Constant.STATS_PEN_TAKEN);
                         int ownGoal = jsonPlayerTournamentStats.getInt(Constant.STATS_OG);
@@ -546,9 +666,9 @@ public class PlayerActivity extends AppCompatActivity
                         int cleanSheet = jsonPlayerTournamentStats.getInt(Constant.STATS_CLEAN_SHEET);
                         int penaltySaved = jsonPlayerTournamentStats.getInt(Constant.STATS_PEN_SAVED);
                         Stats playerTournamentStats = new Stats(tournamentID, clubID, playerID, attendance, appearance,
-                                start, goal, penalty, penaltyShootout, penaltyTaken, ownGoal, header,
+                                start, goal, penalty, freekick, penaltyShootout, penaltyTaken, ownGoal, header,
                                 weakFootGoal,otherGoal, assist, yellow, red, cleanSheet, penaltySaved);
-                        JSONObject jsonPlayerTournamentPerformance = jsonResponse.getJSONObject(Constant.PLAYER_INFO_GAME_PERFORMANCE);
+                        JSONObject jsonPlayerTournamentPerformance = jsonResponse.getJSONObject(Constant.KEY_GAME_PERFORMANCE);
                         int win = jsonPlayerTournamentPerformance.getInt(Constant.PERFORMANCE_WIN);
                         int draw = jsonPlayerTournamentPerformance.getInt(Constant.PERFORMANCE_DRAW);
                         int loss = jsonPlayerTournamentPerformance.getInt(Constant.PERFORMANCE_LOSS);
@@ -556,7 +676,7 @@ public class PlayerActivity extends AppCompatActivity
                         playerTournamentStats.setDraw(draw);
                         playerTournamentStats.setLoss(loss);
                         // cache stats
-                        playerInfo.addTournamentStats(selectedTournamentID,playerTournamentStats);
+                        playerInfo.addTournamentStats(tournamentID,playerTournamentStats);
                         // render view pager
                         showStats(playerTournamentStats);
                     } catch (JSONException e) {
@@ -574,12 +694,13 @@ public class PlayerActivity extends AppCompatActivity
                 }
             }
         };
-        String url = UrlHelper.urlGetPlayerTournamentStats(tournamentID,selectedClubID,playerInfo.getPlayer().id);
+        String url = UrlHelper.urlGetPlayerTournamentStats(tournamentID,selectedClubID,playerInfo.getPlayer().getId());
         RequestHelper.sendGetRequest(url,actionGetPlayerTournamentStats);
     }
 
     private void showStats(Stats stats) {
         tabLayout.removeAllTabs();
+        tabLayout.setBackgroundResource(R.drawable.card_border);
         // initialize stats views
         Fragment[] fragments = new Fragment[4];
         String[] dataX;
@@ -620,5 +741,64 @@ public class PlayerActivity extends AppCompatActivity
         CustomFragmentAdapter adapter = new CustomFragmentAdapter(getSupportFragmentManager());
         adapter.setFragments(fragments);
         viewPager.setAdapter(adapter);
+    }
+
+    private void showPlayerTotalStats(){
+        // hide tournament spinner, show player total stats
+        sp_playerTournament.setVisibility(View.GONE);
+        tv_playerTournament.setVisibility(View.GONE);
+        sp_playerTournament.setSelection(0);
+        showStats(playerInfo.getTotalStats());
+    }
+
+    private void showPlayerClubStats(int clubID) {
+        if (playerInfo.hasClubStats(clubID)) {    // if cached, use cache to set adapter and render stats
+            Log.d("PLAYER__CLUB_STATS","CACHED");
+            showStats(playerInfo.getClubStats(clubID));
+        } else {    // not cached, send request to get the stats
+            Log.d("PLAYER__CLUB_STATS","NOT CACHED");
+            loadPlayerClubStats(clubID);
+        }
+    }
+
+    private void showPlayerTournamentStats(int tournamentID) {
+        if ( playerInfo.hasTournamentStats(tournamentID) ) {    // if player tournament stats is cached, display it
+            showStats(playerInfo.getTournamentStats(tournamentID));
+            Log.d("PLAYER__TOUR_STATS","CACHED");
+        } else {    // if not cached, load and display it
+            loadPlayerTournamentStats(tournamentID);
+            Log.d("PLAYER__TOUR_STATS","NOT CACHED");
+        }
+    }
+
+    private void renderTournamentList(int clubID) {
+        tournamentNames = new ArrayList<String>();
+        tournamentNames.add(Constant.OPTION_ALL_TOURNAMENTS);
+        Tournament[] tournaments = playerInfo.getClubTournaments(selectedClubID);
+        if ( tournaments != null && tournaments.length > 0 ) {
+            for (Tournament tournament : tournaments ) {
+                tournamentNames.add(tournament.name);
+            }
+        }
+        sp_playerTournament.setAdapter(new ArrayAdapter<String>(
+                PlayerActivity.this,
+                android.R.layout.simple_spinner_dropdown_item,
+                tournamentNames));
+        sp_playerTournament.setVisibility(View.VISIBLE);
+        tv_playerTournament.setVisibility(View.VISIBLE);
+    }
+
+    private void setVisitorMode(){
+        btn_club.setVisibility(View.INVISIBLE);
+        ActionBar actionBar = getSupportActionBar();
+        if ( actionBar != null ) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 }
