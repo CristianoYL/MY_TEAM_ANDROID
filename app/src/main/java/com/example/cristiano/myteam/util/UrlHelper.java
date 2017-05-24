@@ -5,8 +5,8 @@ package com.example.cristiano.myteam.util;
  */
 
 public class UrlHelper {
-//    private static final String URL = "https://my-team-rest-api.herokuapp.com";
-    private static final String URL = "http://192.168.1.8:5000";
+    private static final String URL = "https://my-team-rest-api.herokuapp.com";
+//    private static final String URL = "http://192.168.1.8:5000";
 
     public static String urlLogin(){
         return URL + "/auth";
