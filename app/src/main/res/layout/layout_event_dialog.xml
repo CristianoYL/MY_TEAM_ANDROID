@@ -1,221 +1,275 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <Switch
-        android:id="@+id/sw_myEvent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:checked="true"
-        android:showText="true"
-        android:text="My Club Event? "
-        android:textOff="N"
-        android:textOn="Y"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_eventType"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="20dp"
-        android:text="Event Type"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sw_myEvent" />
-
-    <Spinner
-        android:id="@+id/sp_eventType"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toRightOf="@+id/tv_eventType"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_eventType" />
-
-    <TextView
-        android:id="@+id/tv_eventHalf"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="10dp"
-        android:text="Event Half"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sp_eventType" />
-
-    <Spinner
-        android:id="@+id/sp_half"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="8dp"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toRightOf="@+id/tv_eventHalf"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_eventHalf"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="8dp" />
-
-    <Switch
-        android:id="@+id/sw_specificTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
-        android:showText="true"
-        android:text="Use specific time?  "
-        android:textOff="Y"
-        android:textOn="N"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sp_half"
-        android:layout_marginStart="10dp" />
-
+    android:layout_height="500dp"
+    >
     <LinearLayout
-        android:id="@+id/layout_specificTime"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintLeft_toRightOf="@+id/sw_specificTime"
-        app:layout_constraintTop_toTopOf="@+id/sw_specificTime"
-        android:orientation="horizontal"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintBottom_toBottomOf="@+id/sw_specificTime"
-        android:layout_marginBottom="0dp"
-        android:visibility="invisible">
-        <EditText
-            android:id="@+id/et_time"
-            android:layout_width="60dp"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="number"
-            />
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_min"
+        <Switch
+            android:id="@+id/sw_myEvent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="min"/>
+            android:layout_marginEnd="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:checked="true"
+            android:showText="true"
+            android:text="My Club Event? "
+            android:textOff="N"
+            android:textOn="Y"
+            />
+
+        <LinearLayout
+            android:id="@+id/layout_eventType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/tv_eventType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Event Type"
+                android:layout_weight="2"
+                />
+
+            <Spinner
+                android:id="@+id/sp_eventType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_eventPlayer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/tv_eventPlayer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Event Player"
+                android:layout_weight="2"
+                />
+
+            <Spinner
+                android:id="@+id/sp_eventPlayer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginStart="20dp"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_sub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/tv_subOnPlayer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Substitution"
+                android:layout_weight="2"
+                />
+
+            <Spinner
+                android:id="@+id/sp_subOnPlayer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_eventHalf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="8dp">
+            <TextView
+                android:id="@+id/tv_eventHalf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Event Half"
+                android:layout_weight="2"
+                />
+
+            <Spinner
+                android:id="@+id/sp_eventHalf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="10dp"
+            >
+
+            <Switch
+                android:id="@+id/sw_specificTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:showText="true"
+                android:text="Use specific time?  "
+                android:textOff="N"
+                android:textOn="Y"
+                android:layout_gravity="center"
+                />
+
+            <LinearLayout
+                android:id="@+id/layout_specificTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:visibility="invisible">
+                <EditText
+                    android:id="@+id/et_time"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="number"
+                    />
+
+                <TextView
+                    android:id="@+id/tv_min"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="min"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_goalType"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            >
+
+            <TextView
+                android:id="@+id/tv_goalPart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scoring Part:"
+                />
+
+            <RadioGroup
+                android:id="@+id/rg_part"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+
+                <RadioButton
+                    android:id="@+id/rb_left"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="left foot" />
+
+                <RadioButton
+                    android:id="@+id/rb_right"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="right foot" />
+
+                <RadioButton
+                    android:id="@+id/rb_head"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="header" />
+
+                <RadioButton
+                    android:id="@+id/rb_other"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="other" />
+            </RadioGroup>
+
+            <TextView
+                android:id="@+id/tv_goalMethod"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Goal Method"
+                />
+
+            <RadioGroup
+                android:id="@+id/rg_goalMethod"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+
+                <RadioButton
+                    android:id="@+id/rb_regular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="regular" />
+
+                <RadioButton
+                    android:id="@+id/rb_penalty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="penalty" />
+
+                <RadioButton
+                    android:id="@+id/rb_freekick"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="freekick" />
+            </RadioGroup>
+
+        </LinearLayout>
+
     </LinearLayout>
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/layout_goalType"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="60dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sp_half"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintHorizontal_bias="0.0"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/tv_goalPart"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="Scoring Part (check all that applies):"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginRight="8dp"
-            app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp" />
-
-        <RadioGroup
-            android:id="@+id/rg_part"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
-            android:orientation="horizontal"
-            app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginTop="10dp"
-            app:layout_constraintTop_toBottomOf="@+id/tv_goalPart"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp">
-            <RadioButton
-                android:id="@+id/rb_left"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="left foot"/>
-            <RadioButton
-                android:id="@+id/rb_right"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="right foot"/>
-            <RadioButton
-                android:id="@+id/rb_head"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="header"/>
-            <RadioButton
-                android:id="@+id/rb_other"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="other"/>
-        </RadioGroup>
-
-        <TextView
-            android:id="@+id/tv_goalMethod"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Goal Method"
-            app:layout_constraintTop_toBottomOf="@+id/rg_part"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            />
-
-        <RadioGroup
-            android:id="@+id/rg_goalMethod"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
-            android:orientation="horizontal"
-            app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginTop="10dp"
-            app:layout_constraintTop_toBottomOf="@+id/tv_goalMethod"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp">
-            <RadioButton
-                android:id="@+id/rb_regular"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="regular"/>
-            <RadioButton
-                android:id="@+id/rb_penalty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="penalty"/>
-            <RadioButton
-                android:id="@+id/rb_freekick"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="freekick"/>
-        </RadioGroup>
-
-    </android.support.constraint.ConstraintLayout>
-
-</android.support.constraint.ConstraintLayout>
+</ScrollView>

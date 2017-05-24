@@ -9,6 +9,8 @@ public class Constant {
     public static final String SERVER_CHARSET = "UTF-8";
 
     public static final String MSG_TIME_OUT = "{ \"" + Constant.KEY_MSG + "\":\"Connection Timeout\"}";
+    public static final int CONN_TIME_OUT = 10000;
+    public static final int READ_TIME_OUT = 5000;
 
     public static final String RESULT_LIST = "results";
     public static final String TOURNAMENT_LIST = "tournaments";
@@ -134,6 +136,7 @@ public class Constant {
     public static final String EVENT_TYPE_RED = "red";
     public static final String EVENT_TYPE_SUB_ON = "subOn";
     public static final String EVENT_TYPE_SUB_OFF = "subOff";
+    public static final String EVENT_TYPE_SUB = "substitution";
     public static final String EVENT_TYPE_OG = "ownGoal";
 
     // result columns

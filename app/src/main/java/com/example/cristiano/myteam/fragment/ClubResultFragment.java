@@ -5,13 +5,18 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.RadioGroup;
 import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +43,13 @@ public class ClubResultFragment extends Fragment {
     private Club club;
     private int tournamentID;
     private Result[] results;
+    private TextView tv_home, tv_away;
+    private String opponentName;
+    private Spinner sp_eventType, sp_eventHalf,sp_eventPlayer,sp_subOffPlayer;
+    private Switch sw_specificTime;
+    private ListView lv_home, lv_away;
+    private RadioGroup rg_goalPart, rg_goalMethod;
+    private View goalDetailView, specificTimeView, subPlayerView;
     View view;
 
     public ClubResultFragment() {
@@ -88,8 +100,6 @@ public class ClubResultFragment extends Fragment {
                         int id, home, away, tournamentID;
                         String homeName, awayName, tournamentName, date, stage, ftScore, extraScore,
                                 penScore, info, eventType,eventPlayer,eventTime;
-                        ArrayList<String> homeEvents = new ArrayList<>();
-                        ArrayList<String> awayEvents = new ArrayList<>();
                         for ( int i = 0; i < jsonArray.length(); i++ ) {
                             id = jsonArray.getJSONObject(i).getInt(Constant.RESULT_ID);
                             home = jsonArray.getJSONObject(i).getInt(Constant.RESULT_HOME_ID);
@@ -106,26 +116,31 @@ public class ClubResultFragment extends Fragment {
                             info = jsonArray.getJSONObject(i).getString(Constant.RESULT_INFO);
                             results[i] = new Result(id,home,away,tournamentID,homeName,awayName,
                                     tournamentName,date,stage,ftScore,extraScore,penScore,info);
-//                            JSONArray eventArray = jsonArray.getJSONObject(i).getJSONArray(Constant.RESULT_HOME_EVENTS);
-//                            try {
-//                                for ( int j = 0; j < eventArray.length(); j++ ) {
-//                                    eventType = eventArray.getJSONObject(j).getString(Constant.EVENT_TYPE);
-//                                    eventPlayer = eventArray.getJSONObject(j).getString(Constant.EVENT_PLAYER);
-//                                    eventTime = eventArray.getJSONObject(j).getString(Constant.EVENT_TIME);
-//                                    results[i].addEvent(eventType,eventPlayer,eventTime,true);
-//                                }
-//                                eventArray = jsonArray.getJSONObject(i).getJSONArray(Constant.RESULT_AWAY_EVENTS);
-//                                for ( int j = 0; j < eventArray.length(); j++ ) {
-//                                    eventType = eventArray.getJSONObject(j).getString(Constant.EVENT_TYPE);
-//                                    eventPlayer = eventArray.getJSONObject(j).getString(Constant.EVENT_PLAYER);
-//                                    eventTime = eventArray.getJSONObject(j).getString(Constant.EVENT_TIME);
-//                                    results[i].addEvent(eventType,eventPlayer,eventTime,false);
-//                                }
-//                            } catch (Exception e) {
-//                                Log.e("CLUB_RESULT","Error when parsing club results");
-//                            }
+                            JSONArray eventArray;
+                            try {
+                                eventArray = jsonArray.getJSONObject(i).getJSONArray(Constant.RESULT_HOME_EVENTS);
+                                for ( int j = 0; j < eventArray.length(); j++ ) {
+                                    eventType = eventArray.getJSONObject(j).getString(Constant.EVENT_TYPE);
+                                    eventPlayer = eventArray.getJSONObject(j).getString(Constant.EVENT_PLAYER);
+                                    eventTime = eventArray.getJSONObject(j).getString(Constant.EVENT_TIME);
+                                    results[i].addEvent(eventType,eventPlayer,eventTime,true);
+                                }
+                            } catch (Exception e) {
+                                Log.d("CLUB_RESULT","Error when parsing home results");
+                            }
+                            try {
+                                eventArray = jsonArray.getJSONObject(i).getJSONArray(Constant.RESULT_AWAY_EVENTS);
+                                for ( int j = 0; j < eventArray.length(); j++ ) {
+                                    eventType = eventArray.getJSONObject(j).getString(Constant.EVENT_TYPE);
+                                    eventPlayer = eventArray.getJSONObject(j).getString(Constant.EVENT_PLAYER);
+                                    eventTime = eventArray.getJSONObject(j).getString(Constant.EVENT_TIME);
+                                    results[i].addEvent(eventType,eventPlayer,eventTime,false);
+                                }
+                            } catch (Exception e) {
+                                Log.d("CLUB_RESULT","Error when parsing away results");
+                            }
                         }
-                        showResults(view);
+                        showResults();
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -146,7 +161,7 @@ public class ClubResultFragment extends Fragment {
         RequestHelper.sendGetRequest(url,actionGetClubResults);
     }
 
-    private void showResults(View view){
+    private void showResults(){
         ListView lv_result = (ListView) view.findViewById(R.id.lv_result);
         ArrayList<HashMap<String,Object>> resultItems = new ArrayList<>();
         for ( int i = 0; i < results.length; i++ ) {
@@ -244,11 +259,12 @@ public class ClubResultFragment extends Fragment {
             }
         });
 
-        final TextView tv_home = (TextView) dialogView.findViewById(R.id.tv_homeName);
+        tv_home = (TextView) dialogView.findViewById(R.id.tv_homeName);
         tv_home.setText(club.name);
-        final TextView tv_away = (TextView) dialogView.findViewById(R.id.tv_awayName);
-        final String opponentName = "Opponent";
+        tv_away = (TextView) dialogView.findViewById(R.id.tv_awayName);
+        opponentName = "Opponent";
         tv_away.setText(opponentName);
+
 
         Switch sw_homeAway = (Switch) dialogView.findViewById(R.id.sw_homeAway);
         sw_homeAway.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -285,6 +301,55 @@ public class ClubResultFragment extends Fragment {
     private void showEventDialog() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View eventView = inflater.inflate(R.layout.layout_event_dialog,null);
+        sp_eventType = (Spinner) eventView.findViewById(R.id.sp_eventType);
+        sp_eventHalf = (Spinner) eventView.findViewById(R.id.sp_eventHalf);
+        sp_eventPlayer = (Spinner) eventView.findViewById(R.id.sp_eventPlayer);
+        sp_subOffPlayer = (Spinner) eventView.findViewById(R.id.sp_subOnPlayer);
+        sw_specificTime = (Switch) eventView.findViewById(R.id.sw_specificTime);
+        goalDetailView = eventView.findViewById(R.id.layout_goalType);
+        specificTimeView = eventView.findViewById(R.id.layout_specificTime);
+        subPlayerView = eventView.findViewById(R.id.layout_sub);
+
+        sw_specificTime.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if ( isChecked ) {
+                    specificTimeView.setVisibility(View.VISIBLE);
+                } else {
+                    specificTimeView.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        String[] eventType = {"substitution","goal","yellow","red"};
+        String[] eventHalf = {"first half","second half"};
+        String[] players = {"a","b"};
+        String[] subs = {"c","d"};
+        sp_eventType.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,eventType));
+        sp_eventHalf.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,eventHalf));
+        sp_eventPlayer.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,players));
+        sp_subOffPlayer.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,subs));
+
+        sp_eventType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if ( parent.getItemAtPosition(position).toString().equals(Constant.EVENT_TYPE_GOAL) ) {
+                    goalDetailView.setVisibility(View.VISIBLE);
+                    subPlayerView.setVisibility(View.GONE);
+                } else if (parent.getItemAtPosition(position).toString().equals(Constant.EVENT_TYPE_SUB)){
+                    subPlayerView.setVisibility(View.VISIBLE);
+                    goalDetailView.setVisibility(View.GONE);
+                } else {
+                    goalDetailView.setVisibility(View.GONE);
+                    subPlayerView.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(eventView);
@@ -302,5 +367,9 @@ public class ClubResultFragment extends Fragment {
         });
         builder.setCancelable(true);
         builder.show();
+    }
+
+    private void addEvent(String eventType, String eventPlayer, String eventTime, boolean isHomeEvent) {
+
     }
 }

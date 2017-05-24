@@ -16,7 +16,7 @@
         android:layout_marginStart="10dp"
         android:layout_marginTop="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@+id/btn_chooseClub"
+        app:layout_constraintRight_toLeftOf="@+id/btn_setOpponent"
         app:layout_constraintTop_toTopOf="parent">
 
         <EditText
@@ -30,13 +30,13 @@
 
 
     <Button
-        android:id="@+id/btn_chooseClub"
+        android:id="@+id/btn_setOpponent"
         style="@style/BlueButton"
         android:layout_width="88dp"
         android:layout_height="wrap_content"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
-        android:text="Choose"
+        android:text="Set"
         app:layout_constraintBottom_toBottomOf="@+id/layout_opponentName"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/layout_opponentName"
@@ -141,8 +141,8 @@
         android:clickable="true"
         android:tint="@color/colorLightGrey"
         app:fabSize="mini"
-        app:layout_constraintBottom_toBottomOf="@+id/listView"
-        app:layout_constraintRight_toRightOf="@+id/listView"
+        app:layout_constraintBottom_toBottomOf="@+id/layout_events"
+        app:layout_constraintRight_toRightOf="@+id/layout_events"
         app:srcCompat="@android:drawable/ic_input_add"
         android:layout_marginEnd="8dp" />
 
@@ -219,8 +219,9 @@
             />
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/listView"
+    <LinearLayout
+        android:id="@+id/layout_events"
+        android:orientation="horizontal"
         android:layout_width="0dp"
         android:layout_height="200dp"
         android:layout_marginLeft="8dp"
@@ -230,5 +231,25 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_penScore"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp" />
+        android:layout_marginEnd="8dp">
+
+        <ListView
+            android:id="@+id/lv_home"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"/>
+        <ListView
+            android:id="@+id/lv_away"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"/>
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>

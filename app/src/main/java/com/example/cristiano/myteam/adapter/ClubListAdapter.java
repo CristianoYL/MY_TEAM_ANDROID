@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,10 @@ import java.util.List;
  */
 
 public class ClubListAdapter extends ArrayAdapter {
+
+    private class ViewHolder{
+        TextView tv_clubName, tv_clubInfo;
+    }
     public ClubListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List objects) {
         super(context, resource, objects);
     }
@@ -28,20 +33,21 @@ public class ClubListAdapter extends ArrayAdapter {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        View view = convertView;
-        if ( view == null ) {
-            view = LayoutInflater.from(getContext()).inflate(R.layout.layout_card_club,null);
+        ViewHolder viewHolder;
+        if ( convertView == null ) {
+            viewHolder = new ViewHolder();
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.layout_card_club,null);
+            viewHolder.tv_clubName = (TextView) convertView.findViewById(R.id.tv_clubName);
+            viewHolder.tv_clubInfo = (TextView) convertView.findViewById(R.id.tv_clubInfo);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
         HashMap<String,Object> clubMap = (HashMap<String,Object>) getItem(position);
         String clubName = (String) clubMap.get(Constant.CLUB_NAME);
         String clubInfo = (String) clubMap.get(Constant.CLUB_INFO);
-
-        if ( view != null ) {
-            TextView tv_clubName = (TextView) view.findViewById(R.id.tv_clubName);
-            TextView tv_clubInfo = (TextView) view.findViewById(R.id.tv_clubInfo);
-            tv_clubName.setText(clubName);
-            tv_clubInfo.setText(clubInfo);
-        }
-        return view;
+        viewHolder.tv_clubName.setText(clubName);
+        viewHolder.tv_clubInfo.setText(clubInfo);
+        return convertView;
     }
 }
