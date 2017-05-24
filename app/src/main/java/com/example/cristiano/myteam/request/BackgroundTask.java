@@ -23,14 +23,14 @@ import java.net.URL;
  *  sends the request and process the response in the background
  */
 
-public class BackgroundRequest extends AsyncTask<String, Object, String> {
+public class BackgroundTask extends AsyncTask<String, Object, String> {
 
     private int responseCode = 400;
     private InputStream inputStream;
     private OutputStream outputStream;
     private RequestAction action = null;
 
-    public BackgroundRequest(RequestAction action){
+    public BackgroundTask(RequestAction action){
         this.action = action;
     }
 
@@ -72,8 +72,8 @@ public class BackgroundRequest extends AsyncTask<String, Object, String> {
             if (jsonData != null) {
                 httpURLConnection.setRequestProperty("content-type", "application/json");
                 httpURLConnection.setDoOutput(true);
-                httpURLConnection.setConnectTimeout(5000);
-                httpURLConnection.setReadTimeout(5000);
+                httpURLConnection.setConnectTimeout(Constant.CONN_TIME_OUT);
+                httpURLConnection.setReadTimeout(Constant.READ_TIME_OUT);
                 this.outputStream = httpURLConnection.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream, Constant.SERVER_CHARSET));
                 writer.write(jsonData);

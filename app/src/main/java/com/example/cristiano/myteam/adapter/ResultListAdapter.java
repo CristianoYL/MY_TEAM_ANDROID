@@ -24,6 +24,16 @@ import java.util.List;
 
 public class ResultListAdapter extends ArrayAdapter{
 
+    private class ViewHolder{
+        TextView tv_tournament;
+        TextView tv_home;
+        TextView tv_away;
+        TextView tv_score;
+        TextView tv_penScore;
+        ListView lv_home;
+        ListView lv_away;
+    }
+
     public ResultListAdapter(@NonNull Context context, @LayoutRes int resource, @NonNull List objects) {
         super(context, resource, objects);
     }
@@ -31,9 +41,20 @@ public class ResultListAdapter extends ArrayAdapter{
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        View view = convertView;
-        if ( view == null ) {
-            view = LayoutInflater.from(getContext()).inflate(R.layout.layout_card_result,null);
+        ViewHolder viewHolder;
+        if ( convertView == null ) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.layout_card_result,null);
+            viewHolder = new ViewHolder();
+            viewHolder.tv_tournament = (TextView) convertView.findViewById(R.id.tv_tournament);
+            viewHolder.tv_home = (TextView) convertView.findViewById(R.id.tv_home);
+            viewHolder.tv_away = (TextView) convertView.findViewById(R.id.tv_away);
+            viewHolder.tv_score = (TextView) convertView.findViewById(R.id.tv_score);
+            viewHolder.tv_penScore = (TextView) convertView.findViewById(R.id.tv_penScore);
+            viewHolder.lv_home = (ListView) convertView.findViewById(R.id.lv_home);
+            viewHolder.lv_away = (ListView) convertView.findViewById(R.id.lv_away);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
         HashMap<String,Object> resultMap = (HashMap<String,Object>) getItem(position);
         String tournament = (String) resultMap.get(Constant.RESULT_KEY_TOURNAMENT);
@@ -44,23 +65,13 @@ public class ResultListAdapter extends ArrayAdapter{
         SimpleAdapter homeAdapter = (SimpleAdapter) resultMap.get(Constant.RESULT_KEY_HOME_EVENT);
         SimpleAdapter awayAdapter = (SimpleAdapter) resultMap.get(Constant.RESULT_KEY_AWAY_EVENT);
 
-        if ( view != null ) {
-            TextView tv_tournament = (TextView) view.findViewById(R.id.tv_tournament);
-            TextView tv_home = (TextView) view.findViewById(R.id.tv_home);
-            TextView tv_away = (TextView) view.findViewById(R.id.tv_away);
-            TextView tv_score = (TextView) view.findViewById(R.id.tv_score);
-            TextView tv_penScore = (TextView) view.findViewById(R.id.tv_penScore);
-            ListView lv_home = (ListView) view.findViewById(R.id.lv_home);
-            ListView lv_away = (ListView) view.findViewById(R.id.lv_away);
-
-            tv_tournament.setText(tournament);
-            tv_home.setText(home);
-            tv_away.setText(away);
-            tv_score.setText(score);
-            tv_penScore.setText(penScore);
-            lv_home.setAdapter(homeAdapter);
-            lv_away.setAdapter(awayAdapter);
-        }
-        return view;
+        viewHolder.tv_tournament.setText(tournament);
+        viewHolder.tv_home.setText(home);
+        viewHolder.tv_away.setText(away);
+        viewHolder.tv_score.setText(score);
+        viewHolder.tv_penScore.setText(penScore);
+        viewHolder.lv_home.setAdapter(homeAdapter);
+        viewHolder.lv_away.setAdapter(awayAdapter);
+        return convertView;
     }
 }

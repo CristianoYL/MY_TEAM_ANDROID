@@ -85,6 +85,8 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:orientation="horizontal"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -95,7 +97,7 @@
         <ListView
             android:id="@+id/lv_home"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:layout_marginStart="5dp">
@@ -104,7 +106,7 @@
         <ListView
             android:id="@+id/lv_away"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="100dp"
             android:layout_weight="1"
             android:layout_marginLeft="5dp"
             android:layout_marginStart="5dp">
