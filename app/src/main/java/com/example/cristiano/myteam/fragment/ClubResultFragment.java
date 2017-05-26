@@ -28,8 +28,10 @@ import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Event;
+import com.example.cristiano.myteam.structure.GameResultAndStats;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.Result;
+import com.example.cristiano.myteam.structure.Squad;
 import com.example.cristiano.myteam.structure.Stats;
 import com.example.cristiano.myteam.structure.Tournament;
 import com.example.cristiano.myteam.util.Constant;
@@ -53,12 +55,15 @@ public class ClubResultFragment extends Fragment {
     private Tournament tournament;
     private Result[] results;
     private Result newResult;
-    private Stats newStats;
+    private Stats newStats[];
+    private Squad squads[];
+    private String players[] = {};
     private String opponentName;
     private int myScore, opponentScore, myFTScore,opponentFTScore, myPKScore, opponentPKScore;
 
     private TextView tv_home, tv_away, tv_homeScore, tv_awayScore, tv_homePKScore, tv_awayPKScore;
     private TextInputEditText et_opponentName, et_date;
+    private EditText et_specificTime;
     private Button btn_setOpponent;
     private Spinner sp_eventType, sp_eventHalf,sp_eventPlayer,sp_subOffPlayer;
     private Switch sw_myClubEvent, sw_specificTime, sw_isAwayGame;
@@ -353,8 +358,8 @@ public class ClubResultFragment extends Fragment {
                     ftScore = myFTScore + ":" + opponentFTScore;
                 }
                 newResult.ftScore = ftScore;
-                Log.d("RESULT_FRAGMENT","add result: " + newResult.toJson());
-                Toast.makeText(getContext(),"Add result!",Toast.LENGTH_SHORT).show();
+                GameResultAndStats gameResultAndStats = new GameResultAndStats(newResult,newStats);
+                uploadResult(gameResultAndStats);
             }
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -364,6 +369,8 @@ public class ClubResultFragment extends Fragment {
         });
         builder.setCancelable(true);
         builder.show();
+
+        loadTournamentClubSquad();
     }
 
     private void showEventDialog() {
@@ -375,9 +382,12 @@ public class ClubResultFragment extends Fragment {
         sp_subOffPlayer = (Spinner) eventView.findViewById(R.id.sp_subOnPlayer);
         sw_myClubEvent = (Switch) eventView.findViewById(R.id.sw_myClubEvent);
         sw_specificTime = (Switch) eventView.findViewById(R.id.sw_specificTime);
+        et_specificTime = (EditText) eventView.findViewById(R.id.et_time);
         goalDetailView = eventView.findViewById(R.id.layout_goalType);
         specificTimeView = eventView.findViewById(R.id.layout_specificTime);
         subPlayerView = eventView.findViewById(R.id.layout_sub);
+        rg_goalMethod = (RadioGroup) eventView.findViewById(R.id.rg_goalMethod);
+        rg_goalPart = (RadioGroup) eventView.findViewById(R.id.rg_part);
 
         sw_specificTime.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -389,14 +399,28 @@ public class ClubResultFragment extends Fragment {
                 }
             }
         });
-        String[] eventType = {"substitution","goal","yellow","red"};
-        String[] eventHalf = {"first half","second half"};
-        String[] players = {"a","b"};
-        String[] subs = {"c","d"};
+
+        String[] eventType = Constant.EVENT_TYPES;
+        String[] eventHalf = Constant.EVENT_HALVES;
+
         sp_eventType.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,eventType));
         sp_eventHalf.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,eventHalf));
         sp_eventPlayer.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,players));
-        sp_subOffPlayer.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,subs));
+        sp_subOffPlayer.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,players));
+
+        sw_myClubEvent.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if ( isChecked ) {
+                    sp_eventPlayer.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,players));
+                    sp_subOffPlayer.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,players));
+                } else {
+                    String[] opponentPlayers = {"Unknown"};
+                    sp_eventPlayer.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,opponentPlayers));
+                    sp_subOffPlayer.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,opponentPlayers));
+                }
+            }
+        });
 
         sp_eventType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -432,20 +456,35 @@ public class ClubResultFragment extends Fragment {
                 } else {
                     isHomeEvent = true;
                 }
+
+                String eventPlayer = sp_eventPlayer.getSelectedItem().toString();
+                String eventTime = sp_eventHalf.getSelectedItem().toString();
+                switch ( sp_eventHalf.getSelectedItem().toString() ) {
+                    case Constant.EVENT_TIME_FIRST_HALF:
+                        eventTime = "FH";
+                        break;
+                    case Constant.EVENT_TIME_SECOND_HALF:
+                        eventTime = "SH";
+                        break;
+                    case Constant.EVENT_TIME_EXTRA_FIRST_HALF:
+                        eventTime = "EFH";
+                        break;
+                    case Constant.EVENT_TIME_EXTRA_SECOND_HALF:
+                        eventTime = "ESH";
+                        break;
+                }
+
+                if ( sw_specificTime.isChecked() ) {
+                    eventTime = eventTime + " " + et_specificTime.getText() + "'";
+                }
+
                 if ( sp_eventType.getSelectedItem().toString().equals(Constant.EVENT_TYPE_SUB) ) {
-                    addEvent(Constant.EVENT_TYPE_SUB_OFF,
-                            sp_eventPlayer.getSelectedItem().toString(),
-                            sp_eventHalf.getSelectedItem().toString(),
-                            isHomeEvent);
-                    addEvent(Constant.EVENT_TYPE_SUB_ON,
-                            sp_eventPlayer.getSelectedItem().toString(),
-                            sp_eventHalf.getSelectedItem().toString(),
-                            isHomeEvent);
+                    addEvent(Constant.EVENT_TYPE_SUB_OFF, eventPlayer,eventTime, isHomeEvent);
+                    addEvent(Constant.EVENT_TYPE_SUB_ON, sp_eventPlayer.getSelectedItem().toString(),
+                            eventTime, isHomeEvent);
                 } else {
                     addEvent(sp_eventType.getSelectedItem().toString(),
-                            sp_eventPlayer.getSelectedItem().toString(),
-                            sp_eventHalf.getSelectedItem().toString(),
-                            isHomeEvent);
+                            eventPlayer, eventTime, isHomeEvent);
                 }
                 Toast.makeText(getContext(),"Add Event!",Toast.LENGTH_SHORT).show();
             }
@@ -467,39 +506,96 @@ public class ClubResultFragment extends Fragment {
      * @param isHomeEvent   home/away
      */
     private void addEvent(String eventType, String eventPlayer, String eventTime, boolean isHomeEvent) {
-        newResult.addEvent(eventType,eventPlayer,eventTime,isHomeEvent);
         String eventHalf = sp_eventHalf.getSelectedItem().toString();
-        if ( eventType.equals(Constant.EVENT_TYPE_GOAL) ) { // update score if goal
-            if ( sw_myClubEvent.isChecked() ) {
-                myScore++;
-            } else {
-                opponentScore++;
+        int index = sp_eventPlayer.getSelectedItemPosition();
+        if ( sw_myClubEvent.isChecked() ) {
+            switch ( eventType ) {
+                case Constant.EVENT_TYPE_GOAL:
+                    myScore++;
+                    if ( eventHalf.equals(Constant.EVENT_TIME_FIRST_HALF) ||
+                            eventHalf.equals(Constant.EVENT_TIME_SECOND_HALF) ) { // update ftScore if regular time goal
+                        myFTScore++;
+                    }
+                    updateScore();
+                    newStats[index].goal++;
+                    switch ( rg_goalMethod.getCheckedRadioButtonId() ) {
+                        case R.id.rb_freekick:
+                            newStats[index].freekick++;
+                            break;
+                        case R.id.rb_penalty:
+                            newStats[index].penalty++;
+                            newStats[index].penaltyTaken++;
+                            break;
+                    }
+                    switch ( rg_goalPart.getCheckedRadioButtonId() ) {
+                        case R.id.rb_weakFoot:
+                            newStats[index].weakFootGoal++;
+                            break;
+                        case R.id.rb_head:
+                            newStats[index].header++;
+                            break;
+                        case R.id.rb_other:
+                            newStats[index].otherGoal++;
+                            break;
+                    }
+                    break;
+
+                case Constant.EVENT_TYPE_YELLOW:
+                    newStats[index].yellow++;
+                    if ( newStats[index].yellow == 2 ) {
+                        newStats[index].red++;
+                        eventType = Constant.EVENT_TYPE_SECOND_YELLOW;
+                    }
+                    break;
+
+                case Constant.EVENT_TYPE_RED:
+                    newStats[index].red++;
+                    break;
+
+                case Constant.EVENT_TYPE_OG:
+                    opponentScore++;
+                    if ( eventHalf.equals(Constant.EVENT_TIME_FIRST_HALF) ||
+                            eventHalf.equals(Constant.EVENT_TIME_SECOND_HALF) ) { // update ftScore if regular time OG
+                        opponentFTScore++;
+                    }
+                    updateScore();
+                    newStats[index].ownGoal++;
+                    break;
+
+                // TODO: create start and sub list, update start, attendance and appearance accordingly.
+                case Constant.EVENT_TYPE_SUB_ON:
+                    newStats[index].appearance = 1;
+                    newStats[index].attendance = 1;
+                    break;
+
+                case Constant.EVENT_TYPE_SUB_OFF:
+                    newStats[index].appearance = 1;
+                    newStats[index].attendance = 1;
+                    break;
+
             }
-            if ( eventHalf.equals(Constant.EVENT_TIME_FIRST_HALF) ||
-                    eventHalf.equals(Constant.EVENT_TIME_SECOND_HALF) ) { // update ftScore if regular time goal
-                if ( sw_myClubEvent.isChecked() ) {
-                    myFTScore++;
-                } else {
-                    opponentFTScore++;
-                }
+        } else {
+            switch ( eventType ) {
+                case Constant.EVENT_TYPE_GOAL:
+                    opponentScore++;
+                    if ( eventHalf.equals(Constant.EVENT_TIME_FIRST_HALF) ||
+                            eventHalf.equals(Constant.EVENT_TIME_SECOND_HALF) ) { // update ftScore if regular time goal
+                        opponentFTScore++;
+                    }
+                    updateScore();
+                    break;
+
+                case Constant.EVENT_TYPE_OG:
+                    myScore++;
+                    if ( eventHalf.equals(Constant.EVENT_TIME_FIRST_HALF) ||
+                            eventHalf.equals(Constant.EVENT_TIME_SECOND_HALF) ) { // update ftScore if regular time own goal
+                        myFTScore++;
+                    }
+                    updateScore();
+                    break;
             }
-            updateScore();
-        } else if ( eventType.equals(Constant.EVENT_TYPE_OG) ) {    //update score if OG
-            if ( sw_myClubEvent.isChecked() ) {
-                opponentScore++;
-            } else {
-                myScore++;
-            }
-            if ( eventHalf.equals(Constant.EVENT_TIME_FIRST_HALF) ||
-                    eventHalf.equals(Constant.EVENT_TIME_SECOND_HALF) ) { // update ftScore if regular time OG
-                if ( sw_myClubEvent.isChecked() ) {
-                    opponentFTScore++;
-                } else {
-                    myFTScore++;
-                }
-            }
-            updateScore();
         }
+        newResult.addEvent(eventType,eventPlayer,eventTime,isHomeEvent);
         showEventList(isHomeEvent);
     }
 
@@ -523,5 +619,101 @@ public class ClubResultFragment extends Fragment {
             tv_homePKScore.setText(myPKScore+"");
             tv_awayPKScore.setText(opponentPKScore+"");
         }
+    }
+
+    private void loadTournamentClubSquad(){
+        RequestAction actionGetTournamentClubSquad = new RequestAction() {
+            @Override
+            public void actOnPre() {
+            }
+
+            @Override
+            public void actOnPost(int responseCode, String response) {
+                if ( responseCode == 200 ) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        JSONArray jsonArray = jsonObject.getJSONArray(Constant.TABLE_SQUAD);
+                        int number;
+                        String name, role;
+                        squads = new Squad[jsonArray.length()];
+                        players = new String[jsonArray.length()];
+                        newStats = new Stats[jsonArray.length()];
+                        for ( int i = 0; i < jsonArray.length(); i++ ) {
+                            JSONObject jsonSquad = jsonArray.getJSONObject(i);
+                            int playerID = jsonSquad.getInt(Constant.SQUAD_PLAYER_ID);
+                            number = jsonSquad.getInt(Constant.SQUAD_NUMBER);
+                            name = jsonSquad.getString(Constant.PLAYER_DISPLAY_NAME);
+                            role = jsonSquad.getString(Constant.PLAYER_ROLE);
+                            squads[i] = new Squad(tournament.id,club.id,playerID,name,role,number);
+                            players[i] = number + ". " + name;
+                            newStats[i] = new Stats(tournament.id,club.id,playerID);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        Toast.makeText(getActivity(),jsonObject.getString(Constant.KEY_MSG),
+                                Toast.LENGTH_LONG).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getActivity(),response,Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        };
+        String url = UrlHelper.urlGetTournamentClubSquad(tournament.id,club.id);
+        RequestHelper.sendGetRequest(url,actionGetTournamentClubSquad);
+    }
+
+    private void uploadResult(final GameResultAndStats gameResultAndStats) {
+        RequestAction actionPostResultAndStats = new RequestAction() {
+            @Override
+            public void actOnPre() {
+//                Log.d("RESULT_FRAGMENT","add result: " + newResult.toJson());
+//                for ( int i = 0; i < newStats.length; i++ ) {
+//                    Log.d("RESULT_FRAGMENT","add stats: " + newStats[i].toJson());
+//                }
+                String toJson = gameResultAndStats.toJson();
+                Log.d("RESULT_FRAGMENT","add result: " + toJson);
+
+                JSONArray eventArray;
+                try {
+                    JSONObject json = new JSONObject(toJson);
+                    eventArray = json.getJSONArray(Constant.RESULT_HOME_EVENTS);
+                    for ( int j = 0; j < eventArray.length(); j++ ) {
+                        String eventType = eventArray.getJSONObject(j).getString(Constant.EVENT_TYPE);
+                        String eventPlayer = eventArray.getJSONObject(j).getString(Constant.EVENT_PLAYER);
+                        String eventTime = eventArray.getJSONObject(j).getString(Constant.EVENT_TIME);
+                        Log.d("EVENT_TYPE",eventType);
+                        Log.d("EVENT_PLAYER",eventPlayer);
+                        Log.d("EVENT_TIME",eventTime);
+                    }
+                } catch (Exception e) {
+                    Log.d("CLUB_RESULT","Error when parsing home results");
+                }
+            }
+
+            @Override
+            public void actOnPost(int responseCode, String response) {
+                if ( responseCode == 201 ) {
+                    Toast.makeText(getContext(),"Result uploaded!",Toast.LENGTH_SHORT).show();
+                    getResult();
+                } else {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        Toast.makeText(getActivity(),jsonObject.getString(Constant.KEY_MSG),
+                                Toast.LENGTH_LONG).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getActivity(),response,Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        };
+        String url = UrlHelper.urlPostClubTournamentResults(tournament.id,club.id);
+        RequestHelper.sendPostRequest(url,gameResultAndStats.toJson(),actionPostResultAndStats);
     }
 }

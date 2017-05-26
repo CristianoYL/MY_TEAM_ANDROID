@@ -38,6 +38,10 @@ public class Stats {
         this.penaltySaved = penaltySaved;
     }
 
+    public Stats(int tournamentID, int clubID, int playerID) {  // create blank stats
+        this ( tournamentID, clubID, playerID, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
+
     public int getTournamentID() {
         return tournamentID;
     }

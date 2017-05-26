@@ -67,11 +67,11 @@ public class ClubSquadFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_squad, container, false);
-        getResult();
+        getSquad();
         return rootView;
     }
 
-    private void getResult(){
+    private void getSquad(){
         RequestAction actionGetTournamentClubSquad = new RequestAction() {
             @Override
             public void actOnPre() {

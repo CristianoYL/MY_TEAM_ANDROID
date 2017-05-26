@@ -132,18 +132,21 @@ public class Constant {
     public static final String EVENT_TYPE_GOAL = "goal";
     public static final String EVENT_TYPE_ASSIST = "assist";
     public static final String EVENT_TYPE_YELLOW = "yellow";
-    public static final String EVENT_TYPE_SECOND_YELLOW = "yellowRed";
+    public static final String EVENT_TYPE_SECOND_YELLOW = "second yellow";
     public static final String EVENT_TYPE_RED = "red";
-    public static final String EVENT_TYPE_SUB_ON = "subOn";
-    public static final String EVENT_TYPE_SUB_OFF = "subOff";
+    public static final String EVENT_TYPE_SUB_ON = "sub on";
+    public static final String EVENT_TYPE_SUB_OFF = "sub off";
     public static final String EVENT_TYPE_SUB = "substitution";
-    public static final String EVENT_TYPE_OG = "ownGoal";
-
+    public static final String EVENT_TYPE_OG = "own goal";
+    // event half options
     public static final String EVENT_TIME_FIRST_HALF = "first half";
     public static final String EVENT_TIME_SECOND_HALF = "second half";
     public static final String EVENT_TIME_EXTRA_FIRST_HALF = "extra first half";
     public static final String EVENT_TIME_EXTRA_SECOND_HALF = "extra second half";
-    public static final String EVENT_TIME_PK = "PK";
+    public static final String EVENT_TIME_PK = "penalty shootout";
+
+    public static final String[] EVENT_TYPES = {EVENT_TYPE_GOAL,EVENT_TYPE_YELLOW,EVENT_TYPE_RED,EVENT_TYPE_OG,EVENT_TYPE_SUB};
+    public static final String[] EVENT_HALVES = {EVENT_TIME_FIRST_HALF,EVENT_TIME_SECOND_HALF,EVENT_TIME_EXTRA_FIRST_HALF,EVENT_TIME_EXTRA_SECOND_HALF};
 
     // result columns
     public static final String RESULT_KEY_HOME = "homeID";

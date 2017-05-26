@@ -73,6 +73,10 @@ public class UrlHelper {
         return URL + "/result/tournament/"+tournamentID+"/club/" + clubID;
     }
 
+    public static String urlPostClubTournamentResults(int tournamentID, int clubID){
+        return URL + "/result/tournament/"+tournamentID+"/club/" + clubID;
+    }
+
     public static String urlGetClubTournaments(int clubID){
         return URL + "/tournament/club/" + clubID;
     }

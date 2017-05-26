@@ -208,16 +208,16 @@
                 >
 
                 <RadioButton
-                    android:id="@+id/rb_left"
+                    android:id="@+id/rb_strongFoot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="left foot" />
+                    android:text="strong foot" />
 
                 <RadioButton
-                    android:id="@+id/rb_right"
+                    android:id="@+id/rb_weakFoot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="right foot" />
+                    android:text="weak foot" />
 
                 <RadioButton
                     android:id="@+id/rb_head"
