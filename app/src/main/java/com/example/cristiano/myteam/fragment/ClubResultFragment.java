@@ -3,6 +3,7 @@ package com.example.cristiano.myteam.fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioGroup;
 import android.widget.SimpleAdapter;
@@ -26,7 +28,10 @@ import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Event;
+import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.Result;
+import com.example.cristiano.myteam.structure.Stats;
+import com.example.cristiano.myteam.structure.Tournament;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.adapter.ResultListAdapter;
 import com.example.cristiano.myteam.util.UrlHelper;
@@ -36,17 +41,27 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class ClubResultFragment extends Fragment {
     private Club club;
-    private int tournamentID;
+    private Player[] myClubPlayers, opponentPlayers;
+    private Tournament tournament;
     private Result[] results;
-    private TextView tv_home, tv_away;
+    private Result newResult;
+    private Stats newStats;
     private String opponentName;
+    private int myScore, opponentScore, myFTScore,opponentFTScore, myPKScore, opponentPKScore;
+
+    private TextView tv_home, tv_away, tv_homeScore, tv_awayScore, tv_homePKScore, tv_awayPKScore;
+    private TextInputEditText et_opponentName, et_date;
+    private Button btn_setOpponent;
     private Spinner sp_eventType, sp_eventHalf,sp_eventPlayer,sp_subOffPlayer;
-    private Switch sw_specificTime;
+    private Switch sw_myClubEvent, sw_specificTime, sw_isAwayGame;
     private ListView lv_home, lv_away;
     private RadioGroup rg_goalPart, rg_goalMethod;
     private View goalDetailView, specificTimeView, subPlayerView;
@@ -56,11 +71,11 @@ public class ClubResultFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static ClubResultFragment newInstance(int tournamentID, Club club) {
+    public static ClubResultFragment newInstance(Tournament tournament, Club club) {
         ClubResultFragment fragment = new ClubResultFragment();
         Bundle bundle = new Bundle();
         bundle.putString(Constant.TABLE_CLUB,club.toJson());
-        bundle.putInt(Constant.KEY_TOURNAMENT_ID,tournamentID);
+        bundle.putString(Constant.TABLE_TOURNAMENT,tournament.toJson());
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -71,7 +86,7 @@ public class ClubResultFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             club = new Gson().fromJson(bundle.getString(Constant.TABLE_CLUB),Club.class);
-            tournamentID = bundle.getInt(Constant.KEY_TOURNAMENT_ID);
+            tournament = new Gson().fromJson(bundle.getString(Constant.TABLE_TOURNAMENT),Tournament.class);
         }
     }
 
@@ -157,7 +172,7 @@ public class ClubResultFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetClubTournamentResults(tournamentID,club.id);
+        String url = UrlHelper.urlGetClubTournamentResults(tournament.id,club.id);
         RequestHelper.sendGetRequest(url,actionGetClubResults);
     }
 
@@ -251,6 +266,9 @@ public class ClubResultFragment extends Fragment {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View dialogView = inflater.inflate(R.layout.layout_record_match,null);
 
+        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+        newResult = new Result(0,0,0,tournament.id,club.name,opponentName,tournament.name,date,null,null,null,null,null);
+
         FloatingActionButton fab_addEvent = (FloatingActionButton) dialogView.findViewById(R.id.fab_addEvent);
         fab_addEvent.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -265,9 +283,35 @@ public class ClubResultFragment extends Fragment {
         opponentName = "Opponent";
         tv_away.setText(opponentName);
 
+        tv_homeScore = (TextView) dialogView.findViewById(R.id.tv_homeScore);
+        tv_awayScore = (TextView) dialogView.findViewById(R.id.tv_awayScore);
+        tv_homePKScore = (TextView) dialogView.findViewById(R.id.tv_penHome);
+        tv_awayPKScore = (TextView) dialogView.findViewById(R.id.tv_penAway);
 
-        Switch sw_homeAway = (Switch) dialogView.findViewById(R.id.sw_homeAway);
-        sw_homeAway.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        lv_home = (ListView) dialogView.findViewById(R.id.lv_home);
+        lv_away = (ListView) dialogView.findViewById(R.id.lv_away);
+
+        btn_setOpponent = (Button) dialogView.findViewById(R.id.btn_setOpponent);
+        et_opponentName = (TextInputEditText) dialogView.findViewById(R.id.et_opponentName);
+        et_date = (TextInputEditText) dialogView.findViewById(R.id.et_date);
+        et_date.setText(date);
+
+
+        btn_setOpponent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                opponentName = et_opponentName.getText().toString();
+                if ( sw_isAwayGame.isChecked() ) {
+                    tv_home.setText(opponentName);
+                } else {
+                    tv_away.setText(opponentName);
+                }
+
+            }
+        });
+
+        sw_isAwayGame = (Switch) dialogView.findViewById(R.id.sw_homeAway);
+        sw_isAwayGame.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if ( isChecked ) {
@@ -277,6 +321,12 @@ public class ClubResultFragment extends Fragment {
                     tv_home.setText(club.name);
                     tv_away.setText(opponentName);
                 }
+                updateScore();
+                ArrayList<String> temp = new ArrayList<String>(newResult.homeEvents);
+                newResult.homeEvents = newResult.awayEvents;
+                newResult.awayEvents = temp;
+                showEventList(true);
+                showEventList(false);
             }
         });
 
@@ -286,6 +336,24 @@ public class ClubResultFragment extends Fragment {
         builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                if ( sw_isAwayGame.isChecked() ) {
+                    newResult.awayID = club.id;
+                    newResult.awayName = club.name;
+                    newResult.homeName = opponentName;
+                } else {
+                    newResult.homeID = club.id;
+                    newResult.homeName = club.name;
+                    newResult.awayName = opponentName;
+                }
+                newResult.date = et_date.getText().toString();
+                String ftScore;
+                if ( sw_isAwayGame.isChecked() ) {
+                    ftScore = opponentFTScore + ":" + myFTScore;
+                } else {
+                    ftScore = myFTScore + ":" + opponentFTScore;
+                }
+                newResult.ftScore = ftScore;
+                Log.d("RESULT_FRAGMENT","add result: " + newResult.toJson());
                 Toast.makeText(getContext(),"Add result!",Toast.LENGTH_SHORT).show();
             }
         });
@@ -305,6 +373,7 @@ public class ClubResultFragment extends Fragment {
         sp_eventHalf = (Spinner) eventView.findViewById(R.id.sp_eventHalf);
         sp_eventPlayer = (Spinner) eventView.findViewById(R.id.sp_eventPlayer);
         sp_subOffPlayer = (Spinner) eventView.findViewById(R.id.sp_subOnPlayer);
+        sw_myClubEvent = (Switch) eventView.findViewById(R.id.sw_myClubEvent);
         sw_specificTime = (Switch) eventView.findViewById(R.id.sw_specificTime);
         goalDetailView = eventView.findViewById(R.id.layout_goalType);
         specificTimeView = eventView.findViewById(R.id.layout_specificTime);
@@ -320,7 +389,6 @@ public class ClubResultFragment extends Fragment {
                 }
             }
         });
-
         String[] eventType = {"substitution","goal","yellow","red"};
         String[] eventHalf = {"first half","second half"};
         String[] players = {"a","b"};
@@ -357,6 +425,28 @@ public class ClubResultFragment extends Fragment {
         builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                boolean isHomeEvent;
+                if ( (sw_isAwayGame.isChecked() && sw_myClubEvent.isChecked())||
+                        (!sw_isAwayGame.isChecked() && !sw_myClubEvent.isChecked()) ) {
+                    isHomeEvent = false;
+                } else {
+                    isHomeEvent = true;
+                }
+                if ( sp_eventType.getSelectedItem().toString().equals(Constant.EVENT_TYPE_SUB) ) {
+                    addEvent(Constant.EVENT_TYPE_SUB_OFF,
+                            sp_eventPlayer.getSelectedItem().toString(),
+                            sp_eventHalf.getSelectedItem().toString(),
+                            isHomeEvent);
+                    addEvent(Constant.EVENT_TYPE_SUB_ON,
+                            sp_eventPlayer.getSelectedItem().toString(),
+                            sp_eventHalf.getSelectedItem().toString(),
+                            isHomeEvent);
+                } else {
+                    addEvent(sp_eventType.getSelectedItem().toString(),
+                            sp_eventPlayer.getSelectedItem().toString(),
+                            sp_eventHalf.getSelectedItem().toString(),
+                            isHomeEvent);
+                }
                 Toast.makeText(getContext(),"Add Event!",Toast.LENGTH_SHORT).show();
             }
         });
@@ -369,7 +459,69 @@ public class ClubResultFragment extends Fragment {
         builder.show();
     }
 
+    /**
+     *  Add events to the new game result
+     * @param eventType goal,yellow,...
+     * @param eventPlayer   who
+     * @param eventTime when
+     * @param isHomeEvent   home/away
+     */
     private void addEvent(String eventType, String eventPlayer, String eventTime, boolean isHomeEvent) {
+        newResult.addEvent(eventType,eventPlayer,eventTime,isHomeEvent);
+        String eventHalf = sp_eventHalf.getSelectedItem().toString();
+        if ( eventType.equals(Constant.EVENT_TYPE_GOAL) ) { // update score if goal
+            if ( sw_myClubEvent.isChecked() ) {
+                myScore++;
+            } else {
+                opponentScore++;
+            }
+            if ( eventHalf.equals(Constant.EVENT_TIME_FIRST_HALF) ||
+                    eventHalf.equals(Constant.EVENT_TIME_SECOND_HALF) ) { // update ftScore if regular time goal
+                if ( sw_myClubEvent.isChecked() ) {
+                    myFTScore++;
+                } else {
+                    opponentFTScore++;
+                }
+            }
+            updateScore();
+        } else if ( eventType.equals(Constant.EVENT_TYPE_OG) ) {    //update score if OG
+            if ( sw_myClubEvent.isChecked() ) {
+                opponentScore++;
+            } else {
+                myScore++;
+            }
+            if ( eventHalf.equals(Constant.EVENT_TIME_FIRST_HALF) ||
+                    eventHalf.equals(Constant.EVENT_TIME_SECOND_HALF) ) { // update ftScore if regular time OG
+                if ( sw_myClubEvent.isChecked() ) {
+                    opponentFTScore++;
+                } else {
+                    myFTScore++;
+                }
+            }
+            updateScore();
+        }
+        showEventList(isHomeEvent);
+    }
 
+    private void showEventList(boolean isHome){
+        if ( isHome ) {
+            lv_home.setAdapter(getEventListAdapter(newResult,isHome));
+        } else {
+            lv_away.setAdapter(getEventListAdapter(newResult,isHome));
+        }
+    }
+
+    private void updateScore() {
+        if ( sw_isAwayGame.isChecked() ) {
+            tv_homeScore.setText(opponentScore+"");
+            tv_awayScore.setText(myScore+"");
+            tv_homePKScore.setText(opponentPKScore+"");
+            tv_awayPKScore.setText(myPKScore+"");
+        } else {
+            tv_homeScore.setText(myScore+"");
+            tv_awayScore.setText(opponentScore+"");
+            tv_homePKScore.setText(myPKScore+"");
+            tv_awayPKScore.setText(opponentPKScore+"");
+        }
     }
 }

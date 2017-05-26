@@ -11,7 +11,7 @@
         android:orientation="vertical">
 
         <Switch
-            android:id="@+id/sw_myEvent"
+            android:id="@+id/sw_myClubEvent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
@@ -34,8 +34,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp"
             android:layout_marginRight="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="8dp">
+            android:layout_marginEnd="10dp">
 
             <TextView
                 android:id="@+id/tv_eventType"
@@ -63,8 +62,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp"
             android:layout_marginRight="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="8dp">
+            android:layout_marginEnd="10dp">
 
             <TextView
                 android:id="@+id/tv_eventPlayer"
@@ -93,7 +91,6 @@
             android:layout_marginStart="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginEnd="10dp"
-            android:layout_marginTop="8dp"
             android:visibility="gone">
             <TextView
                 android:id="@+id/tv_subOnPlayer"
@@ -121,8 +118,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp"
             android:layout_marginRight="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="8dp">
+            android:layout_marginEnd="10dp">
             <TextView
                 android:id="@+id/tv_eventHalf"
                 android:layout_width="match_parent"
@@ -145,8 +141,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="8dp"
             android:layout_marginStart="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
             >
 
             <Switch
@@ -191,7 +188,6 @@
             android:layout_height="match_parent"
 
             android:orientation="vertical"
-            android:layout_marginTop="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginEnd="8dp"

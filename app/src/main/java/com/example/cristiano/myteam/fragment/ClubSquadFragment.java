@@ -1,10 +1,12 @@
 package com.example.cristiano.myteam.fragment;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -31,7 +33,11 @@ import java.util.Comparator;
 public class ClubSquadFragment extends Fragment {
     private int clubID, tournamentID;
     private ArrayList<Squad> squadList;
-    View rootView;
+    private boolean isEditingSquad;
+
+    private View rootView;
+    private Button btn_editPlayer;
+    private FloatingActionButton fab_delete, fab_add;
 
     public ClubSquadFragment() {
         // Required empty public constructor
@@ -81,10 +87,12 @@ public class ClubSquadFragment extends Fragment {
                         String name, role;
                         squadList = new ArrayList<>(jsonArray.length());
                         for ( int i = 0; i < jsonArray.length(); i++ ) {
-                            number = jsonArray.getJSONObject(i).getInt(Constant.SQUAD_NUMBER);
-                            name = jsonArray.getJSONObject(i).getString(Constant.PLAYER_DISPLAY_NAME);
-                            role = jsonArray.getJSONObject(i).getString(Constant.PLAYER_ROLE);
-                            squadList.add(new Squad(name,role,number));
+                            JSONObject jsonSquad = jsonArray.getJSONObject(i);
+                            int playerID = jsonSquad.getInt(Constant.SQUAD_PLAYER_ID);
+                            number = jsonSquad.getInt(Constant.SQUAD_NUMBER);
+                            name = jsonSquad.getString(Constant.PLAYER_DISPLAY_NAME);
+                            role = jsonSquad.getString(Constant.PLAYER_ROLE);
+                            squadList.add(new Squad(tournamentID,clubID,playerID,name,role,number));
                         }
                         Collections.sort(squadList,sortBy("name"));
                         showSquad();
@@ -108,9 +116,41 @@ public class ClubSquadFragment extends Fragment {
     }
 
     private void showSquad(){
+        isEditingSquad = false;
+
         ListView lv_squad = (ListView) rootView.findViewById(R.id.lv_squad);
+        btn_editPlayer = (Button) rootView.findViewById(R.id.btn_editSquad);
+        fab_add = (FloatingActionButton) rootView.findViewById(R.id.fab_addPlayer);
+        fab_delete = (FloatingActionButton) rootView.findViewById(R.id.fab_deletePlayer);
+
         SquadListAdapter squadListAdapter = new SquadListAdapter(getActivity(),R.layout.layout_card_squad,squadList);
         lv_squad.setAdapter(squadListAdapter);
+
+        fab_add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: popup add player dialog
+                // addPlayer(4,20);
+            }
+        });
+
+        btn_editPlayer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ( isEditingSquad ) {
+                    fab_add.setVisibility(View.GONE);
+                    fab_delete.setVisibility(View.GONE);
+                    btn_editPlayer.setText(R.string.btn_edit_squad);
+                    isEditingSquad = false;
+                } else {
+                    fab_add.setVisibility(View.VISIBLE);
+                    fab_delete.setVisibility(View.VISIBLE);
+                    btn_editPlayer.setText(R.string.btn_cancel_edit_squad);
+                    isEditingSquad = true;
+                }
+            }
+        });
+
     }
 
     private Comparator<Squad> sortBy(final String key) {
@@ -130,5 +170,34 @@ public class ClubSquadFragment extends Fragment {
             }
         };
 
+    }
+
+    private void addPlayer(int playerID, int number) {
+        Squad newSquad = new Squad(tournamentID,clubID,playerID,null,null,number);
+        RequestAction actionPostSquad = new RequestAction() {
+            @Override
+            public void actOnPre() {
+
+            }
+
+            @Override
+            public void actOnPost(int responseCode, String response) {
+                if ( responseCode == 201 ) {
+                    Toast.makeText(getContext(),"Create new squad player.",Toast.LENGTH_SHORT).show();
+                } else {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        String message = jsonObject.getString(Constant.KEY_MSG);
+                        Toast.makeText(getContext(),message,Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getContext(),response,Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+            }
+        };
+        String url = UrlHelper.urlPostSquad();
+        RequestHelper.sendPostRequest(url,newSquad.toJson(),actionPostSquad);
     }
 }

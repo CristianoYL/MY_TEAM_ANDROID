@@ -5,9 +5,9 @@ package com.example.cristiano.myteam.util;
  */
 
 public class UrlHelper {
-    private static final String URL = "https://my-team-rest-api.herokuapp.com";
 //    private static final String URL = "https://my-team-rest-api.herokuapp.com";
-//    private static final String URL = "http://192.168.1.9:5000";
+//    private static final String URL = "https://my-team-rest-api.herokuapp.com";
+    private static final String URL = "http://192.168.1.6:5000";
 
     public static String urlLogin(){
         return URL + "/auth";
@@ -43,6 +43,10 @@ public class UrlHelper {
 
     public static String urlPostRegClub(int playerID){
         return URL + "/club/player/" + playerID;
+    }
+
+    public static String urlPostSquad() {
+        return URL + "/squad";
     }
 
     public static String urlGetClubTeamsheet(int clubID){

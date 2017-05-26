@@ -109,7 +109,7 @@ public class TournamentFragment extends Fragment {
         tab_tournament.addTab(tab_tournament.newTab().setText("Squad"));
         tab_tournament.setTabMode(TabLayout.MODE_FIXED);
         Fragment[] fragments = new Fragment[3];
-        ClubResultFragment clubResultFragment = ClubResultFragment.newInstance(tournament.id,club);
+        ClubResultFragment clubResultFragment = ClubResultFragment.newInstance(tournament,club);
         fragments[0] = clubResultFragment;
 
         ClubStatsFragment clubStatsFragment = ClubStatsFragment.newInstance(tournament.id, club.id);

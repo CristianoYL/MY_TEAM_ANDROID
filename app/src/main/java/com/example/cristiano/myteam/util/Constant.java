@@ -139,6 +139,12 @@ public class Constant {
     public static final String EVENT_TYPE_SUB = "substitution";
     public static final String EVENT_TYPE_OG = "ownGoal";
 
+    public static final String EVENT_TIME_FIRST_HALF = "first half";
+    public static final String EVENT_TIME_SECOND_HALF = "second half";
+    public static final String EVENT_TIME_EXTRA_FIRST_HALF = "extra first half";
+    public static final String EVENT_TIME_EXTRA_SECOND_HALF = "extra second half";
+    public static final String EVENT_TIME_PK = "PK";
+
     // result columns
     public static final String RESULT_KEY_HOME = "homeID";
     public static final String RESULT_KEY_AWAY = "awayID";
@@ -151,6 +157,9 @@ public class Constant {
     // table squad
     public static final String TABLE_SQUAD = "squad";
     // squad columns
+    public static final String SQUAD_TOURNAMENT_ID = "tournamentID";
+    public static final String SQUAD_CLUB_ID = "clubID";
+    public static final String SQUAD_PLAYER_ID = "playerID";
     public static final String SQUAD_NUMBER = "number";
 
     // table teamsheet
