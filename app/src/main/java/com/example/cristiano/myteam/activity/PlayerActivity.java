@@ -73,6 +73,7 @@ public class PlayerActivity extends AppCompatActivity
     private boolean isVisitor = false;
     private int selectedClubID = 0;
     private ArrayList<String> clubNames, tournamentNames;
+    private Stats playerClubStats;
 
     private int pageID = PAGE_PROFILE;
     private static final int PAGE_PROFILE = 0;
@@ -219,13 +220,13 @@ public class PlayerActivity extends AppCompatActivity
         sp_playerClub.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("SELECTION CLUB",parent.getItemAtPosition(position).toString());
                 if ( position == 0 ) {  // position[0] == All Clubs
                     showPlayerTotalStats();
                 } else {    // show sp_playerTournament and let the user choose
                     for ( Club club : playerInfo.getClubs() ) {
                         if ( club.name.equals(parent.getSelectedItem().toString()) ) {
-                            selectedClubID = club.id;
-                            renderTournamentList(selectedClubID);
+                            loadPlayerClubStats(club.id);
                             break;
                         }
                     }
@@ -236,26 +237,6 @@ public class PlayerActivity extends AppCompatActivity
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
-
-        sp_playerTournament.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0) {  // show player's club total stats
-                    showPlayerClubStats(selectedClubID);
-                } else if (position > 0) {    // show player's tournament stats
-                    for (Tournament tournament : playerInfo.getClubTournaments(selectedClubID)) {
-                        if (tournament.name.equals(parent.getSelectedItem().toString())) {
-                            showPlayerTournamentStats(tournament.id);
-                            break;
-                        }
-                    }
-                }
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
 
         tabLayout.addOnTabSelectedListener( new TabLayout.OnTabSelectedListener() {
             @Override
@@ -557,7 +538,8 @@ public class PlayerActivity extends AppCompatActivity
         RequestHelper.sendGetRequest(url,actionGetPlayerInfo);
     }
 
-    private void loadPlayerClubStats(final int clubID){
+    private void loadPlayerClubStats(int clubID){
+        selectedClubID = clubID;
         RequestAction actionGetPlayerClubStats = new RequestAction() {
             @Override
             public void actOnPre() {
@@ -582,11 +564,6 @@ public class PlayerActivity extends AppCompatActivity
                             tournamentNames.add(tournamentName);
                         }
                         playerInfo.addClubTournament(selectedClubID,tournaments);
-                        // set sp_playerTournament adapter
-                        sp_playerTournament.setAdapter(new ArrayAdapter<String>(
-                                PlayerActivity.this,
-                                android.R.layout.simple_spinner_dropdown_item,
-                                tournamentNames));
                         // get player club total stats
                         JSONObject jsonPlayerClubStats = jsonObject.getJSONObject(Constant.TABLE_STATS);
                         int tournamentID = -1;
@@ -608,7 +585,7 @@ public class PlayerActivity extends AppCompatActivity
                         int red = jsonPlayerClubStats.getInt(Constant.STATS_RED);
                         int cleanSheet = jsonPlayerClubStats.getInt(Constant.STATS_CLEAN_SHEET);
                         int penaltySaved = jsonPlayerClubStats.getInt(Constant.STATS_PEN_SAVED);
-                        Stats playerClubStats = new Stats(tournamentID, clubID, playerID, attendance, appearance,
+                        playerClubStats = new Stats(tournamentID, clubID, playerID, attendance, appearance,
                                 start, goal, penalty, freekick, penaltyShootout, penaltyTaken, ownGoal, header,
                                 weakFootGoal,otherGoal, assist, yellow, red, cleanSheet, penaltySaved);
                         JSONObject jsonPlayerGamePerformance = jsonObject.getJSONObject(Constant.KEY_GAME_PERFORMANCE);
@@ -618,7 +595,7 @@ public class PlayerActivity extends AppCompatActivity
                         playerClubStats.setWin(win);
                         playerClubStats.setDraw(draw);
                         playerClubStats.setLoss(loss);
-                        playerInfo.addClubStats(selectedClubID,playerClubStats);
+                        renderTournamentList(selectedClubID);
                         // render view pager
                         showStats(playerClubStats);
                     } catch (JSONException e) {
@@ -675,8 +652,6 @@ public class PlayerActivity extends AppCompatActivity
                         playerTournamentStats.setWin(win);
                         playerTournamentStats.setDraw(draw);
                         playerTournamentStats.setLoss(loss);
-                        // cache stats
-                        playerInfo.addTournamentStats(tournamentID,playerTournamentStats);
                         // render view pager
                         showStats(playerTournamentStats);
                     } catch (JSONException e) {
@@ -747,34 +722,23 @@ public class PlayerActivity extends AppCompatActivity
         // hide tournament spinner, show player total stats
         sp_playerTournament.setVisibility(View.GONE);
         tv_playerTournament.setVisibility(View.GONE);
-        sp_playerTournament.setSelection(0);
+//        sp_playerTournament.setSelection(0);
         showStats(playerInfo.getTotalStats());
     }
 
-    private void showPlayerClubStats(int clubID) {
-        if (playerInfo.hasClubStats(clubID)) {    // if cached, use cache to set adapter and render stats
-            Log.d("PLAYER__CLUB_STATS","CACHED");
-            showStats(playerInfo.getClubStats(clubID));
-        } else {    // not cached, send request to get the stats
-            Log.d("PLAYER__CLUB_STATS","NOT CACHED");
-            loadPlayerClubStats(clubID);
-        }
+    private void showPlayerClubStats() {
+        showStats(playerClubStats);
+
     }
 
     private void showPlayerTournamentStats(int tournamentID) {
-        if ( playerInfo.hasTournamentStats(tournamentID) ) {    // if player tournament stats is cached, display it
-            showStats(playerInfo.getTournamentStats(tournamentID));
-            Log.d("PLAYER__TOUR_STATS","CACHED");
-        } else {    // if not cached, load and display it
-            loadPlayerTournamentStats(tournamentID);
-            Log.d("PLAYER__TOUR_STATS","NOT CACHED");
-        }
+        loadPlayerTournamentStats(tournamentID);
     }
 
     private void renderTournamentList(int clubID) {
         tournamentNames = new ArrayList<String>();
         tournamentNames.add(Constant.OPTION_ALL_TOURNAMENTS);
-        Tournament[] tournaments = playerInfo.getClubTournaments(selectedClubID);
+        Tournament[] tournaments = playerInfo.getClubTournaments(clubID);
         if ( tournaments != null && tournaments.length > 0 ) {
             for (Tournament tournament : tournaments ) {
                 tournamentNames.add(tournament.name);
@@ -784,6 +748,25 @@ public class PlayerActivity extends AppCompatActivity
                 PlayerActivity.this,
                 android.R.layout.simple_spinner_dropdown_item,
                 tournamentNames));
+        sp_playerTournament.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("SELECTION TOUR",parent.getItemAtPosition(position).toString());
+                if ( position == 0 ) {  // show player's club total stats
+                    showPlayerClubStats();
+                } else {    // show player's tournament stats
+                    for (Tournament tournament : playerInfo.getClubTournaments(selectedClubID)) {
+                        if (tournament.name.equals(parent.getSelectedItem().toString())) {
+                            showPlayerTournamentStats(tournament.id);
+                            break;
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
         sp_playerTournament.setVisibility(View.VISIBLE);
         tv_playerTournament.setVisibility(View.VISIBLE);
     }

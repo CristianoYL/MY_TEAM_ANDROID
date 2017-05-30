@@ -1,12 +1,24 @@
 package com.example.cristiano.myteam.fragment;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
@@ -50,6 +62,7 @@ public class ClubStatsFragment extends Fragment {
             clubID = bundle.getInt(Constant.KEY_CLUB_ID);
             tournamentID = bundle.getInt(Constant.KEY_TOURNAMENT_ID);
         }
+        Log.d("STATS_FRAGMENT","onCreate");
     }
 
     @Override
@@ -58,6 +71,7 @@ public class ClubStatsFragment extends Fragment {
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_club_stats, container, false);
         loadStats();
+        Log.d("STATS_FRAGMENT","onCreateView");
         return view;
     }
 

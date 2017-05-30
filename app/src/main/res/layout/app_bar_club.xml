@@ -26,15 +26,5 @@
         android:id="@+id/fragment_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <!--<include layout="@layout/fragment_club_profile"-->
-        <!--android:id="@+id/layout_clubProfile" />-->
-
-    <!--<include layout="@layout/fragment_tournament_list"-->
-        <!--android:id="@+id/layout_tournamentList"-->
-        <!--android:visibility="gone"/>-->
-
-    <!--<include layout="@layout/layout_club_tournament"-->
-        <!--android:visibility="gone"-->
-        <!--android:id="@+id/layout_tournamentDetail"/>-->
 
 </LinearLayout>

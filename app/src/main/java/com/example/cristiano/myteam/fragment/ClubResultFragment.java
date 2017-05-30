@@ -51,7 +51,6 @@ import java.util.Locale;
 
 public class ClubResultFragment extends Fragment {
     private Club club;
-    private Player[] myClubPlayers, opponentPlayers;
     private Tournament tournament;
     private Result[] results;
     private Result newResult;
@@ -198,8 +197,6 @@ public class ClubResultFragment extends Fragment {
                 resultMap.put(Constant.RESULT_KEY_PEN,results[i].penScore);
             }
             // initialize homeID event list for this game result[i]
-            LayoutInflater inflater = LayoutInflater.from(getActivity());
-//            View view = inflater.inflate(R.layout.layout_card_result,null);
             resultMap.put(Constant.RESULT_KEY_HOME_EVENT, getEventListAdapter(results[i],true));
             // awayID events
             resultMap.put(Constant.RESULT_KEY_AWAY_EVENT, getEventListAdapter(results[i],false));
@@ -262,12 +259,18 @@ public class ClubResultFragment extends Fragment {
             eventMap.put(Constant.EVENT_TIME,event.time);
             eventListItems.add(eventMap);
         }
-        return new SimpleAdapter(getActivity(), eventListItems, R.layout.layout_event_detail,
+        return new SimpleAdapter(getContext(), eventListItems, R.layout.layout_event_detail,
                 new String[]{Constant.EVENT_TYPE, Constant.EVENT_PLAYER, Constant.EVENT_TIME},
                 new int[]{R.id.iv_eventIcon, R.id.tv_eventPlayer, R.id.tv_eventTime});
     }
 
     private void showAddResultDialog() {
+        myScore = 0;
+        opponentScore = 0;
+        myFTScore = 0;
+        opponentFTScore = 0;
+        myPKScore = 0;
+        opponentPKScore = 0;
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View dialogView = inflater.inflate(R.layout.layout_record_match,null);
 
@@ -672,13 +675,8 @@ public class ClubResultFragment extends Fragment {
         RequestAction actionPostResultAndStats = new RequestAction() {
             @Override
             public void actOnPre() {
-//                Log.d("RESULT_FRAGMENT","add result: " + newResult.toJson());
-//                for ( int i = 0; i < newStats.length; i++ ) {
-//                    Log.d("RESULT_FRAGMENT","add stats: " + newStats[i].toJson());
-//                }
                 String toJson = gameResultAndStats.toJson();
                 Log.d("RESULT_FRAGMENT","add result: " + toJson);
-
                 JSONArray eventArray;
                 try {
                     JSONObject json = new JSONObject(toJson);

@@ -35,4 +35,8 @@ public class CustomFragmentAdapter extends FragmentStatePagerAdapter {
     public int getCount() {
         return fragments.length;
     }
+
+
+
+
 }

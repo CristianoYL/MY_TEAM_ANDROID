@@ -156,7 +156,7 @@ public class ClubProfileFragment extends Fragment {
                 TournamentListFragment fragment = TournamentListFragment.newInstance(clubInfo.getTournaments(),clubInfo.getClub(),playerID);
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.fragment_content,fragment);
+                transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_TOURNAMENT_LIST);
                 transaction.commit();
             }
         });
@@ -167,7 +167,7 @@ public class ClubProfileFragment extends Fragment {
                 TeamsheetFragment fragment = TeamsheetFragment.newInstance(clubID);
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.fragment_content,fragment);
+                transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_TEAMSHEET);
                 transaction.commit();
             }
         });

@@ -105,7 +105,7 @@ public class TournamentListFragment extends Fragment {
                 TournamentFragment tournamentFragment = TournamentFragment.newInstance(tournaments.get(position),club);
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_content,tournamentFragment,Constant.FRAGMENT_CLUB_TEAMSHEET);
+                fragmentTransaction.replace(R.id.fragment_content,tournamentFragment,Constant.FRAGMENT_CLUB_TOURNAMENT_DETAIL);
                 fragmentTransaction.commit();
             }
         });

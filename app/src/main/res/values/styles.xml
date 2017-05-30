@@ -24,4 +24,11 @@
         <item name="android:paddingRight">5dp</item>
     </style>
 
+    <style name="RedButton">
+        <item name="android:textColor">@color/colorRed</item>
+        <item name="android:background">@drawable/edge_red</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+    </style>
+
 </resources>

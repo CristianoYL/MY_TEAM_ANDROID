@@ -24,7 +24,7 @@ import com.google.gson.Gson;
 public class TournamentFragment extends Fragment {
 
     private TabLayout tab_tournament;
-    private ViewPager viewPager_tournament;
+    public ViewPager viewPager_tournament;
 
     private Tournament tournament;
     private Club club;
@@ -105,18 +105,18 @@ public class TournamentFragment extends Fragment {
 
         tab_tournament.removeAllTabs();
         tab_tournament.addTab(tab_tournament.newTab().setText("Results"));
-        tab_tournament.addTab(tab_tournament.newTab().setText("Stats"));
         tab_tournament.addTab(tab_tournament.newTab().setText("Squad"));
+        tab_tournament.addTab(tab_tournament.newTab().setText("Stats"));
         tab_tournament.setTabMode(TabLayout.MODE_FIXED);
         Fragment[] fragments = new Fragment[3];
         ClubResultFragment clubResultFragment = ClubResultFragment.newInstance(tournament,club);
         fragments[0] = clubResultFragment;
 
-        ClubStatsFragment clubStatsFragment = ClubStatsFragment.newInstance(tournament.id, club.id);
-        fragments[1] = clubStatsFragment;
-
         ClubSquadFragment clubSquadFragment = ClubSquadFragment.newInstance(tournament.id,club.id);
-        fragments[2] = clubSquadFragment;
+        fragments[1] = clubSquadFragment;
+
+        ClubStatsFragment clubStatsFragment = ClubStatsFragment.newInstance(tournament.id, club.id);
+        fragments[2] = clubStatsFragment;
 
         CustomFragmentAdapter adapter = new CustomFragmentAdapter(getChildFragmentManager());
         adapter.setFragments(fragments);
