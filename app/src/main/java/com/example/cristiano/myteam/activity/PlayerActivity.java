@@ -51,6 +51,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ *  this activity displays the main profile page of the player, which presents:
+ *  1) the player's basic info
+ *  2) the access to player's clubs
+ *  3) stats data visualization
+ */
 public class PlayerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -105,6 +111,7 @@ public class PlayerActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view_player);
         navigationView.setNavigationItemSelectedListener(this);
 
+        // to start this activity, the intent must contain the player's email or ID
         Bundle bundle = getIntent().getExtras();
         if ( bundle == null ) {
             return;
@@ -127,13 +134,14 @@ public class PlayerActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        }else if( pageID != PAGE_PROFILE ){
-            showPlayerProfilePage();
-        }else {
-//            super.onBackPressed();
-//            showLogoutPage();
+        if (drawer.isDrawerOpen(GravityCompat.START)) { // if the drawer menu is open
+            drawer.closeDrawer(GravityCompat.START);    // close menu
+        }else if( pageID != PAGE_PROFILE ){ // if it's in other page of this activity
+            showPlayerProfilePage();    // return to profile page
+        }else if (isVisitor){   // if it's other user's profile page
+            super.onBackPressed();  // return to the previous page
+        } else {
+            showLogoutPage();   // ask if to log out
         }
     }
 
@@ -162,7 +170,6 @@ public class PlayerActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -187,6 +194,9 @@ public class PlayerActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     *  presents the player's profile page
+     */
     private void showPlayerProfilePage(){
         // initialize profile page
         pageID = PAGE_PROFILE;
@@ -217,13 +227,14 @@ public class PlayerActivity extends AppCompatActivity
             }
         });
 
+        // listen to the selection of the player's club spinner
         sp_playerClub.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Log.d("SELECTION CLUB",parent.getItemAtPosition(position).toString());
                 if ( position == 0 ) {  // position[0] == All Clubs
                     showPlayerTotalStats();
-                } else {    // show sp_playerTournament and let the user choose
+                } else {    // show sp_playerTournament and let the user choose tournaments
                     for ( Club club : playerInfo.getClubs() ) {
                         if ( club.name.equals(parent.getSelectedItem().toString()) ) {
                             loadPlayerClubStats(club.id);
@@ -238,6 +249,7 @@ public class PlayerActivity extends AppCompatActivity
             }
         });
 
+        // use tabs to coordinate with view pagers
         tabLayout.addOnTabSelectedListener( new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -253,6 +265,7 @@ public class PlayerActivity extends AppCompatActivity
             }
         });
 
+        // view pages should also update tab selections
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -261,9 +274,10 @@ public class PlayerActivity extends AppCompatActivity
 
             @Override
             public void onPageSelected(int position) {
-                try {
-                    tabLayout.getTabAt(position).select();
-                }catch (NullPointerException e) {
+                TabLayout.Tab tab =tabLayout.getTabAt(position);
+                if ( tab != null ) {
+                    tab.select();
+                } else {
                     Log.e("PlayerStatsViewPager","ERROR: No Tab Found For Selected Page.");
                 }
             }
@@ -286,15 +300,19 @@ public class PlayerActivity extends AppCompatActivity
                 iv_avatar.setImageResource(R.drawable.avatar_peter);
                 break;
         }
-
         showStats(playerInfo.getTotalStats());
     }
 
+    /**
+     * go to the player registration page
+     * @param email the email used to login
+     * @param player  the Player instance
+     */
     private void showRegistrationPage(String email, Player player){
         Intent intent = new Intent(PlayerActivity.this,PlayerRegistrationActivity.class);
         intent.putExtra(Constant.PLAYER_EMAIL,email);
         if ( player != null ) {
-            intent.putExtra(Constant.KEY_PLAYER_INFO,player);
+            intent.putExtra(Constant.KEY_PLAYER,player);
         }
         startActivity(intent);
     }
@@ -438,6 +456,9 @@ public class PlayerActivity extends AppCompatActivity
         startActivity(intent);
     }
 
+    /**
+     * send a GET request to retrieve the player's info
+     */
     private void loadPlayerInfo(){
         RequestAction actionGetPlayerInfo = new RequestAction() {
             @Override
@@ -465,6 +486,7 @@ public class PlayerActivity extends AppCompatActivity
                         float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
                         boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
                         int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
+                        // use the retrieve info to create a Player instance
                         Player player = new Player(playerID,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
 
                         // get player's all clubs' info
@@ -515,7 +537,8 @@ public class PlayerActivity extends AppCompatActivity
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                } else if ( responseCode == 404 ){
+                } else if ( responseCode == 404 ){  // if the player's info is not found
+                    // it means it's a new user, let the user create his player profile first
                     showRegistrationPage(email,null);
                 } else {
                     try {
@@ -530,10 +553,12 @@ public class PlayerActivity extends AppCompatActivity
             }
         };
         String url;
-        if ( playerID != 0) {
+        if ( playerID != 0) {   // if the playerID is specified, use the playerID to retrieve the info
             url = UrlHelper.urlGetPlayerInfo(playerID);
-        } else {
+            Log.d("PlayerActivity","Load by ID");
+        } else {    // otherwise use the email to retrieve the info
             url = UrlHelper.urlGetPlayerInfo(email);
+            Log.d("PlayerActivity","Load by email");
         }
         RequestHelper.sendGetRequest(url,actionGetPlayerInfo);
     }
@@ -609,6 +634,10 @@ public class PlayerActivity extends AppCompatActivity
         RequestHelper.sendGetRequest(url,actionGetPlayerClubStats);
     }
 
+    /**
+     * send a GET request to retrieve the player's stats in a specific tournament
+     * @param tournamentID  ID of the specific tournament
+     */
     private void loadPlayerTournamentStats(int tournamentID){
         RequestAction actionGetPlayerTournamentStats = new RequestAction() {
             @Override
@@ -673,6 +702,10 @@ public class PlayerActivity extends AppCompatActivity
         RequestHelper.sendGetRequest(url,actionGetPlayerTournamentStats);
     }
 
+    /**
+     * visualize the stats in the chart ViewPager fragment
+     * @param stats the stats to be displayed
+     */
     private void showStats(Stats stats) {
         tabLayout.removeAllTabs();
         tabLayout.setBackgroundResource(R.drawable.card_border);
@@ -718,6 +751,9 @@ public class PlayerActivity extends AppCompatActivity
         viewPager.setAdapter(adapter);
     }
 
+    /**
+     *  display the player's overall stats (in all clubs and tournaments)
+     */
     private void showPlayerTotalStats(){
         // hide tournament spinner, show player total stats
         sp_playerTournament.setVisibility(View.GONE);
@@ -726,15 +762,27 @@ public class PlayerActivity extends AppCompatActivity
         showStats(playerInfo.getTotalStats());
     }
 
+    /**
+     *  display the player's specific club total stats (in all tournaments)
+     *  the club stats is specified in a global variable (playerClubStats)
+     */
     private void showPlayerClubStats() {
         showStats(playerClubStats);
 
     }
 
+    /**
+     * display the player's specific tournament stats
+     * @param tournamentID  the ID of the specific tournament
+     */
     private void showPlayerTournamentStats(int tournamentID) {
         loadPlayerTournamentStats(tournamentID);
     }
 
+    /**
+     * Fill the tournament spinner with all the tournaments the specified club has participated in
+     * @param clubID ID of the specified club
+     */
     private void renderTournamentList(int clubID) {
         tournamentNames = new ArrayList<String>();
         tournamentNames.add(Constant.OPTION_ALL_TOURNAMENTS);
@@ -771,6 +819,10 @@ public class PlayerActivity extends AppCompatActivity
         tv_playerTournament.setVisibility(View.VISIBLE);
     }
 
+    /**
+     *  if this activity is not presenting the user's own profile, but another user profile
+     *  call this method to limit access
+     */
     private void setVisitorMode(){
         btn_club.setVisibility(View.INVISIBLE);
         ActionBar actionBar = getSupportActionBar();

@@ -29,6 +29,10 @@ public class UrlHelper {
         return URL + "/player_info/" + playerID + "/club/" + clubID;
     }
 
+    public static String urlPutPlayer(int playerID){
+        return URL + "/player/id/" + playerID;
+    }
+
     public static String urlPutPlayer(String playerEmail){
         return URL + "/player/" + playerEmail;
     }

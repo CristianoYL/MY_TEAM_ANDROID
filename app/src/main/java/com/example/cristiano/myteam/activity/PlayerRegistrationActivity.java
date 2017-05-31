@@ -24,6 +24,10 @@ import com.example.cristiano.myteam.util.UrlHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
+/**
+ *  This activity handles the player profile registration/update requests
+ */
 public class PlayerRegistrationActivity extends AppCompatActivity {
 
     private String email;
@@ -79,11 +83,11 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             return;
         }
         this.email = bundle.getString(Constant.PLAYER_EMAIL,null);
-        if ( bundle.containsKey(Constant.KEY_PLAYER_INFO) ) {
+        if ( bundle.containsKey(Constant.KEY_PLAYER) ) {
             setTitle("Update Profile");
-            this.player = (Player) bundle.get(Constant.KEY_PLAYER_INFO);
+            this.player = (Player) bundle.get(Constant.KEY_PLAYER);
             if ( this.player == null ) {
-                Log.e("PlayerRegActivity","Missing player info bundle");
+                Log.e("PlayerRegActivity","Missing player info");
                 return;
             }
             et_firstName.setText(this.player.getFirstName());
@@ -112,11 +116,20 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * send a PUT request to register/update the player's profile
+     */
     private void uploadPlayerInfo() {
         int id = 0;
         String firstName = et_firstName.getText().toString();
         String lastName = et_lastName.getText().toString();
         String displayName = et_displayName.getText().toString();
+        // firstname and lastname cannot be empty
+        if ( firstName.length() == 0 || lastName.length() == 0 ) {
+            Toast.makeText(PlayerRegistrationActivity.this,R.string.empty_name_msg,Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // display name is full name by default
         if ( displayName.length() == 0 ) {
             displayName = firstName + " " + lastName;
         }
@@ -138,8 +151,8 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             height = Float.parseFloat(et_height.getText().toString());
         }
         if ( sw_unit.isChecked() ) {
-            weight = (weight / 1.6f);
-            height = height * 30.3f;
+            weight = weight * 0.45359237f;  // convert lbs to kg
+            height = height * 30.48f;   // convert ft to cm
         }
         boolean leftFooted = sw_leftFooted.isChecked();
         int avatar = 0;
@@ -155,9 +168,9 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             public void actOnPost(int responseCode, String response) {
                 if ( responseCode == 201 || responseCode == 200 ) {    // player created or updated
                     if ( responseCode == 200 ) {
-                        Toast.makeText(PlayerRegistrationActivity.this,"Profile updated!",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PlayerRegistrationActivity.this,R.string.player_profile_updated,Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(PlayerRegistrationActivity.this,"Profile created!",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PlayerRegistrationActivity.this,R.string.player_profile_created,Toast.LENGTH_SHORT).show();
                     }
                     try {
                         JSONObject jsonObject = new JSONObject(response);
@@ -169,10 +182,10 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                } else {    // unknown error
+                } else {    // error
                     try {
                         JSONObject jsonObject = new JSONObject(response);
-                        String message = jsonObject.getString("message");
+                        String message = jsonObject.getString(Constant.KEY_MSG);
                         Toast.makeText(PlayerRegistrationActivity.this,message,Toast.LENGTH_LONG).show();
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -182,7 +195,12 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                 }
             }
         };
-        String url = UrlHelper.urlPutPlayer(email);
+        String url;
+        if ( this.player != null ) {
+            url = UrlHelper.urlPutPlayer(this.player.getId());
+        } else {
+            url = UrlHelper.urlPutPlayer(email);
+        }
         RequestHelper.sendPutRequest(url, player.toJson() ,actionPutPlayer);
         finish();
     }

@@ -23,20 +23,23 @@ public class Constant {
     public static final String KEY_MSG = "message";
     public static final String KEY_CLUB_ID = "clubID";
     public static final String KEY_PLAYER_ID = "playerID";
+    public static final String KEY_PLAYER = "player";
     public static final String KEY_TOURNAMENT_ID= "tournamentID";
     public static final String KEY_IS_VISITOR = "isVisitor";
+    public static final String KEY_PLAYER_INFO = "playerInfo";
+    public static final String KEY_CLUB_INFO = "clubInfo";
+    public static final String KEY_GAME_PERFORMANCE = "gamePerformance";
 
     public static final String METHOD_POST = "POST";
     public static final String METHOD_GET = "GET";
     public static final String METHOD_PUT = "PUT";
     public static final String METHOD_DELETE = "DELETE";
 
-    public static final String KEY_PLAYER_INFO = "playerInfo";
-    public static final String KEY_CLUB_INFO = "clubInfo";
+
     public static final String PLAYER_INFO_PLAYER = "player";
     public static final String PLAYER_INFO_CLUBS = "clubs";
     public static final String PLAYER_INFO_TOTAL_STATS = "totalStats";
-    public static final String KEY_GAME_PERFORMANCE = "gamePerformance";
+
     public static final String PERFORMANCE_WIN = "win";
     public static final String PERFORMANCE_DRAW = "draw";
     public static final String PERFORMANCE_LOSS = "loss";
