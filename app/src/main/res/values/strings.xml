@@ -51,5 +51,7 @@
     <string name="empty_name_msg">Player firstname and lastname cannot be empty!</string>
     <string name="player_profile_created">Player profile created!</string>
     <string name="player_profile_updated">Player profile updated!</string>
+    <string name="error_empty_club_name">Club name cannot be empty!</string>
+    <string name="error_empty_club_info">Club description cannot be empty!</string>
 
 </resources>

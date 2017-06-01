@@ -56,6 +56,9 @@ import java.util.HashMap;
  *  1) the player's basic info
  *  2) the access to player's clubs
  *  3) stats data visualization
+ *
+ *  to start this activity, a bundle containing playerID or email must be passed within the intent
+ *  an optional isVisitor boolean value can be passed to identify if the user is viewing other's profile
  */
 public class PlayerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -129,6 +132,14 @@ public class PlayerActivity extends AppCompatActivity
         this.email = bundle.getString(Constant.PLAYER_EMAIL,null);
         this.playerID = bundle.getInt(Constant.KEY_PLAYER_ID,0);
         loadPlayerInfo();
+    }
+
+    @Override
+    protected void onResume() {
+        if ( this.isVisitor ) {
+            this.setVisitorMode();
+        }
+        super.onResume();
     }
 
     @Override
@@ -314,9 +325,16 @@ public class PlayerActivity extends AppCompatActivity
         if ( player != null ) {
             intent.putExtra(Constant.KEY_PLAYER,player);
         }
+        if ( isVisitor ) {
+            intent.putExtra(Constant.KEY_IS_VISITOR,true);
+        }
         startActivity(intent);
+        finish();
     }
 
+    /**
+     * display list of clubs the player is in
+     */
     private void showPlayerClubPage(){
         pageID = PAGE_CLUB;
         layout_profile.setVisibility(View.GONE);
@@ -345,6 +363,9 @@ public class PlayerActivity extends AppCompatActivity
         });
     }
 
+    /**
+     * show a pop-up dialog to let the user create a new club
+     */
     private void showCreateClubPage() {
         LayoutInflater inflater = LayoutInflater.from(PlayerActivity.this);
         View v_event = inflater.inflate(R.layout.layout_reg_name_info, null);
@@ -358,11 +379,11 @@ public class PlayerActivity extends AppCompatActivity
                 String clubName = tv_name.getText().toString();
                 String clubInfo = tv_info.getText().toString();
                 if ( clubName.equals("") ) {
-                    Toast.makeText(PlayerActivity.this, "Club Name cannot be empty!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PlayerActivity.this, R.string.error_empty_club_name, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if ( clubInfo.equals("") ) {
-                    Toast.makeText(PlayerActivity.this, "Club Info cannot be empty!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PlayerActivity.this,R.string.error_empty_club_info, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 int clubID = 0;
@@ -416,6 +437,9 @@ public class PlayerActivity extends AppCompatActivity
         dialogBuilder.show();
     }
 
+    /**
+     * show a pop-up dialog to ask the user whether to logout
+     */
     private void showLogoutPage() {
         AlertDialog.Builder builder = new AlertDialog.Builder(PlayerActivity.this,0);
         builder.setTitle("Warning");
@@ -445,10 +469,17 @@ public class PlayerActivity extends AppCompatActivity
         builder.show();
     }
 
+    /**
+     * currently, the setting page is the player profile update page
+     */
     private void showSettingsPage() {
         showRegistrationPage(email,playerInfo.getPlayer());
     }
 
+    /**
+     * go to the according club activity
+     * @param clubID the ID of the club to view
+     */
     private void viewClub(int clubID) {
         Intent intent = new Intent(PlayerActivity.this,ClubActivity.class);
         intent.putExtra(Constant.KEY_CLUB_ID,clubID);
@@ -563,6 +594,10 @@ public class PlayerActivity extends AppCompatActivity
         RequestHelper.sendGetRequest(url,actionGetPlayerInfo);
     }
 
+    /**
+     * send a GET request to retrieve the player's total stats in the specified club
+     * @param clubID    ID of the specified club
+     */
     private void loadPlayerClubStats(int clubID){
         selectedClubID = clubID;
         RequestAction actionGetPlayerClubStats = new RequestAction() {

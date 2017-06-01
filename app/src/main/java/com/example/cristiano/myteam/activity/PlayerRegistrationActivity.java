@@ -24,6 +24,8 @@ import com.example.cristiano.myteam.util.UrlHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Locale;
+
 
 /**
  *  This activity handles the player profile registration/update requests
@@ -32,6 +34,7 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
 
     private String email;
     private Player player;
+    private boolean isVisitor;
 
     private EditText et_firstName, et_lastName, et_displayName, et_age, et_phone, et_height, et_weight;
     private Switch sw_unit, sw_leftFooted;
@@ -82,10 +85,11 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             Log.e("PlayerRegActivity","Missing player bundle");
             return;
         }
-        this.email = bundle.getString(Constant.PLAYER_EMAIL,null);
-        if ( bundle.containsKey(Constant.KEY_PLAYER) ) {
+        this.email = bundle.getString(Constant.PLAYER_EMAIL,null);  // creating the player for the first time
+        if ( bundle.containsKey(Constant.KEY_PLAYER) ) {    // updating an existing player
             setTitle("Update Profile");
             this.player = (Player) bundle.get(Constant.KEY_PLAYER);
+            this.isVisitor = bundle.getBoolean(Constant.KEY_IS_VISITOR,false);
             if ( this.player == null ) {
                 Log.e("PlayerRegActivity","Missing player info");
                 return;
@@ -93,10 +97,10 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             et_firstName.setText(this.player.getFirstName());
             et_lastName.setText(this.player.getLastName());
             et_displayName.setText(this.player.getDisplayName());
-            et_age.setText(player.getAge()+"");
+            et_age.setText(String.format(Locale.US,"%d",player.getAge()));
             et_phone.setText(this.player.getPhone());
-            et_height.setText(player.getHeight()+"");
-            et_weight.setText(player.getWeight()+"");
+            et_height.setText(String.format(Locale.US,"%f",player.getHeight()));
+            et_weight.setText(String.format(Locale.US,"%f",player.getWeight()));
             sw_leftFooted.setChecked(this.player.isLeftFooted());
             if ( this.player.getRole().equals(Constant.ROLE_MANAGER) ) {
                 sp_role.setSelection(roleAdapter.getPosition(Constant.ROLE_MANAGER));
@@ -174,11 +178,13 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                     }
                     try {
                         JSONObject jsonObject = new JSONObject(response);
-                        String email = jsonObject.getString(Constant.PLAYER_EMAIL);
+                        int playerID = jsonObject.getInt(Constant.PLAYER_ID);
                         Intent intent = new Intent(PlayerRegistrationActivity.this,PlayerActivity.class);
-                        intent.putExtra(Constant.PLAYER_EMAIL, email);
+                        intent.putExtra(Constant.KEY_PLAYER_ID, playerID);
+                        if ( isVisitor ) {
+                            intent.putExtra(Constant.KEY_IS_VISITOR, isVisitor);
+                        }
                         startActivity(intent);
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
