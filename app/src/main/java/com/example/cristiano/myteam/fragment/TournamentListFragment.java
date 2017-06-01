@@ -35,6 +35,8 @@ import java.util.HashMap;
 
 /**
  * Created by Cristiano on 2017/4/19.
+ *
+ * this fragment presents the list of tournaments the club participates in
  */
 
 public class TournamentListFragment extends Fragment {
@@ -86,6 +88,9 @@ public class TournamentListFragment extends Fragment {
         return view;
     }
 
+    /**
+     * fill the ListView with tournaments
+     */
     private void showTournamentList() {
         ListView lv_tournament = (ListView) view.findViewById(R.id.lv_clubTournaments);
         Button btn_addTournament = (Button) view.findViewById(R.id.btn_addTournament);
@@ -99,6 +104,7 @@ public class TournamentListFragment extends Fragment {
         }
         TournamentListAdapter tournamentListAdapter = new TournamentListAdapter(getContext(),R.layout.layout_card_tournament,tournamentList);
         lv_tournament.setAdapter(tournamentListAdapter);
+        // show the tournament page
         lv_tournament.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -118,6 +124,9 @@ public class TournamentListFragment extends Fragment {
         });
     }
 
+    /**
+     * show a pop-up dialog to let the user create a new tournament
+     */
     private void showCreateTournamentDialog() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View dialogView = inflater.inflate(R.layout.layout_reg_name_info,null);

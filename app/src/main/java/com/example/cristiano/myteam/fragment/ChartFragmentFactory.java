@@ -7,6 +7,8 @@ import com.example.cristiano.myteam.util.Constant;
 
 /**
  * Created by Cristiano on 2017/4/13.
+ *
+ * this factory class produces fragment that contains according type of chart
  */
 
 public class ChartFragmentFactory {

@@ -49,6 +49,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
+/**
+ * this fragment show the results of the club in the given tournament
+ */
 public class ClubResultFragment extends Fragment {
     private Club club;
     private Tournament tournament;
@@ -103,6 +106,9 @@ public class ClubResultFragment extends Fragment {
         return view;
     }
 
+    /**
+     * send a GET request to retrieve the club's tournament results
+     */
     private void getResult(){
         RequestAction actionGetClubResults = new RequestAction() {
             @Override
@@ -180,6 +186,9 @@ public class ClubResultFragment extends Fragment {
         RequestHelper.sendGetRequest(url,actionGetClubResults);
     }
 
+    /**
+     * fill the ListView with the club's tournament results
+     */
     private void showResults(){
         ListView lv_result = (ListView) view.findViewById(R.id.lv_result);
         ArrayList<HashMap<String,Object>> resultItems = new ArrayList<>();
@@ -214,6 +223,11 @@ public class ClubResultFragment extends Fragment {
         });
     }
 
+    /**
+     * set the game event icons accordingly
+     * @param eventMap  the map that contains the event info
+     * @param eventType the type of the game event, e.g. goal, yellow card...
+     */
     private void setEventIcon(HashMap<String,Object> eventMap, String eventType) {
         switch ( eventType ) {
             case Constant.EVENT_TYPE_GOAL:
@@ -242,6 +256,11 @@ public class ClubResultFragment extends Fragment {
         }
     }
 
+    /**
+     * @param result  the Result structure that contains the full info of a game
+     * @param isHome  if this adapter is rendering the home event ListView
+     * @return  a customized adapter that tells the ListView how to display the events
+     */
     private SimpleAdapter getEventListAdapter(Result result, boolean isHome){
         ArrayList<HashMap<String,Object>> eventListItems = new ArrayList<>();
         Gson gson = new Gson();
@@ -264,6 +283,9 @@ public class ClubResultFragment extends Fragment {
                 new int[]{R.id.iv_eventIcon, R.id.tv_eventPlayer, R.id.tv_eventTime});
     }
 
+    /**
+     * show a pop-up dialog that let the user upload a new game result
+     */
     private void showAddResultDialog() {
         myScore = 0;
         opponentScore = 0;
@@ -376,6 +398,9 @@ public class ClubResultFragment extends Fragment {
         loadTournamentClubSquad();
     }
 
+    /**
+     *  show a pop-up dialog that let the user select the game events
+     */
     private void showEventDialog() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View eventView = inflater.inflate(R.layout.layout_event_dialog,null);
@@ -602,6 +627,10 @@ public class ClubResultFragment extends Fragment {
         showEventList(isHomeEvent);
     }
 
+    /**
+     * render the event list
+     * @param isHome if it's home event list
+     */
     private void showEventList(boolean isHome){
         if ( isHome ) {
             lv_home.setAdapter(getEventListAdapter(newResult,isHome));
@@ -610,6 +639,9 @@ public class ClubResultFragment extends Fragment {
         }
     }
 
+    /**
+     * update the result score
+     */
     private void updateScore() {
         if ( sw_isAwayGame.isChecked() ) {
             tv_homeScore.setText(opponentScore+"");
@@ -624,6 +656,9 @@ public class ClubResultFragment extends Fragment {
         }
     }
 
+    /**
+     * send a GET request to retrieve the club's tournament squad
+     */
     private void loadTournamentClubSquad(){
         RequestAction actionGetTournamentClubSquad = new RequestAction() {
             @Override
@@ -671,6 +706,10 @@ public class ClubResultFragment extends Fragment {
         RequestHelper.sendGetRequest(url,actionGetTournamentClubSquad);
     }
 
+    /**
+     * send a Post request to upload the new game result
+     * @param gameResultAndStats  a data structure that contains the new result and player stats
+     */
     private void uploadResult(final GameResultAndStats gameResultAndStats) {
         RequestAction actionPostResultAndStats = new RequestAction() {
             @Override

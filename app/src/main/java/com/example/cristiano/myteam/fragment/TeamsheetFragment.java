@@ -48,6 +48,7 @@ public class TeamsheetFragment extends Fragment{
     private int clubID;
     private View view;
     private EditText et_firstName, et_lastName, et_displayName, et_age, et_phone, et_height, et_weight;
+    private Button btn_addPlayer;
     private Switch sw_unit, sw_leftFooted;
     private Spinner sp_role, sp_position;
     private ArrayAdapter<String> roleAdapter,positionAdapter;
@@ -78,6 +79,9 @@ public class TeamsheetFragment extends Fragment{
         return view;
     }
 
+    /**
+     * send a GET request to retrieve the teamsheet info
+     */
     private void getTeamsheetPlayers(){
         RequestAction actionGetTeamsheetPlayers = new RequestAction() {
             @Override
@@ -113,7 +117,14 @@ public class TeamsheetFragment extends Fragment{
                         e.printStackTrace();
                     }
                 } else {
-
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        String message = jsonObject.getString(Constant.KEY_MSG);
+                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getContext(), response, Toast.LENGTH_SHORT).show();
+                    }
                 }
 
             }
@@ -122,9 +133,12 @@ public class TeamsheetFragment extends Fragment{
         RequestHelper.sendGetRequest(url,actionGetTeamsheetPlayers);
     }
 
+    /**
+     *  render the retrieved teamsheet info into the list view
+     */
     private void showTeamsheet(){
         ListView lv_teamsheet = (ListView) view.findViewById(R.id.lv_teamsheet);
-        final Button btn_addPlayer = (Button) view.findViewById(R.id.btn_addPlayer);
+        btn_addPlayer = (Button) view.findViewById(R.id.btn_addPlayer);
 
         ArrayList<HashMap<String,Object>> teamsheetList = new ArrayList<>();
         for ( Player player : players ) {
@@ -136,6 +150,8 @@ public class TeamsheetFragment extends Fragment{
         }
         TeamsheetListAdapter teamsheetListAdapter = new TeamsheetListAdapter(getContext(),R.layout.layout_card_teamsheet,teamsheetList);
         lv_teamsheet.setAdapter(teamsheetListAdapter);
+
+        // go to the player's profile page onClick() in visitor mode
         lv_teamsheet.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -146,6 +162,7 @@ public class TeamsheetFragment extends Fragment{
             }
         });
 
+        // create new player and add to the teamsheet
         btn_addPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -206,12 +223,21 @@ public class TeamsheetFragment extends Fragment{
         });
     }
 
+    /**
+     * send a POST request to upload the new player
+     */
     private void uploadPlayerInfo(){
         int id = 0;
         String email = null;
         String firstName = et_firstName.getText().toString();
         String lastName = et_lastName.getText().toString();
         String displayName = et_displayName.getText().toString();
+        // firstname and lastname cannot be empty
+        if ( firstName.length() == 0 || lastName.length() == 0 ) {
+            Toast.makeText(getContext(),R.string.empty_name_msg,Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // display name is full name by default
         if ( displayName.length() == 0 ) {
             displayName = firstName + " " + lastName;
         }
@@ -253,6 +279,7 @@ public class TeamsheetFragment extends Fragment{
                         JSONObject jsonObject = new JSONObject(response);
                         JSONObject jsonPlayer = jsonObject.getJSONObject(Constant.TABLE_PLAYER);
                         int playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
+                        String email = null;
                         String firstName = jsonPlayer.getString(Constant.PLAYER_FIRST_NAME);
                         String lastName = jsonPlayer.getString(Constant.PLAYER_LAST_NAME);
                         String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
@@ -263,9 +290,8 @@ public class TeamsheetFragment extends Fragment{
                         float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
                         float weight = (float) jsonPlayer.getDouble(Constant.PLAYER_WEIGHT);
                         boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
-                        Player newPlayer = new Player(playerID,null,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+                        Player newPlayer = new Player(playerID,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
                         players.add(newPlayer);
-                        JSONObject jsonTeamsheet = jsonObject.getJSONObject(Constant.TABLE_TEAMSHEET);
                         showTeamsheet();
                     } catch (JSONException e) {
                         e.printStackTrace();

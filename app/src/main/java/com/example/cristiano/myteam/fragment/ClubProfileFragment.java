@@ -30,6 +30,9 @@ import java.util.ArrayList;
 
 /**
  * Created by Cristiano on 2017/4/18.
+ *
+ * this fragment presents the club profile page,
+ * and offer the user access to teamsheet page and tournament page
  */
 
 public class ClubProfileFragment extends Fragment {
@@ -68,6 +71,9 @@ public class ClubProfileFragment extends Fragment {
         return view;
     }
 
+    /**
+     * send a GET request to retrieve the club's basic info
+     */
     private void getProfile(){
         RequestAction actionGetClubInfo = new RequestAction() {
             @Override
@@ -129,6 +135,9 @@ public class ClubProfileFragment extends Fragment {
         RequestHelper.sendGetRequest(url,actionGetClubInfo);
     }
 
+    /**
+     * after retrieving the club info, call this method to display it
+     */
     private void showProfile() {
         TextView tv_clubName = (TextView) view.findViewById(R.id.tv_clubName);
         TextView tv_clubInfo = (TextView) view.findViewById(R.id.tv_clubInfo);
@@ -153,23 +162,37 @@ public class ClubProfileFragment extends Fragment {
         btn_viewTournaments.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TournamentListFragment fragment = TournamentListFragment.newInstance(clubInfo.getTournaments(),clubInfo.getClub(),playerID);
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_TOURNAMENT_LIST);
-                transaction.commit();
+                viewTournamentList();
             }
         });
 
         btn_viewTeamsheet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TeamsheetFragment fragment = TeamsheetFragment.newInstance(clubID);
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_TEAMSHEET);
-                transaction.commit();
+                viewTeamsheet();
             }
         });
+    }
+
+    /**
+     * replace the current fragment with teamsheet fragment
+     */
+    private void viewTeamsheet() {
+        TeamsheetFragment fragment = TeamsheetFragment.newInstance(clubID);
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_TEAMSHEET);
+        transaction.commit();
+    }
+
+    /**
+     * view tournament list fragment
+     */
+    private void viewTournamentList() {
+        TournamentListFragment fragment = TournamentListFragment.newInstance(clubInfo.getTournaments(),clubInfo.getClub(),playerID);
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_TOURNAMENT_LIST);
+        transaction.commit();
     }
 }

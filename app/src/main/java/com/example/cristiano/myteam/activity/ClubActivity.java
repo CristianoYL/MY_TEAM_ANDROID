@@ -1,16 +1,10 @@
 package com.example.cristiano.myteam.activity;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -19,54 +13,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
 
 import com.example.cristiano.myteam.fragment.ClubProfileFragment;
-import com.example.cristiano.myteam.fragment.ClubStatsFragment;
-import com.example.cristiano.myteam.fragment.ClubResultFragment;
-import com.example.cristiano.myteam.fragment.ClubSquadFragment;
-import com.example.cristiano.myteam.request.RequestAction;
-import com.example.cristiano.myteam.request.RequestHelper;
-import com.example.cristiano.myteam.structure.Event;
-import com.example.cristiano.myteam.structure.Result;
-import com.example.cristiano.myteam.structure.Tournament;
-import com.example.cristiano.myteam.structure.TournamentRegistration;
 import com.example.cristiano.myteam.util.Constant;
-import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
-import com.example.cristiano.myteam.adapter.ResultListAdapter;
-import com.example.cristiano.myteam.adapter.TournamentListAdapter;
-import com.example.cristiano.myteam.util.UrlHelper;
-import com.google.gson.Gson;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
+/**
+ *  this activity holds a frame that contains certain fragments,
+ *  which will present the club profile, members or tournaments
+ */
 public class ClubActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ListView lv_result, lv_event,lv_tournament;
-    private LinearLayout layout_result;
-    private ViewPager viewPager,viewPager_tournament;
-    private TabLayout tab_clubStats,tab_tournament;
-    private Button btn_addTournament;
-    private View profilePage, tournamentListPage,tournamentPage;
-
-    private Result[] results;
-    private Tournament[] tournaments;
     private int clubID, playerID;
 
     @Override
@@ -95,7 +54,6 @@ public class ClubActivity extends AppCompatActivity
         this.playerID = bundle.getInt(Constant.KEY_PLAYER_ID);
         Log.d("CLUB_ID","="+this.clubID);
         showProfilePage();
-
     }
 
     @Override
@@ -159,6 +117,9 @@ public class ClubActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * use a fragment to display the club's profile page
+     */
     private void showProfilePage(){
         ClubProfileFragment clubProfileFragment = ClubProfileFragment.newInstance(clubID,playerID);
         FragmentManager fragmentManager = getSupportFragmentManager();

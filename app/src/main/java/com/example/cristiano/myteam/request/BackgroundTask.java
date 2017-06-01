@@ -20,7 +20,7 @@ import java.net.URL;
  * Created by Cristiano on 2017/3/28.
  *
  *  This helper class creates an AsyncTask that
- *  sends the request and process the response in the background
+ *  sends the request and process the response in the background thread
  */
 
 public class BackgroundTask extends AsyncTask<String, Object, String> {

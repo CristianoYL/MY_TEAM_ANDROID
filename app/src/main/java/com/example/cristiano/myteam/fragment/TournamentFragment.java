@@ -19,6 +19,8 @@ import com.google.gson.Gson;
 
 /**
  * Created by Cristiano on 2017/4/20.
+ *
+ * this fragment show the tournament page
  */
 
 public class TournamentFragment extends Fragment {
@@ -61,6 +63,9 @@ public class TournamentFragment extends Fragment {
         return tournamentView;
     }
 
+    /**
+     * render the ViewPager to display the tournament info
+     */
     private void showTournament(){
         tab_tournament = (TabLayout) tournamentView.findViewById(R.id.tabLayout);
         viewPager_tournament = (ViewPager) tournamentView.findViewById(R.id.viewPager);
@@ -109,6 +114,7 @@ public class TournamentFragment extends Fragment {
         tab_tournament.addTab(tab_tournament.newTab().setText("Stats"));
         tab_tournament.setTabMode(TabLayout.MODE_FIXED);
         Fragment[] fragments = new Fragment[3];
+        // the tournament fragment contains 3 child fragments, which shows the result, squad and stats
         ClubResultFragment clubResultFragment = ClubResultFragment.newInstance(tournament,club);
         fragments[0] = clubResultFragment;
 

@@ -34,12 +34,18 @@ import org.json.JSONObject;
 
 /**
  * Created by Cristiano on 2017/4/17.
+ *
+ * this fragment holds a ViewPager which contains child fragments
+ * that renders different stats of the club
  */
 
 public class ClubStatsFragment extends Fragment {
     private int clubID, tournamentID;
     private Stats clubStats;
+
     View view;
+    private ViewPager viewPager;
+    private TabLayout tab_clubStats;
 
     public ClubStatsFragment() {
         // Required empty public constructor
@@ -75,6 +81,9 @@ public class ClubStatsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * send a GET request to retrieve the club's tournament stats
+     */
     private void loadStats() {
         RequestAction actionGetClubStats = new RequestAction() {
             @Override
@@ -114,7 +123,7 @@ public class ClubStatsFragment extends Fragment {
                         clubStats.setDraw(draw);
                         clubStats.setLoss(loss);
                         clubStats.setGoalsConceded(goalsConceded);
-                        showStats(view);
+                        showStats();
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(getActivity(),"Response format error!\n"+response,Toast.LENGTH_LONG).show();
@@ -135,10 +144,14 @@ public class ClubStatsFragment extends Fragment {
         RequestHelper.sendGetRequest(url,actionGetClubStats);
     }
 
-    private void showStats(View view) {
+
+    /**
+     * fill the ViewPager with child fragments that visualize different stats
+     */
+    private void showStats() {
         View tabViewPager = view.findViewById(R.id.tabViewPager_clubStats);
-        final ViewPager viewPager = (ViewPager) tabViewPager.findViewById(R.id.viewPager);
-        final TabLayout tab_clubStats = (TabLayout) tabViewPager.findViewById(R.id.tabLayout);
+        viewPager = (ViewPager) tabViewPager.findViewById(R.id.viewPager);
+        tab_clubStats = (TabLayout) tabViewPager.findViewById(R.id.tabLayout);
 
         Fragment[] fragments = new Fragment[Constant.CLUB_STATS_TABS.length];
         tab_clubStats.removeAllTabs();

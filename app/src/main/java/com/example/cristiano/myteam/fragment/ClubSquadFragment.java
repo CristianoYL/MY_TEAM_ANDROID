@@ -38,6 +38,8 @@ import java.util.HashMap;
 
 /**
  * Created by Cristiano on 2017/4/17.
+ *
+ * this fragment show the club's tournament squad and allows user to modified the squad
  */
 
 public class ClubSquadFragment extends Fragment {
@@ -86,6 +88,9 @@ public class ClubSquadFragment extends Fragment {
         return rootView;
     }
 
+    /**
+     * send a GET request to retrieve the club's tournament squad
+     */
     private void getSquad(){
         RequestAction actionGetTournamentClubSquad = new RequestAction() {
             @Override
@@ -130,6 +135,9 @@ public class ClubSquadFragment extends Fragment {
         RequestHelper.sendGetRequest(url,actionGetTournamentClubSquad);
     }
 
+    /**
+     * render the ListView to show the club's tournament squad
+     */
     private void showSquad(){
         isEditingSquad = false;
 
