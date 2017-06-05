@@ -99,7 +99,7 @@ public class PlayerActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         layout_profile = (ConstraintLayout) findViewById(R.id.layout_profile);
         layout_club = (ConstraintLayout) findViewById(R.id.layout_club_list);
-        tv_name = (TextView) findViewById(R.id.tv_name);
+        tv_name = (TextView) findViewById(R.id.et_name);
         tv_role = (TextView) findViewById(R.id.tv_role);
         iv_avatar = (ImageView) findViewById(R.id.iv_avatar);
         btn_club = (Button) findViewById(R.id.btn_club);
@@ -369,8 +369,8 @@ public class PlayerActivity extends AppCompatActivity
     private void showCreateClubPage() {
         LayoutInflater inflater = LayoutInflater.from(PlayerActivity.this);
         View v_event = inflater.inflate(R.layout.layout_reg_name_info, null);
-        final TextView tv_name = (TextView) v_event.findViewById(R.id.tv_name);
-        final TextView tv_info = (TextView) v_event.findViewById(R.id.tv_info);
+        final TextView tv_name = (TextView) v_event.findViewById(R.id.et_name);
+        final TextView tv_info = (TextView) v_event.findViewById(R.id.et_info);
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setTitle("Create a club");
         dialogBuilder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {

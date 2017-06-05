@@ -2,6 +2,8 @@ package com.example.cristiano.myteam.util;
 
 /**
  * Created by Cristiano on 2017/3/16.
+ *
+ * this class maintains most of the constant values of the application
  */
 
 public class Constant {

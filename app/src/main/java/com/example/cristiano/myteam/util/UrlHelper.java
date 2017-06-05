@@ -2,11 +2,16 @@ package com.example.cristiano.myteam.util;
 
 /**
  * Created by Cristiano on 2017/4/17.
+ *
+ * this class offers the url to different APIs
  */
 
 public class UrlHelper {
+    //AWS URL
 //    private static final String URL = "https://my-team-rest-api.herokuapp.com";
+    // Heroku URL
 //    private static final String URL = "https://my-team-rest-api.herokuapp.com";
+    //local testing URL
     private static final String URL = "http://192.168.1.9:5000";
 
     public static String urlLogin(){

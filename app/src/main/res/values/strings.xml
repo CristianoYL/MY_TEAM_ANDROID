@@ -8,8 +8,7 @@
     <string name="action_logout">Log Out</string>
 
     <string name="title_activity_profile">Profile</string>
-    <string name="cancel">Cancel</string>
-    <string name="confirm">Confirm</string>
+
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
@@ -53,5 +52,33 @@
     <string name="player_profile_updated">Player profile updated!</string>
     <string name="error_empty_club_name">Club name cannot be empty!</string>
     <string name="error_empty_club_info">Club description cannot be empty!</string>
+    <string name="error_empty_tour_name">Tournament name cannot be empty!</string>
+    <string name="error_empty_tour_info">Tournament description cannot be empty!</string>
+
+    <!-- labels-->
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="abb_yes">Y</string>
+    <string name="abb_no">N</string>
+    <string name="abb_home">H</string>
+    <string name="abb_away">A</string>
+
+    <!-- Dialog titles -->
+    <string name="create_club">Create a new club</string>
+    <string name="create_tournament">Create a new tournament</string>
+
+    <!-- content description -->
+    <string name="desc_club_icon">badge of the club</string>
+
+    <!-- goal types -->
+    <string name="goal_type">Goal Type</string>
+    <string name="goal_method">Scoring Method</string>
+    <string name="goal_action">Action</string>
+    <string name="goal_penalty">Penalty</string>
+    <string name="goal_freekick">Freekick</string>
+    <string name="goal_strong_foot">Strong foot</string>
+    <string name="goal_weak_foot">Weak foot</string>
+    <string name="goal_header">Header</string>
+    <string name="goal_other">Other</string>
 
 </resources>

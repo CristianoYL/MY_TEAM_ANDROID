@@ -67,6 +67,7 @@ public class TournamentFragment extends Fragment {
      * render the ViewPager to display the tournament info
      */
     private void showTournament(){
+        getActivity().setTitle(club.name + "-" + tournament.name);
         tab_tournament = (TabLayout) tournamentView.findViewById(R.id.tabLayout);
         viewPager_tournament = (ViewPager) tournamentView.findViewById(R.id.viewPager);
 
@@ -112,8 +113,9 @@ public class TournamentFragment extends Fragment {
         tab_tournament.addTab(tab_tournament.newTab().setText("Results"));
         tab_tournament.addTab(tab_tournament.newTab().setText("Squad"));
         tab_tournament.addTab(tab_tournament.newTab().setText("Stats"));
+        tab_tournament.addTab(tab_tournament.newTab().setText("Chat"));
         tab_tournament.setTabMode(TabLayout.MODE_FIXED);
-        Fragment[] fragments = new Fragment[3];
+        Fragment[] fragments = new Fragment[4];
         // the tournament fragment contains 3 child fragments, which shows the result, squad and stats
         ClubResultFragment clubResultFragment = ClubResultFragment.newInstance(tournament,club);
         fragments[0] = clubResultFragment;
@@ -123,6 +125,9 @@ public class TournamentFragment extends Fragment {
 
         ClubStatsFragment clubStatsFragment = ClubStatsFragment.newInstance(tournament.id, club.id);
         fragments[2] = clubStatsFragment;
+
+        ChatFragment chatFragment = ChatFragment.newInstance(tournament.id, club.id,0);
+        fragments[3] = chatFragment;
 
         CustomFragmentAdapter adapter = new CustomFragmentAdapter(getChildFragmentManager());
         adapter.setFragments(fragments);

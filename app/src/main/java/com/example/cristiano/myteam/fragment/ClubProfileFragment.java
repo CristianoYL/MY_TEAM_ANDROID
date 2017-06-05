@@ -27,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by Cristiano on 2017/4/18.
@@ -39,6 +40,7 @@ public class ClubProfileFragment extends Fragment {
 
     private int clubID, playerID;
     private ClubInfo clubInfo;
+
     private View view;
 
     public ClubProfileFragment() {
@@ -142,22 +144,24 @@ public class ClubProfileFragment extends Fragment {
         TextView tv_clubName = (TextView) view.findViewById(R.id.tv_clubName);
         TextView tv_clubInfo = (TextView) view.findViewById(R.id.tv_clubInfo);
         TextView tv_totalPlayerCount = (TextView) view.findViewById(R.id.tv_totalCount);
-        final TextView tv_activePlayerCount = (TextView) view.findViewById(R.id.tv_activeCount);
+        TextView tv_activePlayerCount = (TextView) view.findViewById(R.id.tv_activeCount);
         TextView tv_tournamentCount = (TextView) view.findViewById(R.id.tv_tournamentCount);
         Button btn_viewTeamsheet = (Button) view.findViewById(R.id.btn_teamsheet);
         Button btn_viewTournaments = (Button) view.findViewById(R.id.btn_tournament);
 
+        getActivity().setTitle(clubInfo.getClub().name);
+
         tv_clubName.setText(clubInfo.getClub().name);
         tv_clubInfo.setText(clubInfo.getClub().info);
-        tv_totalPlayerCount.setText(clubInfo.getTeamsheet().length+"");
+        tv_totalPlayerCount.setText(String.format(Locale.US,"%d",clubInfo.getTeamsheet().length));
         int count = 0;
         for ( Teamsheet teamsheet : clubInfo.getTeamsheet() ) {
             if ( teamsheet.isActive() ) {
                 count++;
             }
         }
-        tv_activePlayerCount.setText(count+"");
-        tv_tournamentCount.setText(clubInfo.getTournaments().length+"");
+        tv_activePlayerCount.setText(String.format(Locale.US,"%d",count));
+        tv_tournamentCount.setText(String.format(Locale.US,"%d",clubInfo.getTournaments().length));
 
         btn_viewTournaments.setOnClickListener(new View.OnClickListener() {
             @Override

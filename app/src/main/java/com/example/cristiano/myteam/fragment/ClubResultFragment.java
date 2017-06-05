@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -738,6 +739,11 @@ public class ClubResultFragment extends Fragment {
                 if ( responseCode == 201 ) {
                     Toast.makeText(getContext(),"Result uploaded!",Toast.LENGTH_SHORT).show();
                     getResult();
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    Fragment fragment = getActivity().getSupportFragmentManager().findFragmentByTag(Constant.FRAGMENT_CLUB_TOURNAMENT_DETAIL);
+                    transaction.detach(fragment);
+                    transaction.attach(fragment);
+                    transaction.commit();
                 } else {
                     try {
                         JSONObject jsonObject = new JSONObject(response);

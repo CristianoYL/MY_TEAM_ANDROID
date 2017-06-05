@@ -43,6 +43,8 @@ public class TournamentListFragment extends Fragment {
     private ArrayList<Tournament> tournaments;
     private int playerID;
     private Club club;
+
+    private TextView tv_name, tv_info;
     private View view;
 
     public TournamentListFragment(){
@@ -130,21 +132,21 @@ public class TournamentListFragment extends Fragment {
     private void showCreateTournamentDialog() {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View dialogView = inflater.inflate(R.layout.layout_reg_name_info,null);
-        final TextView tv_name = (TextView) dialogView.findViewById(R.id.tv_name);
-        final TextView tv_info = (TextView) dialogView.findViewById(R.id.tv_info);
+        tv_name = (TextView) dialogView.findViewById(R.id.et_name);
+        tv_info = (TextView) dialogView.findViewById(R.id.et_info);
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
-        dialogBuilder.setTitle("Create a tournament");
+        dialogBuilder.setTitle(R.string.create_tournament);
         dialogBuilder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String tournamentName = tv_name.getText().toString();
                 String tournamentInfo = tv_info.getText().toString();
                 if ( tournamentName.equals("") ) {
-                    Toast.makeText(getContext(), "Club Name cannot be empty!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.error_empty_tour_name, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if ( tournamentInfo.equals("") ) {
-                    Toast.makeText(getContext(), "Club Info cannot be empty!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.error_empty_tour_info, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 int tournamentID = 0;
@@ -192,7 +194,6 @@ public class TournamentListFragment extends Fragment {
         dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-//                dialog.cancel();
             }
         });
         dialogBuilder.setView(dialogView);

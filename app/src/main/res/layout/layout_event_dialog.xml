@@ -22,8 +22,8 @@
             android:checked="true"
             android:showText="true"
             android:text="My Club Event? "
-            android:textOff="N"
-            android:textOn="Y"
+            android:textOff="@string/abb_no"
+            android:textOn="@string/abb_yes"
             />
 
         <LinearLayout
@@ -152,8 +152,8 @@
                 android:layout_height="wrap_content"
                 android:showText="true"
                 android:text="Use specific time?  "
-                android:textOff="N"
-                android:textOn="Y"
+                android:textOff="@string/abb_no"
+                android:textOn="@string/abb_yes"
                 android:layout_gravity="center"
                 />
 
@@ -198,7 +198,7 @@
                 android:id="@+id/tv_goalPart"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Scoring Part:"
+                android:text="@string/goal_method"
                 />
 
             <RadioGroup
@@ -211,32 +211,33 @@
                     android:id="@+id/rb_strongFoot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="strong foot" />
+                    android:text="@string/goal_strong_foot"
+                    android:checked="true"/>
 
                 <RadioButton
                     android:id="@+id/rb_weakFoot"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="weak foot" />
+                    android:text="@string/goal_weak_foot" />
 
                 <RadioButton
                     android:id="@+id/rb_head"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="header" />
+                    android:text="@string/goal_header" />
 
                 <RadioButton
                     android:id="@+id/rb_other"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="other" />
+                    android:text="@string/goal_other" />
             </RadioGroup>
 
             <TextView
                 android:id="@+id/tv_goalMethod"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Goal Method"
+                android:text="@string/goal_type"
                 />
 
             <RadioGroup
@@ -249,19 +250,20 @@
                     android:id="@+id/rb_regular"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="regular" />
+                    android:text="@string/goal_action"
+                    android:checked="true"/>
 
                 <RadioButton
                     android:id="@+id/rb_penalty"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="penalty" />
+                    android:text="@string/goal_penalty" />
 
                 <RadioButton
                     android:id="@+id/rb_freekick"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="freekick" />
+                    android:text="@string/goal_freekick" />
             </RadioGroup>
 
         </LinearLayout>

@@ -12,9 +12,7 @@ import android.widget.TextView;
 
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.structure.Squad;
-import com.example.cristiano.myteam.util.Constant;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -36,7 +34,7 @@ public class SquadListAdapter extends ArrayAdapter {
         Squad squad = (Squad) getItem(position);
 
         if ( view != null ) {
-            TextView tv_name = (TextView) view.findViewById(R.id.tv_name);
+            TextView tv_name = (TextView) view.findViewById(R.id.et_name);
             TextView tv_number = (TextView) view.findViewById(R.id.tv_number);
             TextView tv_role = (TextView) view.findViewById(R.id.tv_role);
             tv_name.setText(squad.getName());
