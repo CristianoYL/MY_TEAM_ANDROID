@@ -212,7 +212,7 @@ public class ClubResultFragment extends Fragment {
             resultMap.put(Constant.RESULT_KEY_AWAY_EVENT, getEventListAdapter(results[i],false));
             resultItems.add(resultMap);
         }
-        ResultListAdapter resultListAdapter = new ResultListAdapter(getActivity(),R.layout.layout_card_result,resultItems);
+        ResultListAdapter resultListAdapter = new ResultListAdapter(getContext(),R.layout.layout_card_result,resultItems);
         lv_result.setAdapter(resultListAdapter);
 
         Button btn_addResult = (Button) view.findViewById(R.id.btn_addResult);

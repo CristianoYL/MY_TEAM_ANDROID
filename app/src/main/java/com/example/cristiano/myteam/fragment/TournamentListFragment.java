@@ -110,7 +110,7 @@ public class TournamentListFragment extends Fragment {
         lv_tournament.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TournamentFragment tournamentFragment = TournamentFragment.newInstance(tournaments.get(position),club);
+                TournamentFragment tournamentFragment = TournamentFragment.newInstance(tournaments.get(position),club,playerID);
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fragment_content,tournamentFragment,Constant.FRAGMENT_CLUB_TOURNAMENT_DETAIL);

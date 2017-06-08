@@ -1,5 +1,10 @@
 package com.example.cristiano.myteam.util;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
+
 /**
  * Created by Cristiano on 2017/3/16.
  *
@@ -25,6 +30,8 @@ public class Constant {
     public static final String KEY_MSG = "message";
     public static final String KEY_CLUB_ID = "clubID";
     public static final String KEY_PLAYER_ID = "playerID";
+    public static final String KEY_RECEIVER_ID = "receiverID";
+    public static final String KEY_SENDER_ID = "senderID";
     public static final String KEY_PLAYER = "player";
     public static final String KEY_TOURNAMENT_ID= "tournamentID";
     public static final String KEY_IS_VISITOR = "isVisitor";
@@ -37,6 +44,16 @@ public class Constant {
     public static final String METHOD_PUT = "PUT";
     public static final String METHOD_DELETE = "DELETE";
 
+    public static DateFormat getServerDateFormat() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return dateFormat;
+    }
+    public static final DateFormat LOCAL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+    public static final DateFormat DISPLAY_DATE_FORMAT = new SimpleDateFormat("MMM dd HH:mm",Locale.getDefault());
+    public static final String MESSAGE_TYPE_TEXT = "text";
+    public static final String MESSAGE_TYPE_IMAGE = "image";
+    public static final String MESSAGE_TYPE_VIDEO = "video";
 
     public static final String PLAYER_INFO_PLAYER = "player";
     public static final String PLAYER_INFO_CLUBS = "clubs";
@@ -128,6 +145,19 @@ public class Constant {
     public static final String TOURNAMENT_NAME = "name";
     public static final String TOURNAMENT_INFO = "info";
 
+
+    // table chat
+    public static final String TABLE_CHAT = "chat";
+    // chat columns
+    public static final String CHAT_ID = "id";
+    public static final String CHAT_TOURNAMENT_ID = "tournamentID";
+    public static final String CHAT_CLUB_ID = "clubID";
+    public static final String CHAT_RECEIVER_ID = "receiverID";
+    public static final String CHAT_SENDER_ID = "senderID";
+    public static final String CHAT_SENDER_NAME = "senderName";
+    public static final String CHAT_MESSAGE_TYPE = "messageType";
+    public static final String CHAT_MESSAGE_CONTENT = "messageContent";
+    public static final String CHAT_TIME = "time";
 
     // event keys
     public static final String EVENT_TYPE = "type";

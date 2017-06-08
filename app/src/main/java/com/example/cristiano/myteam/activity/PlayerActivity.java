@@ -101,7 +101,7 @@ public class PlayerActivity extends AppCompatActivity
         layout_club = (ConstraintLayout) findViewById(R.id.layout_club_list);
         tv_name = (TextView) findViewById(R.id.et_name);
         tv_role = (TextView) findViewById(R.id.tv_role);
-        iv_avatar = (ImageView) findViewById(R.id.iv_avatar);
+        iv_avatar = (ImageView) findViewById(R.id.iv_otherAvatar);
         btn_club = (Button) findViewById(R.id.btn_club);
         btn_addClub = (Button) findViewById(R.id.btn_addClub);
         lv_club = (ListView) findViewById(R.id.lv_club);

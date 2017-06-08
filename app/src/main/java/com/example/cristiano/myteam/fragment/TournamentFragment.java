@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
 import com.example.cristiano.myteam.structure.Club;
+import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.Tournament;
 import com.example.cristiano.myteam.util.Constant;
 import com.google.gson.Gson;
@@ -30,17 +31,15 @@ public class TournamentFragment extends Fragment {
 
     private Tournament tournament;
     private Club club;
+    private int playerID;
     private View tournamentView;
 
-    public void TournamentFragment(){
-
-    }
-
-    public static TournamentFragment newInstance(Tournament tournament, Club club){
+    public static TournamentFragment newInstance(Tournament tournament, Club club, int playerID){
         TournamentFragment fragment = new TournamentFragment();
         Bundle bundle = new Bundle();
         bundle.putString(Constant.TABLE_TOURNAMENT,tournament.toJson());
         bundle.putString(Constant.TABLE_CLUB,club.toJson());
+        bundle.putInt(Constant.KEY_PLAYER_ID,playerID);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -52,6 +51,7 @@ public class TournamentFragment extends Fragment {
         if (bundle != null) {
             tournament = new Gson().fromJson(bundle.getString(Constant.TABLE_TOURNAMENT),Tournament.class);
             club = new Gson().fromJson(bundle.getString(Constant.TABLE_CLUB),Club.class);
+            playerID = bundle.getInt(Constant.KEY_PLAYER_ID);
         }
     }
 
@@ -126,7 +126,7 @@ public class TournamentFragment extends Fragment {
         ClubStatsFragment clubStatsFragment = ClubStatsFragment.newInstance(tournament.id, club.id);
         fragments[2] = clubStatsFragment;
 
-        ChatFragment chatFragment = ChatFragment.newInstance(tournament.id, club.id,0);
+        ChatFragment chatFragment = ChatFragment.newInstance(tournament.id, club.id,0,playerID);
         fragments[3] = chatFragment;
 
         CustomFragmentAdapter adapter = new CustomFragmentAdapter(getChildFragmentManager());
