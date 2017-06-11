@@ -5,9 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -48,8 +45,6 @@ import com.example.cristiano.myteam.util.UrlHelper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static android.Manifest.permission.READ_CONTACTS;
-
 /**
  * A login screen that offers login via email/password.
  */
@@ -59,14 +54,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -75,8 +62,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     // UI references.
     private AutoCompleteTextView et_email;
     private EditText et_password,et_passwordConfirm;
-    private Button btn_signIn,btn_register;
-    private View pb_progress, mLoginView;
+    private View layout_passwordConfirm;
+    private Button btn_left, btn_right;
+    private View pb_progress, layout_login;
     private boolean isLogin, rememberUsername,autoLogin;
     private CheckBox cb_remember, cb_auto;
 
@@ -88,17 +76,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        // Set up the login form.
-        isLogin = true;
         et_email = (AutoCompleteTextView) findViewById(R.id.et_email);
-        populateAutoComplete();
-
         et_password = (EditText) findViewById(R.id.et_password);
+        layout_passwordConfirm =  findViewById(R.id.layout_passwordConfirm);
         et_passwordConfirm =  (EditText) findViewById(R.id.et_confirm);
+        btn_left = (Button) findViewById(R.id.email_sign_in_button);
+        btn_right = (Button) findViewById(R.id.email_register_button);
+        layout_login = findViewById(R.id.layout_login);
+        pb_progress = findViewById(R.id.login_progress);
+        cb_remember = (CheckBox) findViewById(R.id.cb_remember);
+        cb_auto = (CheckBox) findViewById(R.id.cb_autoLogin);
+        // Set up the login form.
+        setRegistrationMode(false);
+//        populateAutoComplete();
         et_password.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                if ( isLogin && id == EditorInfo.IME_ACTION_GO ) {
                     attemptLogin();
                     return true;
                 }
@@ -106,42 +100,39 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        btn_signIn = (Button) findViewById(R.id.email_sign_in_button);
-        btn_signIn.setOnClickListener(new OnClickListener() {
+        et_passwordConfirm.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if ( !isLogin && actionId == EditorInfo.IME_ACTION_GO) {
+                    attemptRegister();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        btn_left.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (isLogin) {
                     attemptLogin();
                 } else {
-                    //TODO: register
                     attemptRegister();
                 }
             }
         });
 
-        btn_register = (Button) findViewById(R.id.email_register_button);
-        btn_register.setOnClickListener(new OnClickListener() {
+        btn_right.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (isLogin) {
-                    // go to registration page, set button to "Register" and "Cancel"
-                    btn_register.setText(R.string.cancel);
-                    btn_signIn.setText(R.string.action_register);
-                    et_passwordConfirm.setVisibility(View.VISIBLE);
+                    setRegistrationMode(true);  // set to register mode
                 } else {
-                    // go to sign in page, set button to "Sign in" and "Register"
-                    et_passwordConfirm.setVisibility(View.GONE);
-                    btn_register.setText(R.string.action_register);
-                    btn_signIn.setText(R.string.action_sign_in);
+                    setRegistrationMode(false); // set to login mode
                 }
-                isLogin = !isLogin;
             }
         });
-        mLoginView = findViewById(R.id.layout_login);
-        pb_progress = findViewById(R.id.login_progress);
-        cb_remember = (CheckBox) findViewById(R.id.cb_remember);
-        cb_auto = (CheckBox) findViewById(R.id.cb_autoLogin);
-
+        // retrieve the user's login preference. e.g. auto login
         sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
         rememberUsername = sharedPreferences.getBoolean(Constant.KEY_REMEMBER,false);
         autoLogin = sharedPreferences.getBoolean(Constant.KEY_AUTO_LOGIN,false);
@@ -155,51 +146,49 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             et_email.setText(sharedPreferences.getString(Constant.KEY_USERNAME,""));
             et_password.requestFocus();
         }
-
     }
 
-    private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
-
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(et_email, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
-    }
+//    private void populateAutoComplete() {
+//        if (!mayRequestContacts()) {
+//            return;
+//        }
+//        getLoaderManager().initLoader(0, null, this);
+//    }
+//
+//    private boolean mayRequestContacts() {
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+//            return true;
+//        }
+//        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+//            return true;
+//        }
+//        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
+//            Snackbar.make(et_email, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+//                    .setAction(android.R.string.ok, new View.OnClickListener() {
+//                        @Override
+//                        @TargetApi(Build.VERSION_CODES.M)
+//                        public void onClick(View v) {
+//                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+//                        }
+//                    });
+//        } else {
+//            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+//        }
+//        return false;
+//    }
+//
+//    /**
+//     * Callback received when a permissions request has been completed.
+//     */
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+//                                           @NonNull int[] grantResults) {
+//        if (requestCode == REQUEST_READ_CONTACTS) {
+//            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                populateAutoComplete();
+//            }
+//        }
+//    }
 
 
     /**
@@ -220,7 +209,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         this.email = et_email.getText().toString();
         this.password = et_password.getText().toString();
-        String confirm_pwd = et_passwordConfirm.getText().toString();
+        String confirmPassword = et_passwordConfirm.getText().toString();
 
 
         boolean cancel = false;
@@ -245,7 +234,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         //check password match up
-        if (!password.equals(confirm_pwd)) {
+        if (!password.equals(confirmPassword)) {
             et_passwordConfirm.setError(getString(R.string.error_match_failed));
             focusView = et_passwordConfirm;
             cancel = true;
@@ -258,8 +247,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            User user = new User(this.email,this.password);
-            String credentials = user.toJson();
             requestAction = new RequestAction() {
                 @Override
                 public void actOnPre() {
@@ -271,12 +258,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Log.d("Register response",response);
                     showProgress(false);
                     if ( responseCode == 201 ) {
-                        isLogin = true;
-                        et_passwordConfirm.setVisibility(View.GONE);
-                        btn_register.setText(R.string.action_register);
-                        btn_signIn.setText(R.string.action_sign_in);
-                        et_password.requestFocus();
                         Toast.makeText(LoginActivity.this,"Registration Succeeded!",Toast.LENGTH_SHORT).show();
+                        isLogin = true;
+                        layout_passwordConfirm.setVisibility(View.GONE);
+                        btn_right.setText(R.string.action_register);
+                        btn_left.setText(R.string.action_sign_in);
+                        cb_auto.setChecked(true);
+                        cb_remember.setChecked(true);
+                        // clear reference and try to login
+                        requestAction = null;
+                        attemptLogin();
                     } else {
                         try {
                             JSONObject jsonObject = new JSONObject(response);
@@ -294,7 +285,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             };
             Log.d("LOGIN_TEST","registering...");
             String url = UrlHelper.urlRegister();
-            RequestHelper.sendPostRequest(url,credentials,requestAction);
+            User user = new User(this.email,this.password);
+            RequestHelper.sendPostRequest(url,user.toJson(),requestAction);
         }
 
     }
@@ -381,7 +373,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Log.e("LOGIN","unexpected response");
-                            et_password.setError(response);
+                            if ( response == null || response.length() < 1 ) {
+                                et_password.setError(getString(R.string.error_no_connection));
+                            } else {
+                                et_password.setError(response);
+                            }
                         }
                         et_password.requestFocus();
                     }
@@ -399,9 +395,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         return email.contains("@");
     }
 
+    /**
+     * password requirement length of 6-20
+     * @param password the new password to test
+     * @return if the password is valid
+     */
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+        boolean isValid = true;
+        if ( password.length() < 6 || password.length() > 20 ) {
+            isValid = false;
+        }
+        return isValid;
     }
 
     /**
@@ -415,12 +419,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginView.animate().setDuration(shortAnimTime).alpha(
+            layout_login.setVisibility(show ? View.GONE : View.VISIBLE);
+            layout_login.animate().setDuration(shortAnimTime).alpha(
                     show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mLoginView.setVisibility(show ? View.GONE : View.VISIBLE);
+                    layout_login.setVisibility(show ? View.GONE : View.VISIBLE);
                 }
             });
 
@@ -436,7 +440,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // The ViewPropertyAnimator APIs are not available, so simply show
             // and hide the relevant UI components.
             pb_progress.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginView.setVisibility(show ? View.GONE : View.VISIBLE);
+            layout_login.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -492,5 +496,46 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         int ADDRESS = 0;
         int IS_PRIMARY = 1;
+    }
+
+    private void setRegistrationMode(boolean isRegister) {
+        if ( isRegister ) { // turn to registration mode
+            isLogin = false;
+            layout_passwordConfirm.setVisibility(View.VISIBLE);
+            // reset all error info and focuses
+            et_email.setError(null);
+            et_email.clearFocus();
+            et_password.setError(null);
+            et_password.clearFocus();
+            et_passwordConfirm.setText("");
+            et_passwordConfirm.clearFocus();
+            // change button text accordingly, set button to "Register" and "Cancel"
+            btn_right.setText(R.string.cancel);
+            btn_left.setText(R.string.action_register);
+            layout_passwordConfirm.setVisibility(View.VISIBLE);
+            // define IME Actions
+            et_password.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        } else {    // set to login mode
+            isLogin = true;
+            // hide and clear password confirm field
+            layout_passwordConfirm.setVisibility(View.GONE);
+            et_passwordConfirm.setText("");
+            et_passwordConfirm.clearFocus();
+            // reset all error info and focus on the first blank field
+            et_email.setError(null);
+            et_password.setError(null);
+
+            if ( TextUtils.isEmpty(et_email.getText()) ) {
+                et_email.requestFocus();
+            } else if ( TextUtils.isEmpty(et_password.getText()) ) {
+                et_password.requestFocus();
+            }
+            // change button text accordingly, set button to "Sign in" and "Register"
+            layout_passwordConfirm.setVisibility(View.GONE);
+            btn_right.setText(R.string.action_register);
+            btn_left.setText(R.string.action_sign_in);
+            // define IME Actions
+            et_password.setImeOptions(EditorInfo.IME_ACTION_GO);
+        }
     }
 }

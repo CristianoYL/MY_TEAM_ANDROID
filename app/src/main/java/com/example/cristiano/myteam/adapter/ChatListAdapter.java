@@ -86,13 +86,6 @@ public class ChatListAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        if ( isSelf ) {  // received message
-            viewHolder.iv_selfAvatar.setImageResource(R.drawable.avatar_peter);
-            viewHolder.tv_selfName.setText(chat.senderName);
-        } else {    // sent message
-            viewHolder.iv_otherAvatar.setImageResource(R.drawable.avatar_rooney);
-            viewHolder.tv_otherName.setText(chat.senderName);
-        }
         try {
             Date date = Constant.getServerDateFormat().parse(chat.time);
             String time = Constant.DISPLAY_DATE_FORMAT.format(date);
@@ -120,6 +113,13 @@ public class ChatListAdapter extends BaseAdapter {
                 }
                 imageLoader.execute();
                 break;
+        }
+        if ( isSelf ) {  // received message
+            viewHolder.iv_selfAvatar.setImageResource(R.drawable.avatar_peter);
+            viewHolder.tv_selfName.setText(chat.senderName);
+        } else {    // sent message
+            viewHolder.iv_otherAvatar.setImageResource(R.drawable.avatar_rooney);
+            viewHolder.tv_otherName.setText(chat.senderName);
         }
         return convertView;
     }

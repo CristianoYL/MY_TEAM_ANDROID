@@ -16,7 +16,7 @@
         android:layout_marginTop="10dp"
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
-        android:background="@drawable/card_border"
+        android:background="@drawable/card_border_light_grey"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">

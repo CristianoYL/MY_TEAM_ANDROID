@@ -17,7 +17,7 @@ import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.ClubInfo;
-import com.example.cristiano.myteam.structure.Teamsheet;
+import com.example.cristiano.myteam.structure.Member;
 import com.example.cristiano.myteam.structure.Tournament;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
@@ -26,7 +26,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Locale;
 
 /**
@@ -104,19 +103,19 @@ public class ClubProfileFragment extends Fragment {
                             String tournamentInfo = jsonTournament.getString(Constant.TOURNAMENT_INFO);
                             tournaments[i] = new Tournament(tournamentID,tournamentName,tournamentInfo);
                         }
-                        // get club's teamsheet
-                        JSONArray teamsheetList = jsonClubInfo.getJSONArray(Constant.TABLE_TEAMSHEET);
-                        Teamsheet[] teamsheet = new Teamsheet[teamsheetList.length()];
-                        for ( int i = 0; i < teamsheetList.length(); i++ ) {
-                            JSONObject jsonTeamsheet = teamsheetList.getJSONObject(i);
-                            int playerID = jsonTeamsheet.getInt(Constant.TEAMSHEET_P_ID);
-                            int clubID = jsonTeamsheet.getInt(Constant.TEAMSHEET_C_ID);
-                            String memberSince = jsonTeamsheet.getString(Constant.TEAMSHEET_MEMBER_SINCE);
-                            boolean isActive = jsonTeamsheet.getBoolean(Constant.TEAMSHEET_IS_ACTIVE);
-                            boolean isAdmin = jsonTeamsheet.getBoolean(Constant.TEAMSHEET_IS_ADMIN);
-                            teamsheet[i] = new Teamsheet(playerID,clubID,memberSince,isActive,isAdmin);
+                        // get club's member
+                        JSONArray memberList = jsonClubInfo.getJSONArray(Constant.TABLE_MEMBER);
+                        Member[] member = new Member[memberList.length()];
+                        for ( int i = 0; i < memberList.length(); i++ ) {
+                            JSONObject jsonMember = memberList.getJSONObject(i);
+                            int playerID = jsonMember.getInt(Constant.MEMBER_P_ID);
+                            int clubID = jsonMember.getInt(Constant.MEMBER_C_ID);
+                            String memberSince = jsonMember.getString(Constant.MEMBER_SINCE);
+                            boolean isActive = jsonMember.getBoolean(Constant.MEMBER_IS_ACTIVE);
+                            int priority = jsonMember.getInt(Constant.MEMBER_PRIORITY);
+                            member[i] = new Member(playerID,clubID,memberSince,isActive,priority);
                         }
-                        clubInfo = new ClubInfo(club,tournaments,teamsheet);
+                        clubInfo = new ClubInfo(club,tournaments, member);
                         showProfile();
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -153,10 +152,10 @@ public class ClubProfileFragment extends Fragment {
 
         tv_clubName.setText(clubInfo.getClub().name);
         tv_clubInfo.setText(clubInfo.getClub().info);
-        tv_totalPlayerCount.setText(String.format(Locale.US,"%d",clubInfo.getTeamsheet().length));
+        tv_totalPlayerCount.setText(String.format(Locale.US,"%d",clubInfo.getMember().length));
         int count = 0;
-        for ( Teamsheet teamsheet : clubInfo.getTeamsheet() ) {
-            if ( teamsheet.isActive() ) {
+        for ( Member member : clubInfo.getMember() ) {
+            if ( member.isActive() ) {
                 count++;
             }
         }
@@ -182,10 +181,10 @@ public class ClubProfileFragment extends Fragment {
      * replace the current fragment with teamsheet fragment
      */
     private void viewTeamsheet() {
-        TeamsheetFragment fragment = TeamsheetFragment.newInstance(clubID);
-        FragmentManager fragmentManager = getFragmentManager();
+        ClubMemberFragment fragment = ClubMemberFragment.newInstance(clubID);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_TEAMSHEET);
+        transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_MEMBER);
         transaction.commit();
     }
 
@@ -194,7 +193,7 @@ public class ClubProfileFragment extends Fragment {
      */
     private void viewTournamentList() {
         TournamentListFragment fragment = TournamentListFragment.newInstance(clubInfo.getTournaments(),clubInfo.getClub(),playerID);
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_TOURNAMENT_LIST);
         transaction.commit();

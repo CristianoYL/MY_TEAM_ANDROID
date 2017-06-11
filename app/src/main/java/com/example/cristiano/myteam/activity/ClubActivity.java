@@ -16,8 +16,11 @@ import android.view.MenuItem;
 
 import com.example.cristiano.myteam.R;
 
-import com.example.cristiano.myteam.fragment.ClubProfileFragment;
+import com.example.cristiano.myteam.fragment.ClubFragment;
+import com.example.cristiano.myteam.structure.Club;
+import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
+import com.google.gson.Gson;
 
 /**
  *  this activity holds a frame that contains certain fragments,
@@ -26,7 +29,8 @@ import com.example.cristiano.myteam.util.Constant;
 public class ClubActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private int clubID, playerID;
+    private Club club;
+    private Player player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,15 +49,15 @@ public class ClubActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         Bundle bundle = getIntent().getExtras();
-        if ( !bundle.containsKey(Constant.KEY_CLUB_ID) ||
-                !bundle.containsKey(Constant.KEY_PLAYER_ID) ) {
-            Log.e("ClubActivity","clubID/playerID not specified!");
+        if ( !bundle.containsKey(Constant.TABLE_CLUB) ||
+                !bundle.containsKey(Constant.TABLE_CLUB) ) {
+            Log.e("ClubActivity","club/player not specified!");
             return;
         }
-        this.clubID = bundle.getInt(Constant.KEY_CLUB_ID);
-        this.playerID = bundle.getInt(Constant.KEY_PLAYER_ID);
-        Log.d("CLUB_ID","="+this.clubID);
-        showProfilePage();
+        Gson gson = new Gson();
+        this.club = gson.fromJson(bundle.getString(Constant.TABLE_CLUB),Club.class);
+        this.player = gson.fromJson(bundle.getString(Constant.TABLE_PLAYER),Player.class);
+        showClubPage();
     }
 
     @Override
@@ -63,11 +67,11 @@ public class ClubActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             FragmentManager fragmentManager = getSupportFragmentManager();
-            Fragment fragment = fragmentManager.findFragmentByTag(Constant.FRAGMENT_CLUB_PROFILE);
+            Fragment fragment = fragmentManager.findFragmentByTag(Constant.FRAGMENT_CLUB);
             if ( fragment != null && fragment.isVisible() ) {
                 super.onBackPressed();
             } else {
-                showProfilePage();
+                showClubPage();
             }
         }
     }
@@ -120,12 +124,11 @@ public class ClubActivity extends AppCompatActivity
     /**
      * use a fragment to display the club's profile page
      */
-    private void showProfilePage(){
-        ClubProfileFragment clubProfileFragment = ClubProfileFragment.newInstance(clubID,playerID);
+    private void showClubPage(){
+        ClubFragment clubFragment = ClubFragment.newInstance(club,player);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_content,clubProfileFragment,Constant.FRAGMENT_CLUB_PROFILE);
+        fragmentTransaction.replace(R.id.fragment_content,clubFragment,Constant.FRAGMENT_CLUB);
         fragmentTransaction.commit();
-
     }
 }

@@ -49,7 +49,7 @@ public class Constant {
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat;
     }
-    public static final DateFormat LOCAL_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+    public static final DateFormat MARKER_DATE_FORMAT = new SimpleDateFormat("HH:mm MMM-dd", Locale.getDefault());
     public static final DateFormat DISPLAY_DATE_FORMAT = new SimpleDateFormat("MMM dd HH:mm",Locale.getDefault());
     public static final String MESSAGE_TYPE_TEXT = "text";
     public static final String MESSAGE_TYPE_IMAGE = "image";
@@ -159,6 +159,15 @@ public class Constant {
     public static final String CHAT_MESSAGE_CONTENT = "messageContent";
     public static final String CHAT_TIME = "time";
 
+    // table location
+    public static final String TABLE_LOCATION = "location";
+    // location columns
+    public static final String LOCATION_C_ID = "clubID";
+    public static final String LOCATION_P_ID = "playerID";
+    public static final String LOCATION_LAT = "latitude";
+    public static final String LOCATION_LNG = "longitude";
+    public static final String LOCATION_LAST_UPDATE = "lastUpdate";
+
     // event keys
     public static final String EVENT_TYPE = "type";
     public static final String EVENT_PLAYER = "player";
@@ -200,14 +209,19 @@ public class Constant {
     public static final String SQUAD_PLAYER_ID = "playerID";
     public static final String SQUAD_NUMBER = "number";
 
-    // table teamsheet
-    public static final String TABLE_TEAMSHEET = "teamsheet";
-    // teamsheet columns
-    public static final String TEAMSHEET_P_ID = "playerID";
-    public static final String TEAMSHEET_C_ID = "clubID";
-    public static final String TEAMSHEET_MEMBER_SINCE = "memberSince";
-    public static final String TEAMSHEET_IS_ACTIVE = "isActive";
-    public static final String TEAMSHEET_IS_ADMIN = "isAdmin";
+    // table member
+    public static final String TABLE_MEMBER = "member";
+    // member columns
+    public static final String MEMBER_P_ID = "playerID";
+    public static final String MEMBER_C_ID = "clubID";
+    public static final String MEMBER_SINCE = "memberSince";
+    public static final String MEMBER_IS_ACTIVE = "isActive";
+    public static final String MEMBER_PRIORITY = "priority";
+
+    public static final int PRIORITY_APPLICANT = 0;
+    public static final int PRIORITY_REGULAR = 1;
+    public static final int PRIORITY_ADMIN = 2;
+    public static final int PRIORITY_LEADER = 3;
 
 
     public static final String ROLE_PLAYER = "Player";
@@ -249,8 +263,9 @@ public class Constant {
     public static final String[] LABEL_GOAL_DISTRIBUTION = {"Strong Foot","Weak Foot","Header","Other"};
     public static final String[] LABEL_PLAYER_TOTAL_STATS = {"played","start","goal","assist","yellow","red"};
 
+    public static final String FRAGMENT_CLUB = "fragment_club";
     public static final String FRAGMENT_CLUB_PROFILE = "fragment_club_profile";
     public static final String FRAGMENT_CLUB_TOURNAMENT_LIST = "fragment_club_tournament_list";
     public static final String FRAGMENT_CLUB_TOURNAMENT_DETAIL = "fragment_club_tournament_detail";
-    public static final String FRAGMENT_CLUB_TEAMSHEET = "fragment_club_teamsheet";
+    public static final String FRAGMENT_CLUB_MEMBER = "fragment_club_member";
 }

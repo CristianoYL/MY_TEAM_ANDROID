@@ -1,22 +1,23 @@
 package com.example.cristiano.myteam.structure;
 
+import com.example.cristiano.myteam.util.Constant;
 import com.google.gson.Gson;
 
 /**
  * Created by Cristiano on 2017/4/19.
  */
 
-public class Teamsheet {
-    int clubID,playerId;
+public class Member {
+    int clubID,playerId,priority;
     String memberSince;
-    boolean isActive, isAdmin;
+    boolean isActive;
 
-    public Teamsheet(int clubID, int playerId, String memberSince, boolean isActive, boolean isAdmin) {
+    public Member(int clubID, int playerId, String memberSince, boolean isActive, int priority) {
         this.clubID = clubID;
         this.playerId = playerId;
         this.memberSince = memberSince;
         this.isActive = isActive;
-        this.isAdmin = isAdmin;
+        this.priority =priority;
     }
 
     public String toJson(){
@@ -55,11 +56,10 @@ public class Teamsheet {
         isActive = active;
     }
 
-    public boolean isAdmin() {
-        return isAdmin;
+    public int getPriority() {
+        return this.priority;
     }
-
-    public void setAdmin(boolean admin) {
-        isAdmin = admin;
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
 }

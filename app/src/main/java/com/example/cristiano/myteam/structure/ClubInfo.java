@@ -7,12 +7,12 @@ package com.example.cristiano.myteam.structure;
 public class ClubInfo {
     private Club club;
     private Tournament[] tournaments;
-    private Teamsheet[] teamsheet;
+    private Member[] member;
 
-    public ClubInfo(Club club, Tournament[] tournaments, Teamsheet[] teamsheet) {
+    public ClubInfo(Club club, Tournament[] tournaments, Member[] member) {
         this.club = club;
         this.tournaments = tournaments;
-        this.teamsheet = teamsheet;
+        this.member = member;
     }
 
     public Club getClub() {
@@ -31,12 +31,12 @@ public class ClubInfo {
         this.tournaments = tournaments;
     }
 
-    public Teamsheet[] getTeamsheet() {
-        return teamsheet;
+    public Member[] getMember() {
+        return member;
     }
 
-    public void setTeamsheet(Teamsheet[] teamsheet) {
-        this.teamsheet = teamsheet;
+    public void setMember(Member[] member) {
+        this.member = member;
     }
     
 }

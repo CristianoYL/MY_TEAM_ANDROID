@@ -352,7 +352,7 @@ public class PlayerActivity extends AppCompatActivity
         lv_club.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                viewClub(playerInfo.getClubs()[i].id);
+                viewClub(playerInfo.getClubs()[i]);
             }
         });
         btn_addClub.setOnClickListener(new View.OnClickListener() {
@@ -478,12 +478,12 @@ public class PlayerActivity extends AppCompatActivity
 
     /**
      * go to the according club activity
-     * @param clubID the ID of the club to view
+     * @param club the club to view
      */
-    private void viewClub(int clubID) {
+    private void viewClub(Club club) {
         Intent intent = new Intent(PlayerActivity.this,ClubActivity.class);
-        intent.putExtra(Constant.KEY_CLUB_ID,clubID);
-        intent.putExtra(Constant.KEY_PLAYER_ID,playerInfo.getPlayer().getId());
+        intent.putExtra(Constant.TABLE_CLUB,club.toJson());
+        intent.putExtra(Constant.TABLE_PLAYER,playerInfo.getPlayer().toJson());
         startActivity(intent);
     }
 
@@ -743,7 +743,7 @@ public class PlayerActivity extends AppCompatActivity
      */
     private void showStats(Stats stats) {
         tabLayout.removeAllTabs();
-        tabLayout.setBackgroundResource(R.drawable.card_border);
+        tabLayout.setBackgroundResource(R.drawable.card_border_light_grey);
         // initialize stats views
         Fragment[] fragments = new Fragment[4];
         String[] dataX;

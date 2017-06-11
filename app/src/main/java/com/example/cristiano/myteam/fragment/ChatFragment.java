@@ -97,7 +97,6 @@ public class ChatFragment extends Fragment {
         fab_less = (FloatingActionButton) view_chat.findViewById(R.id.fab_less);
         view_functions = view_chat.findViewById(R.id.layout_function_menu);
         et_message = (EditText) view_chat.findViewById(R.id.et_message);
-
         et_message.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -220,10 +219,26 @@ public class ChatFragment extends Fragment {
                             JSONObject json = jsonArray.getJSONObject(i);
                             JSONObject jsonChat = json.getJSONObject(Constant.TABLE_CHAT);
                             int id = jsonChat.getInt(Constant.CHAT_ID);
-                            int tournamentID = jsonChat.getInt(Constant.CHAT_TOURNAMENT_ID);
-                            int clubID = jsonChat.getInt(Constant.CHAT_CLUB_ID);
-                            int receiverID = 0;
-                            int senderID = jsonChat.getInt(Constant.CHAT_SENDER_ID);
+                            int tournamentID, clubID, receiverID, senderID;
+                            try {
+                                tournamentID = jsonChat.getInt(Constant.CHAT_TOURNAMENT_ID);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                tournamentID = 0;
+                            }
+                            try {
+                                clubID = jsonChat.getInt(Constant.CHAT_CLUB_ID);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                clubID = 0;
+                            }
+                            try {
+                                receiverID = jsonChat.getInt(Constant.CHAT_RECEIVER_ID);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                receiverID = 0;
+                            }
+                            senderID = jsonChat.getInt(Constant.CHAT_SENDER_ID);
                             String messageType = jsonChat.getString(Constant.CHAT_MESSAGE_TYPE);
                             String messageContent = jsonChat.getString(Constant.CHAT_MESSAGE_CONTENT);
                             String time = jsonChat.getString(Constant.CHAT_TIME);

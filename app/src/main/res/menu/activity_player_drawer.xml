@@ -3,20 +3,20 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_menu_profile"
-            android:title="My Profile" />
-        <item
             android:id="@+id/nav_club"
             android:icon="@drawable/ic_menu_club"
-            android:title="My Clubs" />
+            android:title="@string/menu_my_clubs" />
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_menu_profile"
+            android:title="@string/menu_my_profile" />
         <item
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_menu_logout"
-            android:title="Logout" />
+            android:title="@string/menu_log_out" />
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_menu_settings"
-            android:title="Settings" />
+            android:title="@string/menu_settings" />
     </group>
 </menu>

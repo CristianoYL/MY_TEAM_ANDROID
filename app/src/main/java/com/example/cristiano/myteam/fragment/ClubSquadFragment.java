@@ -216,7 +216,7 @@ public class ClubSquadFragment extends Fragment {
                 if ( responseCode == 200 ) {
                     try {
                         JSONObject jsonResponse = new JSONObject(response);
-                        JSONArray jsonArray = jsonResponse.getJSONArray(Constant.TABLE_TEAMSHEET);
+                        JSONArray jsonArray = jsonResponse.getJSONArray(Constant.TABLE_MEMBER);
                         playerList = new ArrayList<>(jsonArray.length());
                         playerIDMap = new HashMap<>(jsonArray.length());
                         for ( int i = 0; i < jsonArray.length(); i++ ) {
@@ -286,7 +286,7 @@ public class ClubSquadFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetClubTeamsheet(clubID);
+        String url = UrlHelper.urlGetClubMembers(clubID);
         RequestHelper.sendGetRequest(url,actionGetTeamsheet);
     }
 

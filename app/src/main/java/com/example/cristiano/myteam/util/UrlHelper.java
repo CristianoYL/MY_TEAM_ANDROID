@@ -12,7 +12,7 @@ public class UrlHelper {
     // Heroku URL
 //    private static final String URL = "https://my-team-rest-api.herokuapp.com";
     //local testing URL
-    private static final String URL = "http://192.168.1.12:5000";
+    private static final String URL = "http://192.168.1.9:5000";
 
     public static String urlLogin(){
         return URL + "/auth";
@@ -62,8 +62,8 @@ public class UrlHelper {
         return URL + "/squad";
     }
 
-    public static String urlGetClubTeamsheet(int clubID){
-        return URL + "/teamsheet/club/" + clubID;
+    public static String urlGetClubMembers(int clubID){
+        return URL + "/member/club/" + clubID;
     }
 
     public static String urlPostRegTournament(int clubID, int playerID){
@@ -121,6 +121,14 @@ public class UrlHelper {
 
     public static String urlPostPrivateChat (int receiverID) {
         return URL + "/chat/private/" + receiverID;
+    }
+
+    public static String urlPutLocation (int clubID, int playerID) {
+        return URL + "/location/club/" + clubID + "/player/" + playerID;
+    }
+
+    public static String urlGetAllLocations (int clubID) {
+        return URL + "/location/club/" + clubID;
     }
 
 }

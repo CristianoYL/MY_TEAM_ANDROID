@@ -51,7 +51,7 @@ public class ImageLoader extends AsyncTask<Void, Void, Bitmap> {
             Log.d("ImageLoader","Use cached image.");
             return bitmap;
         }
-        // if not cache found, load from internet
+        // if no cache found, load from internet
         Log.d("ImageLoader","Load image from internet.");
         InputStream is;
         try {
@@ -59,7 +59,7 @@ public class ImageLoader extends AsyncTask<Void, Void, Bitmap> {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = 0;
             bitmap = BitmapFactory.decodeStream(is,null,options);
-            if ( !this.dbHelper.cacheImage(url,bitmap) ) {
+            if ( !this.dbHelper.cacheImage(url,bitmap) ) {  // cache image
                 Log.e("ImageLoader","Cache image failed");
             }
         } catch (IOException e) {
