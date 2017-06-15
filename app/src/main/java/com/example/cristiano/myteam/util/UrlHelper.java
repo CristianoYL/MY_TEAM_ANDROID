@@ -44,7 +44,7 @@ public class UrlHelper {
     }
 
     public static String urlPutPlayer(String playerEmail){
-        return URL + "/player/" + playerEmail;
+        return URL + "/player/email/" + playerEmail;
     }
 
     public static String urlPostRegPlayer(int clubID){

@@ -417,6 +417,7 @@ public class PlayerActivity extends AppCompatActivity
                                 String name = jsonObject.getString(Constant.CLUB_NAME);
                                 String info = jsonObject.getString(Constant.CLUB_INFO);
                                 Club newClub = new Club(clubID,name,info);
+                                newClub.priority = 3;
                                 playerInfo.addClub(newClub);
                                 Toast.makeText(PlayerActivity.this,"Club Created!",Toast.LENGTH_LONG).show();
                                 showPlayerClubPage();
