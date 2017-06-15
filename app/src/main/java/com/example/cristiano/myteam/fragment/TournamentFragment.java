@@ -25,21 +25,24 @@ import com.google.gson.Gson;
  */
 
 public class TournamentFragment extends Fragment {
+    private static final String ARG_TOUR = "tournament";
+    private static final String ARG_CLUB = "club";
+    private static final String ARG_PLAYER = "player";
 
     private TabLayout tab_tournament;
     public ViewPager viewPager_tournament;
 
     private Tournament tournament;
     private Club club;
-    private int playerID;
+    private Player player;
     private View tournamentView;
 
-    public static TournamentFragment newInstance(Tournament tournament, Club club, int playerID){
+    public static TournamentFragment newInstance(Tournament tournament, Club club, Player player){
         TournamentFragment fragment = new TournamentFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(Constant.TABLE_TOURNAMENT,tournament.toJson());
-        bundle.putString(Constant.TABLE_CLUB,club.toJson());
-        bundle.putInt(Constant.KEY_PLAYER_ID,playerID);
+        bundle.putString(ARG_TOUR,tournament.toJson());
+        bundle.putString(ARG_CLUB,club.toJson());
+        bundle.putString(ARG_PLAYER,player.toJson());
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -49,9 +52,10 @@ public class TournamentFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            tournament = new Gson().fromJson(bundle.getString(Constant.TABLE_TOURNAMENT),Tournament.class);
-            club = new Gson().fromJson(bundle.getString(Constant.TABLE_CLUB),Club.class);
-            playerID = bundle.getInt(Constant.KEY_PLAYER_ID);
+            Gson gson = new Gson();
+            tournament = gson.fromJson(bundle.getString(ARG_TOUR),Tournament.class);
+            club = gson.fromJson(bundle.getString(ARG_CLUB),Club.class);
+            player = gson.fromJson(bundle.getString(ARG_PLAYER),Player.class);
         }
     }
 
@@ -117,16 +121,16 @@ public class TournamentFragment extends Fragment {
         tab_tournament.setTabMode(TabLayout.MODE_FIXED);
         Fragment[] fragments = new Fragment[4];
         // the tournament fragment contains 3 child fragments, which shows the result, squad and stats
-        ClubResultFragment clubResultFragment = ClubResultFragment.newInstance(tournament,club);
-        fragments[0] = clubResultFragment;
+        TournamentResultFragment tournamentResultFragment = TournamentResultFragment.newInstance(tournament,club);
+        fragments[0] = tournamentResultFragment;
 
-        ClubSquadFragment clubSquadFragment = ClubSquadFragment.newInstance(tournament.id,club.id);
-        fragments[1] = clubSquadFragment;
+        TournamentSquadFragment tournamentSquadFragment = TournamentSquadFragment.newInstance(tournament.id,club.id);
+        fragments[1] = tournamentSquadFragment;
 
-        ClubStatsFragment clubStatsFragment = ClubStatsFragment.newInstance(tournament.id, club.id);
-        fragments[2] = clubStatsFragment;
+        TournamentStatsFragment tournamentStatsFragment = TournamentStatsFragment.newInstance(tournament.id, club.id);
+        fragments[2] = tournamentStatsFragment;
 
-        ChatFragment chatFragment = ChatFragment.newInstance(tournament.id, club.id,0,playerID);
+        ChatFragment chatFragment = ChatFragment.newInstance(tournament, club,null,player);
         fragments[3] = chatFragment;
 
         CustomFragmentAdapter adapter = new CustomFragmentAdapter(getChildFragmentManager());

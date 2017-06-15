@@ -11,26 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
-import com.example.cristiano.myteam.request.RequestAction;
-import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Club;
-import com.example.cristiano.myteam.structure.Member;
 import com.example.cristiano.myteam.structure.Player;
-import com.example.cristiano.myteam.structure.Tournament;
-import com.example.cristiano.myteam.util.Constant;
-import com.example.cristiano.myteam.util.UrlHelper;
 import com.google.gson.Gson;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Cristiano on 2017/4/20.
@@ -74,14 +60,14 @@ public class ClubFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         clubView = inflater.inflate(R.layout.fragment_club, container, false);
-        showTournament();
+        showClub();
         return clubView;
     }
 
     /**
-     * render the ViewPager to display the tournament info
+     * render the ViewPager to display the club info
      */
-    private void showTournament(){
+    private void showClub(){
         getActivity().setTitle(club.name);
         tab_club = (TabLayout) clubView.findViewById(R.id.tabLayout);
         viewPager_club = (ViewPager) clubView.findViewById(R.id.viewPager);
@@ -115,7 +101,10 @@ public class ClubFragment extends Fragment {
 
             @Override
             public void onPageSelected(int position) {
-                tab_club.getTabAt(position).select();
+                TabLayout.Tab tab = tab_club.getTabAt(position);
+                if ( tab != null ) {
+                    tab.select();
+                }
                 hideKeyboard();
             }
 
@@ -134,13 +123,13 @@ public class ClubFragment extends Fragment {
         tab_club.setTabMode(TabLayout.MODE_FIXED);
         // set fragments into view pagers
         Fragment[] fragments = new Fragment[4];
-        ChatFragment chatFragment = ChatFragment.newInstance(0, club.id,0,player.getId());
+        ChatFragment chatFragment = ChatFragment.newInstance(null, club,null,player);
         fragments[0] = chatFragment;
-        ClubMemberFragment memberFragment = ClubMemberFragment.newInstance(club.id);
+        ClubMemberFragment memberFragment = ClubMemberFragment.newInstance(club,player);
         fragments[1] = memberFragment;
-        ClubMapFragment mapFragment = ClubMapFragment.newInstance(club,player.getId());
+        ClubMapFragment mapFragment = ClubMapFragment.newInstance(club,player);
         fragments[2] = mapFragment;
-        ClubProfileFragment clubProfileFragment = ClubProfileFragment.newInstance(club.id,player.getId());
+        ClubProfileFragment clubProfileFragment = ClubProfileFragment.newInstance(club,player);
         fragments[3] = clubProfileFragment;
 
         CustomFragmentAdapter adapter = new CustomFragmentAdapter(getChildFragmentManager());

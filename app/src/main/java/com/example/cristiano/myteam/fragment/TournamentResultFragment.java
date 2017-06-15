@@ -30,7 +30,6 @@ import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Event;
 import com.example.cristiano.myteam.structure.GameResultAndStats;
-import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.Result;
 import com.example.cristiano.myteam.structure.Squad;
 import com.example.cristiano.myteam.structure.Stats;
@@ -53,7 +52,7 @@ import java.util.Locale;
 /**
  * this fragment show the results of the club in the given tournament
  */
-public class ClubResultFragment extends Fragment {
+public class TournamentResultFragment extends Fragment {
     private Club club;
     private Tournament tournament;
     private Result[] results;
@@ -75,12 +74,12 @@ public class ClubResultFragment extends Fragment {
     private View goalDetailView, specificTimeView, subPlayerView;
     View view;
 
-    public ClubResultFragment() {
+    public TournamentResultFragment() {
         // Required empty public constructor
     }
 
-    public static ClubResultFragment newInstance(Tournament tournament, Club club) {
-        ClubResultFragment fragment = new ClubResultFragment();
+    public static TournamentResultFragment newInstance(Tournament tournament, Club club) {
+        TournamentResultFragment fragment = new TournamentResultFragment();
         Bundle bundle = new Bundle();
         bundle.putString(Constant.TABLE_CLUB,club.toJson());
         bundle.putString(Constant.TABLE_TOURNAMENT,tournament.toJson());
@@ -364,7 +363,7 @@ public class ClubResultFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(dialogView);
         builder.setTitle("Upload a new game result.");
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if ( sw_isAwayGame.isChecked() ) {
@@ -388,7 +387,7 @@ public class ClubResultFragment extends Fragment {
                 uploadResult(gameResultAndStats);
             }
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
             }
@@ -475,7 +474,7 @@ public class ClubResultFragment extends Fragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setView(eventView);
         builder.setTitle("Event");
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 boolean isHomeEvent;
@@ -518,7 +517,7 @@ public class ClubResultFragment extends Fragment {
                 Toast.makeText(getContext(),"Add Event!",Toast.LENGTH_SHORT).show();
             }
         });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
             }

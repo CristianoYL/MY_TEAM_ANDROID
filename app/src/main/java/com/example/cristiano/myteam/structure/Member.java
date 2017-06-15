@@ -8,13 +8,14 @@ import com.google.gson.Gson;
  */
 
 public class Member {
-    int clubID,playerId,priority;
+    int clubID,playerID,priority;
     String memberSince;
     boolean isActive;
 
-    public Member(int clubID, int playerId, String memberSince, boolean isActive, int priority) {
+
+    public Member(int clubID, int playerID, String memberSince, boolean isActive, int priority) {
         this.clubID = clubID;
-        this.playerId = playerId;
+        this.playerID = playerID;
         this.memberSince = memberSince;
         this.isActive = isActive;
         this.priority =priority;
@@ -32,12 +33,12 @@ public class Member {
         this.clubID = clubID;
     }
 
-    public int getPlayerId() {
-        return playerId;
+    public int getPlayerID() {
+        return playerID;
     }
 
     public void setPlayerId(int playerId) {
-        this.playerId = playerId;
+        this.playerID = playerId;
     }
 
     public String getMemberSince() {

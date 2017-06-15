@@ -23,10 +23,12 @@ import com.example.cristiano.myteam.activity.PlayerActivity;
 import com.example.cristiano.myteam.adapter.MemberListAdapter;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
+import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Member;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,9 +41,15 @@ import java.util.ArrayList;
  */
 
 public class ClubMemberFragment extends Fragment{
+    private static final String ARG_CLUB = "club";
+    private static final String ARG_PLAYER = "player";
+
     private ArrayList<Player> clubPlayers;
-    private ArrayList<Member> memberInfo;
-    private int clubID;
+    private ArrayList<Member> memberList;
+    private Club club;
+    private Player player;
+    private int selfPriority;
+
     private View view;
     private EditText et_firstName, et_lastName, et_displayName, et_age, et_phone, et_height, et_weight;
     private Button btn_addPlayer;
@@ -49,13 +57,11 @@ public class ClubMemberFragment extends Fragment{
     private Spinner sp_role, sp_position;
     private ArrayAdapter<String> roleAdapter,positionAdapter;
 
-    public ClubMemberFragment(){
-    }
-
-    public static ClubMemberFragment newInstance(int clubID){
+    public static ClubMemberFragment newInstance(Club club, Player player){
         ClubMemberFragment fragment = new ClubMemberFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(Constant.KEY_CLUB_ID,clubID);
+        bundle.putString(ARG_CLUB,club.toJson());
+        bundle.putString(ARG_PLAYER,player.toJson());
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -64,7 +70,9 @@ public class ClubMemberFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
-        clubID = bundle.getInt(Constant.KEY_CLUB_ID);
+        Gson gson = new Gson();
+        club = gson.fromJson(bundle.getString(ARG_CLUB),Club.class);
+        player = gson.fromJson(bundle.getString(ARG_PLAYER),Player.class);
     }
 
     @Nullable
@@ -90,9 +98,9 @@ public class ClubMemberFragment extends Fragment{
                 if ( responseCode == 200 ) {
                     try {
                         JSONObject jsonResponse = new JSONObject(response);
-                        JSONArray jsonMemberList = jsonResponse.getJSONArray(Constant.TABLE_MEMBER);
+                        JSONArray jsonMemberList = jsonResponse.getJSONArray(Constant.MEMBER_LIST);
                         clubPlayers = new ArrayList<>(jsonMemberList.length());
-                        memberInfo = new ArrayList<>(jsonMemberList.length());
+                        memberList = new ArrayList<>(jsonMemberList.length());
                         for ( int i = 0; i < jsonMemberList.length(); i++ ) {
                             JSONObject jsonObject = jsonMemberList.getJSONObject(i);
                             JSONObject jsonPlayer = jsonObject.getJSONObject(Constant.TABLE_PLAYER);
@@ -108,16 +116,19 @@ public class ClubMemberFragment extends Fragment{
                             boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
                             String phone = jsonPlayer.getString(Constant.PLAYER_PHONE);
                             String role = jsonPlayer.getString(Constant.PLAYER_ROLE);
-                            clubPlayers.add(new Player(playerID,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar));
                             JSONObject jsonMember = jsonObject.getJSONObject(Constant.TABLE_MEMBER);
                             int clubID = jsonMember.getInt(Constant.MEMBER_C_ID);
                             int pID = jsonMember.getInt(Constant.MEMBER_P_ID);
                             String memberSince = jsonMember.getString(Constant.MEMBER_SINCE);
                             boolean isActive = jsonMember.getBoolean(Constant.MEMBER_IS_ACTIVE);
                             int priority = jsonMember.getInt(Constant.MEMBER_PRIORITY);
-                            memberInfo.add(new Member(clubID,pID,memberSince,isActive,priority));
+                            if ( playerID == player.getId() ) { // get self priority
+                                selfPriority = priority;
+                            }
+                            clubPlayers.add(new Player(playerID,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar));
+                            memberList.add(new Member(clubID,pID,memberSince,isActive,priority));
                         }
-                        showTeamsheet();
+                        showMembers();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -134,18 +145,19 @@ public class ClubMemberFragment extends Fragment{
 
             }
         };
-        String url = UrlHelper.urlGetClubMembers(clubID);
+        String url = UrlHelper.urlGetClubMembers(club.id);
         RequestHelper.sendGetRequest(url,actionGetTeamsheetPlayers);
     }
 
     /**
-     *  render the retrieved teamsheet info into the list view
+     *  render the retrieved member info into the list view
      */
-    private void showTeamsheet(){
+    private void showMembers(){
         ListView lv_teamsheet = (ListView) view.findViewById(R.id.lv_teamsheet);
         btn_addPlayer = (Button) view.findViewById(R.id.btn_addPlayer);
 
-        MemberListAdapter memberListAdapter = new MemberListAdapter(getContext(), clubPlayers,memberInfo);
+        MemberListAdapter memberListAdapter = new MemberListAdapter(getContext(), clubPlayers,
+                memberList,player.getId(),selfPriority);
         lv_teamsheet.setAdapter(memberListAdapter);
 
         // go to the player's profile page onClick() in visitor mode
@@ -202,13 +214,13 @@ public class ClubMemberFragment extends Fragment{
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle("Add a player to your club");
                 builder.setView(dialogView);
-                builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         uploadPlayerInfo();
                     }
                 });
-                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
@@ -295,8 +307,8 @@ public class ClubMemberFragment extends Fragment{
                         boolean isActive =  jsonMember.getBoolean(Constant.MEMBER_IS_ACTIVE);
                         int priority =  jsonMember.getInt(Constant.MEMBER_PRIORITY);
                         Member newMember = new Member(clubID,playerID,memberSince,isActive,priority);
-                        memberInfo.add(newMember);
-                        showTeamsheet();
+                        memberList.add(newMember);
+                        showMembers();
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(getContext(),response,Toast.LENGTH_SHORT).show();
@@ -313,7 +325,7 @@ public class ClubMemberFragment extends Fragment{
                 }
             }
         };
-        String url = UrlHelper.urlPostRegPlayer(clubID);
+        String url = UrlHelper.urlPostRegPlayer(club.id);
         RequestHelper.sendPostRequest(url, player.toJson() ,actionPostRegPlayer);
     }
 }

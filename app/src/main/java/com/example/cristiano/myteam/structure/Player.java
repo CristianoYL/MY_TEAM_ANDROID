@@ -8,7 +8,7 @@ import java.io.Serializable;
  * Created by Cristiano on 2017/4/2.
  */
 
-public class Player implements Serializable{
+public class Player {
     private int id;
     private String email;
     private String firstName;

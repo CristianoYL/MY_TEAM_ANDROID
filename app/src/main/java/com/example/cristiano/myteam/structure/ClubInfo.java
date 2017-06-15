@@ -1,15 +1,17 @@
 package com.example.cristiano.myteam.structure;
 
+import java.util.List;
+
 /**
  * Created by Cristiano on 2017/4/19.
  */
 
 public class ClubInfo {
     private Club club;
-    private Tournament[] tournaments;
-    private Member[] member;
+    private List<Tournament> tournaments;
+    private List<Member> member;
 
-    public ClubInfo(Club club, Tournament[] tournaments, Member[] member) {
+    public ClubInfo(Club club, List<Tournament> tournaments, List<Member> member) {
         this.club = club;
         this.tournaments = tournaments;
         this.member = member;
@@ -23,20 +25,12 @@ public class ClubInfo {
         this.club = club;
     }
 
-    public Tournament[] getTournaments() {
+    public List<Tournament> getTournaments() {
         return tournaments;
     }
 
-    public void setTournaments(Tournament[] tournaments) {
-        this.tournaments = tournaments;
-    }
-
-    public Member[] getMember() {
+    public List<Member> getMember() {
         return member;
     }
 
-    public void setMember(Member[] member) {
-        this.member = member;
-    }
-    
 }

@@ -29,13 +29,6 @@
     <!--Strings related to connection -->
     <string name="error_no_connection">Connection failed!</string>
 
-    <!--Strings related to displaying labels -->
-    <string name="menu_my_profile">My Profile</string>
-    <string name="menu_my_clubs">My Clubs</string>
-    <string name="menu_log_out">Log Out</string>
-    <string name="menu_settings">Settings</string>
-    <string name="btn_share_location">Share My Location</string>
-
     <!-- Strings related to user profile page -->
     <string name="player_first_name">First Name</string>
     <string name="player_last_name">Last Name</string>
@@ -54,8 +47,16 @@
     <string name="title_activity_player_registration">Create Your Profile</string>
     <string name="title_activity_club">ClubActivity</string>
 
+    <!-- Button text -->
+    <string name="btn_share_location">Share My Location</string>
     <string name="btn_edit_squad">Edit Squad</string>
     <string name="btn_cancel_edit_squad">Done</string>
+
+    <!-- Menu text -->
+    <string name="menu_my_profile">My Profile</string>
+    <string name="menu_my_club">My Club</string>
+    <string name="menu_log_out">Log Out</string>
+    <string name="menu_settings">Settings</string>
 
     <!-- Toast messages -->
     <string name="empty_name_msg">Player firstname and lastname cannot be empty!</string>
@@ -65,16 +66,29 @@
     <string name="error_empty_club_info">Club description cannot be empty!</string>
     <string name="error_empty_tour_name">Tournament name cannot be empty!</string>
     <string name="error_empty_tour_info">Tournament description cannot be empty!</string>
+    <string name="error_pending_club_as_default">Your application to this club is still pending. You can only set your active club as default.</string>
+    <string name="set_club_as_default">New default club set!</string>
+    <string name="error_view_pending_club">Your application to this club is still pending.Please wait for captain\'s approval.</string>
 
     <!-- labels-->
-    <string name="cancel">Cancel</string>
-    <string name="confirm">Confirm</string>
-    <string name="abb_yes">Y</string>
-    <string name="abb_no">N</string>
-    <string name="abb_home">H</string>
-    <string name="abb_away">A</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_confirm">Confirm</string>
+    <string name="label_ok">OK</string>
+    <string name="label_save">Save</string>
+    <string name="label_yes">Yes</string>
+    <string name="label_no">No</string>
+    <string name="label_abb_yes">Y</string>
+    <string name="label_abb_no">N</string>
+    <string name="label_abb_home">H</string>
+    <string name="label_abb_away">A</string>
+    <string name="label_status">Status:</string>
+    <string name="label_pending">Pending</string>
+    <string name="label_active">Active</string>
+
 
     <!-- Dialog titles -->
+    <string name="notice">Notice</string>
+    <string name="warning">Warning</string>
     <string name="create_club">Create a new club</string>
     <string name="create_tournament">Create a new tournament</string>
 
@@ -91,5 +105,12 @@
     <string name="goal_weak_foot">Weak foot</string>
     <string name="goal_header">Header</string>
     <string name="goal_other">Other</string>
+
+    <!-- member priority types -->
+    <string name="priority_applicant">applicant</string>
+    <string name="priority_member">member</string>
+    <string name="priority_co_cap">co-captain</string>
+    <string name="priority_captain">captain</string>
+
 
 </resources>

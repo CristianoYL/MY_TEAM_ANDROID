@@ -19,7 +19,9 @@ public class Constant {
     public static final int CONN_TIME_OUT = 10000;
     public static final int READ_TIME_OUT = 5000;
 
+    public static final String CLUB_LIST = "clubs";
     public static final String RESULT_LIST = "results";
+    public static final String MEMBER_LIST = "members";
     public static final String TOURNAMENT_LIST = "tournaments";
 
     public static final String KEY_USER_PREF = "user preference";
@@ -38,6 +40,7 @@ public class Constant {
     public static final String KEY_PLAYER_INFO = "playerInfo";
     public static final String KEY_CLUB_INFO = "clubInfo";
     public static final String KEY_GAME_PERFORMANCE = "gamePerformance";
+    public static final String KEY_DEFAULT_CLUB_ID = "defaultClubID";
 
     public static final String METHOD_POST = "POST";
     public static final String METHOD_GET = "GET";
@@ -220,9 +223,8 @@ public class Constant {
 
     public static final int PRIORITY_APPLICANT = 0;
     public static final int PRIORITY_REGULAR = 1;
-    public static final int PRIORITY_ADMIN = 2;
-    public static final int PRIORITY_LEADER = 3;
-
+    public static final int PRIORITY_CO_CAP = 2;
+    public static final int PRIORITY_CAPTAIN = 3;
 
     public static final String ROLE_PLAYER = "Player";
     public static final String ROLE_MANAGER = "Manager";

@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.text.InputType;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +27,7 @@ import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -34,6 +38,7 @@ import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.fragment.ChartFragmentFactory;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.structure.Club;
+import com.example.cristiano.myteam.structure.Member;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.PlayerInfo;
 import com.example.cristiano.myteam.structure.Stats;
@@ -67,7 +72,7 @@ public class PlayerActivity extends AppCompatActivity
     private ImageView iv_avatar;
     private ConstraintLayout layout_profile,layout_club;
     private ListView lv_club;
-    private Button btn_club,btn_addClub;
+    private Button btn_club, btn_createClub, btn_joinClub;
     private NavigationView navigationView;
     private ViewPager viewPager;
     private TabLayout tabLayout;
@@ -82,7 +87,9 @@ public class PlayerActivity extends AppCompatActivity
     private boolean isVisitor = false;
     private int selectedClubID = 0;
     private ArrayList<String> clubNames, tournamentNames;
+    private ArrayList<Club> clubList;
     private Stats playerClubStats;
+    private SharedPreferences sharedPreferences;
 
     private int pageID = PAGE_PROFILE;
     private static final int PAGE_PROFILE = 0;
@@ -103,7 +110,8 @@ public class PlayerActivity extends AppCompatActivity
         tv_role = (TextView) findViewById(R.id.tv_role);
         iv_avatar = (ImageView) findViewById(R.id.iv_otherAvatar);
         btn_club = (Button) findViewById(R.id.btn_club);
-        btn_addClub = (Button) findViewById(R.id.btn_addClub);
+        btn_createClub = (Button) findViewById(R.id.btn_createClub);
+        btn_joinClub = (Button) findViewById(R.id.btn_joinClub);
         lv_club = (ListView) findViewById(R.id.lv_club);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         toggle = new ActionBarDrawerToggle(
@@ -131,15 +139,16 @@ public class PlayerActivity extends AppCompatActivity
         }
         this.email = bundle.getString(Constant.PLAYER_EMAIL,null);
         this.playerID = bundle.getInt(Constant.KEY_PLAYER_ID,0);
-        loadPlayerInfo();
+        sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
     }
 
     @Override
     protected void onResume() {
+        super.onResume();
         if ( this.isVisitor ) {
             this.setVisitorMode();
         }
-        super.onResume();
+        loadPlayerInfo();   // load player info in onResume() allows info updated when navigating back to this activity
     }
 
     @Override
@@ -222,10 +231,10 @@ public class PlayerActivity extends AppCompatActivity
         sp_playerClub = (Spinner) findViewById(R.id.sp_playerClub);
         sp_playerTournament = (Spinner) findViewById(R.id.sp_playerTournament);
         tv_playerTournament = (TextView) findViewById(R.id.tv_playerTournament);
-        clubNames = new ArrayList<>(playerInfo.getClubs().length+1);
+        clubNames = new ArrayList<>(playerInfo.getClubs().size());
         clubNames.add(Constant.OPTION_ALL_CLUBS);
-        for ( int i = 0; i < playerInfo.getClubs().length; i++ ) {
-            clubNames.add(playerInfo.getClubs()[i].name);
+        for ( int i = 0; i < playerInfo.getClubs().size(); i++ ) {
+            clubNames.add(playerInfo.getClubs().get(i).name);
         }
         sp_playerClub.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,clubNames));
 //        tabLayout.removeAllTabs();
@@ -323,13 +332,12 @@ public class PlayerActivity extends AppCompatActivity
         Intent intent = new Intent(PlayerActivity.this,PlayerRegistrationActivity.class);
         intent.putExtra(Constant.PLAYER_EMAIL,email);
         if ( player != null ) {
-            intent.putExtra(Constant.KEY_PLAYER,player);
+            intent.putExtra(Constant.KEY_PLAYER,player.toJson());
         }
         if ( isVisitor ) {
             intent.putExtra(Constant.KEY_IS_VISITOR,true);
         }
         startActivity(intent);
-        finish();
     }
 
     /**
@@ -340,25 +348,31 @@ public class PlayerActivity extends AppCompatActivity
         layout_profile.setVisibility(View.GONE);
         layout_club.setVisibility(View.VISIBLE);
         setTitle("My Clubs");
-        ArrayList<HashMap<String,Object>> clubList = new ArrayList<>();
-        for ( Club club : playerInfo.getClubs() ) {
-            HashMap<String,Object> clubMap = new HashMap<>();
-            clubMap.put(Constant.CLUB_NAME,club.name);
-            clubMap.put(Constant.CLUB_INFO,club.info);
-            clubList.add(clubMap);
-        }
-        ClubListAdapter clubListAdapter = new ClubListAdapter(this,R.layout.layout_card_club,clubList);
+        ClubListAdapter clubListAdapter = new ClubListAdapter(PlayerActivity.this,playerInfo.getClubs());
         lv_club.setAdapter(clubListAdapter);
         lv_club.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                viewClub(playerInfo.getClubs()[i]);
+                Club club = playerInfo.getClubs().get(i);
+                if ( club.priority > 0 ) {
+                    viewClub(playerInfo.getClubs().get(i));
+                } else {
+                    Toast.makeText(PlayerActivity.this, R.string.error_view_pending_club, Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
-        btn_addClub.setOnClickListener(new View.OnClickListener() {
+        btn_createClub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showCreateClubPage();
+            }
+        });
+
+        btn_joinClub.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showJoinClubPage();
             }
         });
     }
@@ -373,7 +387,7 @@ public class PlayerActivity extends AppCompatActivity
         final TextView tv_info = (TextView) v_event.findViewById(R.id.et_info);
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setTitle("Create a club");
-        dialogBuilder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+        dialogBuilder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String clubName = tv_name.getText().toString();
@@ -426,7 +440,7 @@ public class PlayerActivity extends AppCompatActivity
                 RequestHelper.sendPostRequest(url,regClub.toJson(),actionPostClub);
             }
         });
-        dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        dialogBuilder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 //                dialog.cancel();
@@ -435,6 +449,194 @@ public class PlayerActivity extends AppCompatActivity
         dialogBuilder.setView(v_event);
         dialogBuilder.setCancelable(true);
         dialogBuilder.show();
+    }
+
+    /**
+     *  show the join club page to let the user search and join club
+     */
+
+    EditText et_search;
+    ListView lv_searchResult;
+    Button btn_join;
+    AlertDialog dialog;
+    private void showJoinClubPage(){
+        LayoutInflater inflater = LayoutInflater.from(PlayerActivity.this);
+        View view_search = inflater.inflate(R.layout.layout_search_club, null);
+        Spinner sp_searchKey = (Spinner) view_search.findViewById(R.id.sp_searchKey);
+        et_search = (EditText) view_search.findViewById(R.id.et_search);
+        FloatingActionButton fab_search = (FloatingActionButton) view_search.findViewById(R.id.fab_search);
+        btn_join = (Button) view_search.findViewById(R.id.btn_join);
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(PlayerActivity.this);
+        dialogBuilder.setTitle("Join Club");
+        dialogBuilder.setView(view_search);
+        dialogBuilder.setCancelable(true);
+        lv_searchResult = (ListView) view_search.findViewById(R.id.lv_searchResult);
+
+        String[] keys = {"Club ID", "Club Name"};
+        sp_searchKey.setAdapter(new ArrayAdapter<String>(PlayerActivity.this,android.R.layout.simple_list_item_1,keys));
+        sp_searchKey.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if ( parent.getSelectedItem().toString().equals("Club ID")) {
+                    et_search.setHint("Club ID");
+                    et_search.setInputType(InputType.TYPE_CLASS_NUMBER);
+                } else {
+                    et_search.setHint("Club Name");
+                    et_search.setInputType(InputType.TYPE_NULL);
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        fab_search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (TextUtils.isEmpty(et_search.getText())) {
+                    return;
+                }
+
+                RequestAction actionGetClubByID = new RequestAction() {
+                    @Override
+                    public void actOnPre() {
+                    }
+
+                    @Override
+                    public void actOnPost(int responseCode, String response) {
+                        if ( responseCode == 200 ) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response);
+                                int clubID = jsonObject.getInt(Constant.CLUB_ID);
+                                String name = jsonObject.getString(Constant.CLUB_NAME);
+                                String info = jsonObject.getString(Constant.CLUB_INFO);
+                                Club club = new Club(clubID,name,info);
+                                ArrayList<String> clubNames = new ArrayList<>();
+                                clubList = new ArrayList<Club>();
+                                clubList.add(club);
+                                clubNames.add(club.name);
+                                lv_searchResult.setAdapter(new ArrayAdapter<String>(
+                                        PlayerActivity.this,
+                                        android.R.layout.simple_list_item_single_choice,
+                                        clubNames
+                                ));
+                                lv_searchResult.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                Toast.makeText(PlayerActivity.this, "Error while searching for club", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response);
+                                String message = jsonObject.getString(Constant.KEY_MSG);
+                                Toast.makeText(PlayerActivity.this, message, Toast.LENGTH_SHORT).show();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                Toast.makeText(PlayerActivity.this, "Error while searching for club", Toast.LENGTH_SHORT).show();
+                                Log.e("SEARCH CLUB",response);
+                            }
+                        }
+                    }
+                };
+
+                RequestAction actionGetClubByName = new RequestAction() {
+                    @Override
+                    public void actOnPre() {
+                    }
+
+                    @Override
+                    public void actOnPost(int responseCode, String response) {
+                        if ( responseCode == 200 ) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response);
+                                JSONArray jsonArray = jsonObject.getJSONArray(Constant.CLUB_LIST);
+                                ArrayList<String> clubNames = new ArrayList<>();
+                                clubList = new ArrayList<Club>();
+                                if ( jsonArray.length() == 0 ) {
+                                    Toast.makeText(PlayerActivity.this, "No club named<" + et_search.getText() + "> found!", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                for ( int i = 0; i < jsonArray.length(); i++ ) {
+                                    JSONObject jsonClub = jsonArray.getJSONObject(i);
+                                    int clubID = jsonClub.getInt(Constant.CLUB_ID);
+                                    String name = jsonClub.getString(Constant.CLUB_NAME);
+                                    String info = jsonClub.getString(Constant.CLUB_INFO);
+                                    Club club = new Club(clubID,name,info);
+                                    clubList.add(club);
+                                    clubNames.add(club.name);
+                                }
+                                lv_searchResult.setAdapter(new ArrayAdapter<String>(
+                                        PlayerActivity.this,
+                                        android.R.layout.simple_list_item_single_choice,
+                                        clubNames
+                                ));
+                                lv_searchResult.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                Toast.makeText(PlayerActivity.this, "Error while searching for club", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response);
+                                String message = jsonObject.getString(Constant.KEY_MSG);
+                                Toast.makeText(PlayerActivity.this, message, Toast.LENGTH_SHORT).show();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                Toast.makeText(PlayerActivity.this, "Error while searching for club", Toast.LENGTH_SHORT).show();
+                                Log.e("SEARCH CLUB",response);
+                            }
+                        }
+                    }
+                };
+                String url;
+                if ( et_search.getInputType() == InputType.TYPE_CLASS_NUMBER) {
+                    url = UrlHelper.urlGetClubByID(Integer.parseInt(et_search.getText().toString()));
+                    RequestHelper.sendGetRequest(url,actionGetClubByID);
+                } else {
+                    url = UrlHelper.urlGetClubByName(et_search.getText().toString());
+                    RequestHelper.sendGetRequest(url,actionGetClubByName);
+                }
+            }
+        });
+        btn_join.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ( lv_searchResult.getCheckedItemCount() == 0 ) {
+                    Toast.makeText(PlayerActivity.this, "Please select a club.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                RequestAction actionPostClubRequest = new RequestAction() {
+                    @Override
+                    public void actOnPre() {
+
+                    }
+
+                    @Override
+                    public void actOnPost(int responseCode, String response) {
+                        if ( responseCode == 201 ) {
+                            Toast.makeText(PlayerActivity.this, "Join club request sent. Please wait for club admins to handle the request.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            try {
+                                JSONObject jsonObject = new JSONObject(response);
+                                String message = jsonObject.getString(Constant.KEY_MSG);
+                                Toast.makeText(PlayerActivity.this, message, Toast.LENGTH_SHORT).show();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                Toast.makeText(PlayerActivity.this, response, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        dialog.dismiss();
+                    }
+                };
+                int clubID = clubList.get(lv_searchResult.getCheckedItemPosition()).id;
+                String url = UrlHelper.urlPostClubRequest(clubID);
+                Member member = new Member(clubID,playerID,null,false,0);
+                RequestHelper.sendPostRequest(url,member.toJson(),actionPostClubRequest);
+            }
+        });
+        dialog = dialogBuilder.show();
+
     }
 
     /**
@@ -449,7 +651,6 @@ public class PlayerActivity extends AppCompatActivity
             public void onClick(DialogInterface dialogInterface, int i) {
                 Intent intent = new Intent(PlayerActivity.this,LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                SharedPreferences sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putBoolean(Constant.KEY_AUTO_LOGIN,false);
                 editor.apply();
@@ -523,15 +724,29 @@ public class PlayerActivity extends AppCompatActivity
                         // get player's all clubs' info
                         JSONArray jsonPlayerClubs = jsonPlayerInfo.getJSONArray(Constant.PLAYER_INFO_CLUBS);
 //                        clubNames = new String[jsonPlayerClubs.length()];   // contains only the club names
-                        Club[] myClubs = new Club[jsonPlayerClubs.length()];
+                        ArrayList<Club> myClubs = new ArrayList<>(jsonPlayerClubs.length());
                         int clubID;
-                        String clubName, clubInfo;
                         for ( int i = 0; i < jsonPlayerClubs.length(); i++ ) {
-                            clubID = jsonPlayerClubs.getJSONObject(i).getInt(Constant.CLUB_ID);
-                            clubName = jsonPlayerClubs.getJSONObject(i).getString(Constant.CLUB_NAME);
-//                            clubNames[i] = clubName;
-                            clubInfo = jsonPlayerClubs.getJSONObject(i).getString(Constant.CLUB_INFO);
-                            myClubs[i] = new Club(clubID,clubName,clubInfo);
+                            JSONObject jsonClub = jsonPlayerClubs.getJSONObject(i);
+                            clubID = jsonClub.getInt(Constant.CLUB_ID);
+                            String clubName = jsonClub.getString(Constant.CLUB_NAME);
+                            String clubInfo = jsonClub.getString(Constant.CLUB_INFO);
+                            int priority = jsonClub.getInt(Constant.MEMBER_PRIORITY);
+                            Club club = new Club(clubID,clubName,clubInfo);
+                            club.priority = priority;
+                            myClubs.add(club);
+                        }
+                        int defaultClubID = sharedPreferences.getInt(Constant.KEY_DEFAULT_CLUB_ID,0);
+                        if ( defaultClubID != 0 ) { // if default club has been set
+                            for ( Club club : myClubs ) {
+                                if ( club.id == defaultClubID ) {
+                                    club.isDefault = true;
+                                }
+                            }
+                        } else {    // if not set
+                            if ( myClubs.size() > 0 ) {
+                                myClubs.get(0).isDefault = true;
+                            }
                         }
                         JSONObject jsonPlayerTotalStats = jsonPlayerInfo.getJSONObject(Constant.PLAYER_INFO_TOTAL_STATS);
                         int tournamentID = -1;
@@ -793,7 +1008,6 @@ public class PlayerActivity extends AppCompatActivity
         // hide tournament spinner, show player total stats
         sp_playerTournament.setVisibility(View.GONE);
         tv_playerTournament.setVisibility(View.GONE);
-//        sp_playerTournament.setSelection(0);
         showStats(playerInfo.getTotalStats());
     }
 
@@ -803,7 +1017,6 @@ public class PlayerActivity extends AppCompatActivity
      */
     private void showPlayerClubStats() {
         showStats(playerClubStats);
-
     }
 
     /**

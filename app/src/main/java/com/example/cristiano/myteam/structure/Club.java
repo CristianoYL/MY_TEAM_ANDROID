@@ -9,6 +9,8 @@ import com.google.gson.Gson;
 public class Club {
     public int id;
     public String name, info;
+    public boolean isDefault = false;
+    public int priority;
 
     public Club(int id, String name, String info) {
         this.id = id;

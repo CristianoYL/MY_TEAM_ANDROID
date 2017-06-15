@@ -20,6 +20,7 @@ import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,7 +89,7 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
         this.email = bundle.getString(Constant.PLAYER_EMAIL,null);  // creating the player for the first time
         if ( bundle.containsKey(Constant.KEY_PLAYER) ) {    // updating an existing player
             setTitle("Update Profile");
-            this.player = (Player) bundle.get(Constant.KEY_PLAYER);
+            this.player = new Gson().fromJson(bundle.getString(Constant.KEY_PLAYER),Player.class);
             this.isVisitor = bundle.getBoolean(Constant.KEY_IS_VISITOR,false);
             if ( this.player == null ) {
                 Log.e("PlayerRegActivity","Missing player info");
@@ -170,21 +171,17 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
 
             @Override
             public void actOnPost(int responseCode, String response) {
-                if ( responseCode == 201 || responseCode == 200 ) {    // player created or updated
-                    if ( responseCode == 200 ) {
-                        Toast.makeText(PlayerRegistrationActivity.this,R.string.player_profile_updated,Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(PlayerRegistrationActivity.this,R.string.player_profile_created,Toast.LENGTH_SHORT).show();
-                    }
+                if ( responseCode == 200 ) {    // player profile updated
+                    // simply finish the registration activity and go back to previous activity
+                    Toast.makeText(PlayerRegistrationActivity.this,R.string.player_profile_updated,Toast.LENGTH_SHORT).show();
+                } else if ( responseCode == 201 ){  // created new player profile
+                    Toast.makeText(PlayerRegistrationActivity.this,R.string.player_profile_created,Toast.LENGTH_SHORT).show();
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         int playerID = jsonObject.getInt(Constant.PLAYER_ID);
                         Intent intent = new Intent(PlayerRegistrationActivity.this,PlayerActivity.class);
                         intent.putExtra(Constant.KEY_PLAYER_ID, playerID);
-                        if ( isVisitor ) {
-                            intent.putExtra(Constant.KEY_IS_VISITOR, isVisitor);
-                        }
-                        startActivity(intent);
+                        startActivity(intent);  // start the PlayerActivity with the created player's ID
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -199,6 +196,7 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                     }
                     Log.e("PlayerActivity","Error in loading player profile.\nError Message:\n" + response);
                 }
+                finish();   // finish PlayerRegistration activity after request sent, clear it in stack to prevent navigate back to it
             }
         };
         String url;
@@ -208,6 +206,5 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             url = UrlHelper.urlPutPlayer(email);
         }
         RequestHelper.sendPutRequest(url, player.toJson() ,actionPutPlayer);
-        finish();
     }
 }

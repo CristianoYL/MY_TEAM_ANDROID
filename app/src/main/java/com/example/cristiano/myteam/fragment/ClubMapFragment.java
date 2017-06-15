@@ -18,21 +18,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Club;
-import com.example.cristiano.myteam.structure.Member;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Marker;
 import com.google.gson.Gson;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -48,9 +43,7 @@ import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 
 /**
@@ -63,7 +56,7 @@ import java.util.List;
 public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
 
     private static final String ARG_CLUB = "club";
-    private static final String ARG_SELF_ID = "myPlayerID";
+    private static final String ARG_PLAYER = "player";
 
     private GoogleMap mMap;
     private MarkerOptions selfMarker;
@@ -79,18 +72,18 @@ public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
     private LocationListener locationListener;
 
     private Club club;
-    private int selfID;
+    private Player player;
 
     private View view;
 
     public ClubMapFragment() {
     }
 
-    public static ClubMapFragment newInstance(Club club, int selfID){
+    public static ClubMapFragment newInstance(Club club, Player player){
         ClubMapFragment fragment = new ClubMapFragment();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_CLUB,club.toJson());
-        bundle.putInt(ARG_SELF_ID,selfID);
+        bundle.putString(ARG_PLAYER,player.toJson());
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -102,7 +95,7 @@ public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
         if (bundle != null) {
             Gson gson = new Gson();
             club = gson.fromJson(bundle.getString(ARG_CLUB),Club.class);
-            selfID = bundle.getInt(ARG_SELF_ID);
+            player = gson.fromJson(bundle.getString(ARG_PLAYER),Player.class);
         }
     }
 
@@ -169,13 +162,13 @@ public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                     builder.setTitle("Notice");
                     builder.setMessage("Are you sure to share your location info with your teammates?");
-                    builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             uploadLocation(currentBestLocation);
                         }
                     });
-                    builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                         }
@@ -223,8 +216,8 @@ public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
         };
         String latitude = location.getLatitude()+"";
         String longitude = location.getLongitude()+"";
-        com.example.cristiano.myteam.structure.Location locationData = new com.example.cristiano.myteam.structure.Location(club.id,selfID,latitude,longitude,null);
-        String url = UrlHelper.urlPutLocation(club.id, selfID);
+        com.example.cristiano.myteam.structure.Location locationData = new com.example.cristiano.myteam.structure.Location(club.id,player.getId(),latitude,longitude,null);
+        String url = UrlHelper.urlPutLocation(club.id, player.getId());
         RequestHelper.sendPutRequest(url,locationData.toJson(),actionPutLocation);
     }
 
@@ -253,7 +246,7 @@ public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
-                            if ( playerID != selfID ) {
+                            if ( playerID != player.getId() ) {
                                 addMarkerOnMap(latitude,longitude,"Player "+ playerID,lastUpdate);
                             } else {
                                 addMarkerOnMap(latitude,longitude,"My Location",lastUpdate);
@@ -373,6 +366,7 @@ public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
             Toast.makeText(getContext(),"Failed to get location, please try again.",Toast.LENGTH_SHORT).show();
             return;
         }
+
         locationManager.removeUpdates(locationListener);
         Log.d("LOCATION_","LAT:"+currentBestLocation.getLatitude());
         Log.d("LOCATION_","LONG:"+currentBestLocation.getLongitude());

@@ -22,6 +22,7 @@ import com.example.cristiano.myteam.adapter.TournamentListAdapter;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Club;
+import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.Tournament;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
@@ -32,6 +33,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by Cristiano on 2017/4/19.
@@ -40,26 +42,27 @@ import java.util.HashMap;
  */
 
 public class TournamentListFragment extends Fragment {
+    private static final String ARG_TOURS = "tournaments";
+    private static final String ARG_CLUB = "club";
+    private static final String ARG_PLAYER = "player";
+
     private ArrayList<Tournament> tournaments;
-    private int playerID;
     private Club club;
+    private Player player;
 
     private TextView tv_name, tv_info;
     private View view;
 
-    public TournamentListFragment(){
-    }
-
-    public static TournamentListFragment newInstance(Tournament[] tournaments, Club club, int playerID){
+    public static TournamentListFragment newInstance(List<Tournament> tournaments, Club club, Player player){
         TournamentListFragment fragment = new TournamentListFragment();
         Bundle bundle = new Bundle();
-        String[] jsonArray = new String[tournaments.length];
+        String[] jsonArray = new String[tournaments.size()];
         for ( int i = 0; i < jsonArray.length; i++ ) {
-            jsonArray[i] = tournaments[i].toJson();
+            jsonArray[i] = tournaments.get(i).toJson();
         }
-        bundle.putStringArray(Constant.TOURNAMENT_LIST,jsonArray);
-        bundle.putString(Constant.TABLE_CLUB,club.toJson());
-        bundle.putInt(Constant.KEY_PLAYER_ID,playerID);
+        bundle.putStringArray(ARG_TOURS,jsonArray);
+        bundle.putString(ARG_CLUB,club.toJson());
+        bundle.putString(ARG_PLAYER,player.toJson());
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -69,16 +72,17 @@ public class TournamentListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            String[] jsonArray = bundle.getStringArray(Constant.TOURNAMENT_LIST);
+            Gson gson = new Gson();
+            String[] jsonArray = bundle.getStringArray(ARG_TOURS);
             tournaments = new ArrayList<>();
             if ( jsonArray != null ) {
                 for ( int i = 0; i < jsonArray.length; i++ ) {
-                    tournaments.add(new Gson().fromJson(jsonArray[i],Tournament.class));
+                    tournaments.add(gson.fromJson(jsonArray[i],Tournament.class));
                     Log.d("TOURNAMENT:",tournaments.get(i).name);
                 }
             }
-            club = new Gson().fromJson(bundle.getString(Constant.TABLE_CLUB),Club.class);
-            playerID = bundle.getInt(Constant.KEY_PLAYER_ID,0);
+            club = gson.fromJson(bundle.getString(ARG_CLUB),Club.class);
+            player = gson.fromJson(bundle.getString(ARG_PLAYER),Player.class);
         }
     }
 
@@ -110,7 +114,7 @@ public class TournamentListFragment extends Fragment {
         lv_tournament.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                TournamentFragment tournamentFragment = TournamentFragment.newInstance(tournaments.get(position),club,playerID);
+                TournamentFragment tournamentFragment = TournamentFragment.newInstance(tournaments.get(position),club,player);
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.fragment_content,tournamentFragment,Constant.FRAGMENT_CLUB_TOURNAMENT_DETAIL);
@@ -136,7 +140,7 @@ public class TournamentListFragment extends Fragment {
         tv_info = (TextView) dialogView.findViewById(R.id.et_info);
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
         dialogBuilder.setTitle(R.string.create_tournament);
-        dialogBuilder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+        dialogBuilder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String tournamentName = tv_name.getText().toString();
@@ -187,11 +191,11 @@ public class TournamentListFragment extends Fragment {
                         }
                     }
                 };
-                String url = UrlHelper.urlPostRegTournament(club.id,playerID);
+                String url = UrlHelper.urlPostRegTournament(club.id,player.getId());
                 RequestHelper.sendPostRequest(url,regTournament.toJson(),actionPostRegTournament);
             }
         });
-        dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        dialogBuilder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
             }

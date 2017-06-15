@@ -20,6 +20,6 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_player"
-        app:menu="@menu/activity_player_drawer" />
+        app:menu="@menu/menu_player_profile" />
 
 </android.support.v4.widget.DrawerLayout>

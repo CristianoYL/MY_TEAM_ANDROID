@@ -22,8 +22,8 @@
             android:checked="true"
             android:showText="true"
             android:text="My Club Event? "
-            android:textOff="@string/abb_no"
-            android:textOn="@string/abb_yes"
+            android:textOff="@string/label_abb_no"
+            android:textOn="@string/label_abb_yes"
             />
 
         <LinearLayout
@@ -152,8 +152,8 @@
                 android:layout_height="wrap_content"
                 android:showText="true"
                 android:text="Use specific time?  "
-                android:textOff="@string/abb_no"
-                android:textOn="@string/abb_yes"
+                android:textOff="@string/label_abb_no"
+                android:textOn="@string/label_abb_yes"
                 android:layout_gravity="center"
                 />
 

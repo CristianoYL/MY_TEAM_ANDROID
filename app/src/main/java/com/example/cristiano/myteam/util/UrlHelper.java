@@ -10,9 +10,9 @@ public class UrlHelper {
     //AWS URL
 //    private static final String URL = "https://my-team-rest-api.herokuapp.com";
     // Heroku URL
-//    private static final String URL = "https://my-team-rest-api.herokuapp.com";
+    private static final String URL = "https://my-team-rest-api.herokuapp.com";
     //local testing URL
-    private static final String URL = "http://192.168.1.9:5000";
+//    private static final String URL = "http://192.168.1.9:5000";
 
     public static String urlLogin(){
         return URL + "/auth";
@@ -24,6 +24,11 @@ public class UrlHelper {
 
     public static String urlGetPlayerInfo(int playerID){
         return URL + "/player_info/id/" + playerID;
+    }
+
+
+    public static String urlGetPlayer(String playerEmail){
+        return URL + "/player/email/" + playerEmail;
     }
 
     public static String urlGetPlayerInfo(String playerEmail){
@@ -46,8 +51,20 @@ public class UrlHelper {
         return URL + "/player/club/" + clubID;
     }
 
+    public static String urlGetClubByID(int clubID){
+        return URL + "/club/id/" + clubID;
+    }
+
+    public static String urlGetClubByName(String name){
+        return URL + "/club/name/" + name;
+    }
+
     public static String urlGetClubInfo(int clubID){
         return URL + "/club_info/id/" + clubID;
+    }
+
+    public static String urlPostClubRequest(int clubID) {
+        return URL + "/member/request/" + clubID;
     }
 
     public static String urlPostRegClub(int playerID){
@@ -106,9 +123,10 @@ public class UrlHelper {
         return URL + "/squad/tournament/" + tournamentID + "/club/" + clubID;
     }
 
-    public static String urlGetChat (int tournamentID, int clubID, int receiverID, int senderID, int limit, int offset) {
+    public static String urlGetChat (int tournamentID, int clubID, int receiverID, int senderID, int limit, int beforeID, int afterID) {
         return URL + "/chat/tournament/" + tournamentID + "/club/" + clubID + "/receiver/"
-                + receiverID + "/sender/" + senderID + "/limit/" + limit + "/offset/" + offset;
+                + receiverID + "/sender/" + senderID + "/limit/" + limit
+                + "/before/" + beforeID + "/after/" + afterID;
     }
 
     public static String urlPostTournamentChat (int tournamentID, int clubID) {

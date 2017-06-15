@@ -36,12 +36,17 @@ import java.util.List;
 import com.example.cristiano.myteam.R;
 
 import com.example.cristiano.myteam.request.RequestAction;
+import com.example.cristiano.myteam.structure.Club;
+import com.example.cristiano.myteam.structure.Player;
+import com.example.cristiano.myteam.structure.PlayerInfo;
+import com.example.cristiano.myteam.structure.Stats;
 import com.example.cristiano.myteam.structure.User;
 import com.example.cristiano.myteam.structure.UserCredential;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.util.UrlHelper;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -136,6 +141,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
         rememberUsername = sharedPreferences.getBoolean(Constant.KEY_REMEMBER,false);
         autoLogin = sharedPreferences.getBoolean(Constant.KEY_AUTO_LOGIN,false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         cb_remember.setChecked(rememberUsername);
         cb_auto.setChecked(autoLogin);
         if ( autoLogin ) {
@@ -148,7 +158,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-//    private void populateAutoComplete() {
+    //    private void populateAutoComplete() {
 //        if (!mayRequestContacts()) {
 //            return;
 //        }
@@ -357,9 +367,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     Log.d("Response",response);
                     showProgress(false);
                     if ( responseCode == 200 ) {
-                        Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
-                        intent.putExtra(Constant.PLAYER_EMAIL,email);
-                        startActivity(intent);
+                        navigateToNextPage();
                     } else {
                         try {
                             JSONObject jsonObject = new JSONObject(response);
@@ -510,7 +518,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             et_passwordConfirm.setText("");
             et_passwordConfirm.clearFocus();
             // change button text accordingly, set button to "Register" and "Cancel"
-            btn_right.setText(R.string.cancel);
+            btn_right.setText(R.string.label_cancel);
             btn_left.setText(R.string.action_register);
             layout_passwordConfirm.setVisibility(View.VISIBLE);
             // define IME Actions
@@ -537,5 +545,103 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // define IME Actions
             et_password.setImeOptions(EditorInfo.IME_ACTION_GO);
         }
+    }
+
+    /**
+     * Send a GET request to retrieve player info,
+     * and use the response to decide which page to navigate to.
+     * (PlayerRegistration, Player Profile or Club Page)
+     */
+    private void navigateToNextPage(){
+        RequestAction actionGetPlayerInfo = new RequestAction() {
+            @Override
+            public void actOnPre() {
+                showProgress(true);
+            }
+
+            @Override
+            public void actOnPost(int responseCode, String response) {
+                showProgress(false);
+                if ( responseCode == 200 ) {
+                    try {
+                        JSONObject jsonPlayer = new JSONObject(response);
+                        int playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
+                        String firstName = jsonPlayer.getString(Constant.PLAYER_FIRST_NAME);
+                        String lastName = jsonPlayer.getString(Constant.PLAYER_LAST_NAME);
+                        String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
+                        String role = jsonPlayer.getString(Constant.PLAYER_ROLE);
+                        String phone = jsonPlayer.getString(Constant.PLAYER_PHONE);
+                        int age = jsonPlayer.getInt(Constant.PLAYER_AGE);
+                        float weight = (float) jsonPlayer.getDouble(Constant.PLAYER_WEIGHT);
+                        float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
+                        boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
+                        int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
+                        // use the retrieve info to create a Player instance
+                        Player player = new Player(playerID,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+                        int defaultClubID = sharedPreferences.getInt(Constant.KEY_DEFAULT_CLUB_ID,0);
+                        if ( defaultClubID != 0 ) { // if default club has been set
+                            getClub(defaultClubID, player); // go to default club's page
+                        } else {    // if not set
+                            showPlayerPage(player.getId()); // go to player's profile page
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else if ( responseCode == 404 ) { // if player not found, go to registration page
+                    showRegistrationPage(email);
+                } else {
+                    Toast.makeText(LoginActivity.this, "Unknown Error!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+        String url = UrlHelper.urlGetPlayer(email);
+        RequestHelper.sendGetRequest(url,actionGetPlayerInfo);
+    }
+
+    private void getClub(int clubID, final Player player) {
+        RequestAction actionGetClub = new RequestAction() {
+            @Override
+            public void actOnPre() {
+                showProgress(true);
+            }
+
+            @Override
+            public void actOnPost(int responseCode, String response) {
+                showProgress(false);
+                if ( responseCode == 200 ) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        int id = jsonObject.getInt(Constant.CLUB_ID);
+                        String name = jsonObject.getString(Constant.CLUB_NAME);
+                        String info = jsonObject.getString(Constant.CLUB_INFO);
+                        Club club = new Club(id,name,info);
+                        showClubPage(club,player);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        String url = UrlHelper.urlGetClubByID(clubID);
+        RequestHelper.sendGetRequest(url,actionGetClub);
+    }
+
+    private void showPlayerPage(int playerID) {
+        Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
+        intent.putExtra(Constant.PLAYER_ID, playerID);
+        startActivity(intent);
+    }
+
+    private void showClubPage(Club club, Player player) {
+        Intent intent = new Intent(LoginActivity.this,ClubActivity.class);
+        intent.putExtra(Constant.TABLE_PLAYER, player.toJson());
+        intent.putExtra(Constant.TABLE_CLUB, club.toJson());
+        startActivity(intent);
+    }
+
+    private void showRegistrationPage(String email) {
+        Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
+        intent.putExtra(Constant.PLAYER_EMAIL,email);
+        startActivity(intent);
     }
 }

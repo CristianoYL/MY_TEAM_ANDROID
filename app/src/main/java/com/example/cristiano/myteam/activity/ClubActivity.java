@@ -1,9 +1,13 @@
 package com.example.cristiano.myteam.activity;
 
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -31,11 +35,13 @@ public class ClubActivity extends AppCompatActivity
 
     private Club club;
     private Player player;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_club);
+        sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_club);
         setSupportActionBar(toolbar);
 
@@ -50,7 +56,7 @@ public class ClubActivity extends AppCompatActivity
 
         Bundle bundle = getIntent().getExtras();
         if ( !bundle.containsKey(Constant.TABLE_CLUB) ||
-                !bundle.containsKey(Constant.TABLE_CLUB) ) {
+                !bundle.containsKey(Constant.TABLE_PLAYER) ) {
             Log.e("ClubActivity","club/player not specified!");
             return;
         }
@@ -104,16 +110,13 @@ public class ClubActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_result) {
-
-        } else if (id == R.id.nav_stats) {
-
-        } else if (id == R.id.nav_recordMatch) {
-
-        } else if (id == R.id.nav_logOut) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.nav_club) {
+            // do nothing
+        } else if (id == R.id.nav_profile) {
+            showPlayerPage(player.getId());
+        } else if (id == R.id.nav_logout) {
+            showLogoutPage();
+            return false;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -130,5 +133,38 @@ public class ClubActivity extends AppCompatActivity
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_content,clubFragment,Constant.FRAGMENT_CLUB);
         fragmentTransaction.commit();
+    }
+
+    private void showPlayerPage(int playerID) {
+        Intent intent = new Intent(ClubActivity.this,PlayerActivity.class);
+        intent.putExtra(Constant.KEY_PLAYER_ID,playerID);
+        startActivity(intent);
+    }
+
+    /**
+     * show a pop-up dialog to ask the user whether to logout
+     */
+    private void showLogoutPage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ClubActivity.this);
+        builder.setTitle("Warning");
+        builder.setMessage("Are you sure to logout?");
+        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                Intent intent = new Intent(ClubActivity.this,LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(Constant.KEY_AUTO_LOGIN,false);
+                editor.apply();
+                startActivity(intent);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+            }
+        });
+        builder.show();
     }
 }

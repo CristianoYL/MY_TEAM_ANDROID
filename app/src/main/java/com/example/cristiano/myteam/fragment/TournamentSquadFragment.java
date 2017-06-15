@@ -40,7 +40,7 @@ import java.util.HashMap;
  * this fragment show the club's tournament squad and allows user to modified the squad
  */
 
-public class ClubSquadFragment extends Fragment {
+public class TournamentSquadFragment extends Fragment {
     private int clubID, tournamentID;
     private ArrayList<Squad> squadList;
     private boolean isEditingSquad;
@@ -54,12 +54,12 @@ public class ClubSquadFragment extends Fragment {
     private TextInputEditText et_number;
     private FloatingActionButton fab_delete, fab_add;
 
-    public ClubSquadFragment() {
+    public TournamentSquadFragment() {
         // Required empty public constructor
     }
 
-    public static ClubSquadFragment newInstance(int tournamentID, int clubID) {
-        ClubSquadFragment fragment = new ClubSquadFragment();
+    public static TournamentSquadFragment newInstance(int tournamentID, int clubID) {
+        TournamentSquadFragment fragment = new TournamentSquadFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(Constant.KEY_CLUB_ID,clubID);
         bundle.putInt(Constant.KEY_TOURNAMENT_ID,tournamentID);
@@ -221,8 +221,9 @@ public class ClubSquadFragment extends Fragment {
                         playerIDMap = new HashMap<>(jsonArray.length());
                         for ( int i = 0; i < jsonArray.length(); i++ ) {
                             JSONObject jsonTeamsheet = jsonArray.getJSONObject(i);
-                            int playerID = jsonTeamsheet.getInt(Constant.PLAYER_ID);
-                            String displayName = jsonTeamsheet.getString(Constant.PLAYER_DISPLAY_NAME);
+                            JSONObject jsonPlayer = jsonTeamsheet.getJSONObject(Constant.TABLE_PLAYER);
+                            int playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
+                            String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
                             playerList.add(displayName);
                             playerIDMap.put(displayName,playerID);
                         }
@@ -248,7 +249,7 @@ public class ClubSquadFragment extends Fragment {
                         tv_totalCount.setText(totalCount+"");
                         tv_availableCount.setText(availableCount+"");
                         lv_members.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_multiple_choice,playerList));
-                        dialogBuilder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                        dialogBuilder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 PlayerIDList playerIDList = new PlayerIDList();
@@ -262,7 +263,7 @@ public class ClubSquadFragment extends Fragment {
                                 addSquadPlayers(playerIDList);
                             }
                         });
-                        dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        dialogBuilder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
@@ -341,7 +342,7 @@ public class ClubSquadFragment extends Fragment {
         et_number = (TextInputEditText) dialogView.findViewById(R.id.et_number);
         tv_name.setText(squad.getName());
         et_number.setText(previousNumber+"");
-        dialogBuilder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+        dialogBuilder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 int newNumber = Integer.parseInt(et_number.getText().toString());
@@ -350,7 +351,7 @@ public class ClubSquadFragment extends Fragment {
                 }
             }
         });
-        dialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        dialogBuilder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 

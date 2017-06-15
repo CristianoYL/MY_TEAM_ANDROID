@@ -1,24 +1,13 @@
 package com.example.cristiano.myteam.fragment;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
@@ -39,7 +28,7 @@ import org.json.JSONObject;
  * that renders different stats of the club
  */
 
-public class ClubStatsFragment extends Fragment {
+public class TournamentStatsFragment extends Fragment {
     private int clubID, tournamentID;
     private Stats clubStats;
 
@@ -47,12 +36,12 @@ public class ClubStatsFragment extends Fragment {
     private ViewPager viewPager;
     private TabLayout tab_clubStats;
 
-    public ClubStatsFragment() {
+    public TournamentStatsFragment() {
         // Required empty public constructor
     }
 
-    public static ClubStatsFragment newInstance(int tournamentID, int clubID) {
-        ClubStatsFragment fragment = new ClubStatsFragment();
+    public static TournamentStatsFragment newInstance(int tournamentID, int clubID) {
+        TournamentStatsFragment fragment = new TournamentStatsFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(Constant.KEY_CLUB_ID,clubID);
         bundle.putInt(Constant.KEY_TOURNAMENT_ID,tournamentID);

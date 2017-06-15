@@ -20,8 +20,12 @@ import com.example.cristiano.myteam.database.LocalDBHelper;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Chat;
+import com.example.cristiano.myteam.structure.Club;
+import com.example.cristiano.myteam.structure.Player;
+import com.example.cristiano.myteam.structure.Tournament;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,16 +34,27 @@ import org.json.JSONObject;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 
 /**
  * Created by Cristiano on 2017/6/1.
  */
 
 public class ChatFragment extends Fragment {
-    private int tournamentID, clubID, receiverID, selfID, limit, offset;
-    private ArrayList<Chat> chatArray;
+    private static final String ARG_TOUR = "tournament";
+    private static final String ARG_CLUB = "club";
+    private static final String ARG_RECV = "receiver";
+    private static final String ARG_SELF = "self";
 
-    private final static int CHAT_LIMIT = 20;
+    private final static int CHAT_LIMIT = 30;
+
+    private Tournament tournament;
+    private Club club;
+    private Player receiver, self;
+
+    private int tournamentID, clubID, receiverID, selfID;
+
+    private LinkedList<Chat> chatArray;
 
     private View view_chat,view_functions;
     private FloatingActionButton fab_send,fab_more,fab_less,fab_gallery,fab_camera,fab_location;
@@ -48,21 +63,27 @@ public class ChatFragment extends Fragment {
     private ChatListAdapter adapter;
 
     /**
-     * when creating a ChatFragment, use tournamentID, clubID, receiverID to specify whether
-     * it's a tournament chat, club chat or private chat. And use selfID to identify oneself
-     * @param tournamentID  ID of the tournament, if it's a tournament chat. set to 0 if not.
-     * @param clubID    ID of the club, if it's a tournament/club chat. set to 0 if not.
-     * @param receiverID    playerID of the receiver, if it's a private chat. set to 0 if not.
-     * @param selfID    playerID of the user
+     * when creating a ChatFragment, use tournament, club, receiver to specify whether
+     * it's a tournament chat, club chat or private chat. And use self to identify oneself
+     * @param tournament  the tournament, if it's a tournament chat. set to null if not.
+     * @param club    the club, if it's a tournament/club chat. set to null if not.
+     * @param receiver    the receiver player if it's a private chat. set to null if not.
+     * @param self    the self player
      * @return  the ChatFragment
      */
-    public static ChatFragment newInstance(int tournamentID, int clubID, int receiverID, int selfID){
+    public static ChatFragment newInstance(Tournament tournament, Club club, Player receiver, Player self){
         ChatFragment fragment = new ChatFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(Constant.KEY_TOURNAMENT_ID,tournamentID);
-        bundle.putInt(Constant.KEY_CLUB_ID,clubID);
-        bundle.putInt(Constant.KEY_RECEIVER_ID,receiverID);
-        bundle.putInt(Constant.KEY_SENDER_ID,selfID);
+        if ( tournament != null ) {
+            bundle.putString(ARG_TOUR,tournament.toJson());
+        }
+        if ( club != null ) {
+            bundle.putString(ARG_CLUB,club.toJson());
+        }
+        if ( receiver != null ) {
+            bundle.putString(ARG_RECV,receiver.toJson());
+        }
+        bundle.putString(ARG_SELF,self.toJson());
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -72,10 +93,21 @@ public class ChatFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            tournamentID = bundle.getInt(Constant.KEY_TOURNAMENT_ID);
-            clubID = bundle.getInt(Constant.KEY_CLUB_ID);
-            receiverID = bundle.getInt(Constant.KEY_RECEIVER_ID);
-            selfID = bundle.getInt(Constant.KEY_SENDER_ID);
+            Gson gson = new Gson();
+            if ( bundle.containsKey(ARG_TOUR) ) {
+                tournament = gson.fromJson(bundle.getString(ARG_TOUR),Tournament.class);
+                tournamentID = tournament.id;
+            }
+            if ( bundle.containsKey(ARG_CLUB) ) {
+                club = gson.fromJson(bundle.getString(ARG_CLUB),Club.class);
+                clubID = club.id;
+            }
+            if ( bundle.containsKey(ARG_RECV) ) {
+                receiver = gson.fromJson(bundle.getString(ARG_RECV),Player.class);
+                receiverID = receiver.getId();
+            }
+            self = gson.fromJson(bundle.getString(ARG_SELF),Player.class);
+            selfID = self.getId();
         }
     }
 
@@ -91,7 +123,7 @@ public class ChatFragment extends Fragment {
      * render the chat page and show chat messages
      */
     private void showChatPage(){
-        loadChatHistory(CHAT_LIMIT,0);  // load CHAT_LIMIT (20) latest (0 offset) messages
+        loadChatHistory(CHAT_LIMIT,0,0);  // load most recent CHAT_LIMIT chats
         fab_send = (FloatingActionButton) view_chat.findViewById(R.id.fab_send);
         fab_more = (FloatingActionButton) view_chat.findViewById(R.id.fab_more);
         fab_less = (FloatingActionButton) view_chat.findViewById(R.id.fab_less);
@@ -153,7 +185,7 @@ public class ChatFragment extends Fragment {
 
     private void showMessages() {
         lv_chat = (ListView) view_chat.findViewById(R.id.lv_chat);
-        adapter = new ChatListAdapter(getContext(),chatArray, selfID);
+        adapter = new ChatListAdapter(getContext(),chatArray, self.getId());
         lv_chat.setAdapter(adapter);
     }
 
@@ -166,7 +198,7 @@ public class ChatFragment extends Fragment {
             return;
         }
         DateFormat localDateFormat = Constant.getServerDateFormat();
-        final Chat chat = new Chat(0,tournamentID,clubID,receiverID, selfID,"Me",
+        final Chat chat = new Chat(0,tournamentID,clubID,receiverID, selfID,self.getDisplayName(),
                 Constant.MESSAGE_TYPE_TEXT,message,localDateFormat.format(new Date()));
         RequestAction actionPostChatText = new RequestAction() {
             @Override
@@ -175,7 +207,7 @@ public class ChatFragment extends Fragment {
 
             @Override
             public void actOnPost(int responseCode, String response) {
-                chatArray.add(chat);
+                chatArray.offer(chat);  // add to tail
                 adapter.notifyDataSetChanged();
                 lv_chat.setSelection(adapter.getCount()-1);
                 adapter.notifyDataSetChanged();
@@ -183,12 +215,12 @@ public class ChatFragment extends Fragment {
             }
         };
         String url;
-        if ( tournamentID != 0 ) {  // tournament chat
-            url = UrlHelper.urlPostTournamentChat(tournamentID,clubID);
-        } else if ( clubID != 0 ) {// club chat
-            url = UrlHelper.urlPostClubChat(clubID);
-        } else if ( receiverID != 0 ) { // private chat
-            url = UrlHelper.urlPostPrivateChat(receiverID);
+        if ( tournament != null ) {  // tournament chat
+            url = UrlHelper.urlPostTournamentChat(tournament.id,club.id);
+        } else if ( club != null ) {// club chat
+            url = UrlHelper.urlPostClubChat(club.id);
+        } else if ( receiver != null ) { // private chat
+            url = UrlHelper.urlPostPrivateChat(receiver.getId());
         } else {
             Toast.makeText(getContext(), "Unknown error!", Toast.LENGTH_SHORT).show();
             Log.e("Chat Error","Unspecified chat type.");
@@ -200,9 +232,10 @@ public class ChatFragment extends Fragment {
     /**
      * load the according chat messages
      * @param limit number of chat messages to load
-     * @param offset  the starting point of the load
+     * @param beforeID  if beforeID is 0, ignore this param; else load chat with ID < beforeID
+     * @param afterID  if afterID is 0, ignore this param; else load chat with ID > afterID
      */
-    private void loadChatHistory(int limit, int offset){
+    private void loadChatHistory(int limit, final int beforeID, final int afterID){
         RequestAction actionGetChat = new RequestAction() {
             @Override
             public void actOnPre() {
@@ -214,7 +247,7 @@ public class ChatFragment extends Fragment {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         JSONArray jsonArray = jsonObject.getJSONArray(Constant.TABLE_CHAT);
-                        chatArray = new ArrayList<>(jsonArray.length());
+                        chatArray = new LinkedList<>();
                         for ( int i = 0; i < jsonArray.length(); i++ ) {
                             JSONObject json = jsonArray.getJSONObject(i);
                             JSONObject jsonChat = json.getJSONObject(Constant.TABLE_CHAT);
@@ -223,19 +256,16 @@ public class ChatFragment extends Fragment {
                             try {
                                 tournamentID = jsonChat.getInt(Constant.CHAT_TOURNAMENT_ID);
                             } catch (JSONException e) {
-                                e.printStackTrace();
                                 tournamentID = 0;
                             }
                             try {
                                 clubID = jsonChat.getInt(Constant.CHAT_CLUB_ID);
                             } catch (JSONException e) {
-                                e.printStackTrace();
                                 clubID = 0;
                             }
                             try {
                                 receiverID = jsonChat.getInt(Constant.CHAT_RECEIVER_ID);
                             } catch (JSONException e) {
-                                e.printStackTrace();
                                 receiverID = 0;
                             }
                             senderID = jsonChat.getInt(Constant.CHAT_SENDER_ID);
@@ -243,8 +273,15 @@ public class ChatFragment extends Fragment {
                             String messageContent = jsonChat.getString(Constant.CHAT_MESSAGE_CONTENT);
                             String time = jsonChat.getString(Constant.CHAT_TIME);
                             String senderName = json.getString(Constant.CHAT_SENDER_NAME);
-                            chatArray.add(0,new Chat(id,tournamentID,clubID,receiverID,senderID,
-                                    senderName,messageType,messageContent,time));
+                            if ( afterID != 0 ) {
+                                // TODO: should sort messages asc in time
+                                chatArray.offer(new Chat(id,tournamentID,clubID,receiverID,senderID,
+                                        senderName,messageType,messageContent,time));
+                            } else {
+                                chatArray.push(new Chat(id,tournamentID,clubID,receiverID,senderID,
+                                        senderName,messageType,messageContent,time));
+                            }
+
                         }
                         showMessages();
                     } catch (JSONException e) {
@@ -253,7 +290,7 @@ public class ChatFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetChat(tournamentID,clubID,receiverID,selfID,limit,offset);
+        String url = UrlHelper.urlGetChat(tournamentID,clubID,receiverID,selfID,limit,beforeID,afterID);
         RequestHelper.sendGetRequest(url,actionGetChat);
     }
 }
