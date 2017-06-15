@@ -75,7 +75,7 @@ public class ClubActivity extends AppCompatActivity
             FragmentManager fragmentManager = getSupportFragmentManager();
             Fragment fragment = fragmentManager.findFragmentByTag(Constant.FRAGMENT_CLUB);
             if ( fragment != null && fragment.isVisible() ) {
-                super.onBackPressed();
+                showLogoutPage();
             } else {
                 showClubPage();
             }
