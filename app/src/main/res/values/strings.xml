@@ -34,6 +34,7 @@
     <string name="player_last_name">Last Name</string>
     <string name="player_display_name">Display Name</string>
     <string name="player_role">Role</string>
+    <string name="player_position">Position</string>
     <string name="player_age">Age</string>
     <string name="player_phone">Phone</string>
     <string name="player_height">Height</string>
@@ -84,6 +85,8 @@
     <string name="label_status">Status:</string>
     <string name="label_pending">Pending</string>
     <string name="label_active">Active</string>
+    <string name="label_name">Name</string>
+    <string name="label_description">Description</string>
 
 
     <!-- Dialog titles -->
@@ -112,5 +115,61 @@
     <string name="priority_co_cap">co-captain</string>
     <string name="priority_captain">captain</string>
 
+    <!-- user roles -->
+    <string name="role_manager">Manager</string>
+    <string name="role_player">Player</string>
+
+    <string-array
+        name="array_user_roles">
+        <item>@string/role_player</item>
+        <item>@string/role_manager</item>
+    </string-array>
+
+
+    <!-- player positions -->
+    <string name="position_gk">Goalkeeper</string>
+    <string name="position_cb">Center Back</string>
+    <string name="position_rb">Right Back</string>
+    <string name="position_lb">Left Back</string>
+    <string name="position_cm">Center Midfielder</string>
+    <string name="position_cdm">Defensive Midfielder</string>
+    <string name="position_cam">Attacking Midfielder</string>
+    <string name="position_lm">Left Midfielder</string>
+    <string name="position_rm">Right Midfielder</string>
+    <string name="position_lw">Left Winger</string>
+    <string name="position_rw">Right Winger</string>
+    <string name="position_st">Striker</string>
+    <string name="position_cf">Center Forward</string>
+
+    <string name="position_abbr_gk">GK</string>
+    <string name="position_abbr_cb">CB</string>
+    <string name="position_abbr_rb">RB</string>
+    <string name="position_abbr_lb">LB</string>
+    <string name="position_abbr_cm">CM</string>
+    <string name="position_abbr_cdm">CDM</string>
+    <string name="position_abbr_cam">CAM</string>
+    <string name="position_abbr_lm">LM</string>
+    <string name="position_abbr_rm">RM</string>
+    <string name="position_abbr_lw">LW</string>
+    <string name="position_abbr_rw">RW</string>
+    <string name="position_abbr_st">ST</string>
+    <string name="position_abbr_cf">CF</string>
+
+    <string-array
+        name="array_player_positions">
+        <item>@string/position_gk</item>
+        <item>@string/position_cb</item>
+        <item>@string/position_rb</item>
+        <item>@string/position_lb</item>
+        <item>@string/position_cm</item>
+        <item>@string/position_cdm</item>
+        <item>@string/position_cam</item>
+        <item>@string/position_rm</item>
+        <item>@string/position_lm</item>
+        <item>@string/position_lw</item>
+        <item>@string/position_rw</item>
+        <item>@string/position_st</item>
+        <item>@string/position_cf</item>
+    </string-array>
 
 </resources>

@@ -2,6 +2,7 @@ package com.example.cristiano.myteam.fragment;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -55,6 +56,8 @@ public class ClubMemberFragment extends Fragment{
     private Button btn_addPlayer;
     private Switch sw_unit, sw_leftFooted;
     private Spinner sp_role, sp_position;
+    private Resources resources;
+    private View layout_position;
     private ArrayAdapter<String> roleAdapter,positionAdapter;
 
     public static ClubMemberFragment newInstance(Club club, Player player){
@@ -170,7 +173,6 @@ public class ClubMemberFragment extends Fragment{
                 startActivity(intent);
             }
         });
-
         // create new player and add to the teamsheet
         btn_addPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -189,18 +191,24 @@ public class ClubMemberFragment extends Fragment{
                 sw_leftFooted = (Switch) dialogView.findViewById(R.id.sw_leftFooted);
                 sp_role = (Spinner) dialogView.findViewById(R.id.sp_role);
                 sp_position = (Spinner) dialogView.findViewById(R.id.sp_position);
+                layout_position = dialogView.findViewById(R.id.layout_position);
+                resources = getResources();
                 roleAdapter = new ArrayAdapter<String>(getContext(),
-                        android.R.layout.simple_spinner_dropdown_item, Constant.roles);
+                        android.R.layout.simple_spinner_dropdown_item,
+                        resources.getStringArray(R.array.array_user_roles));
                 sp_role.setAdapter(roleAdapter);
-                positionAdapter = new ArrayAdapter<String>(getContext(),
-                        android.R.layout.simple_spinner_dropdown_item, Constant.positions);
+
                 sp_role.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                        if ( (sp_role.getItemAtPosition(i)).equals(Constant.ROLE_PLAYER)){
-                            sp_position.setVisibility(View.VISIBLE);
+                        if ( (sp_role.getItemAtPosition(i)).equals(resources.getString(R.string.role_player))){
+                            layout_position.setVisibility(View.VISIBLE);
+                            positionAdapter = new ArrayAdapter<String>(getContext(),
+                                    android.R.layout.simple_spinner_dropdown_item,
+                                    resources.getStringArray(R.array.array_player_positions));
+                            sp_position.setAdapter(positionAdapter);
                         } else {
-                            sp_position.setVisibility(View.GONE);
+                            layout_position.setVisibility(View.GONE);
                         }
                     }
 
@@ -209,7 +217,6 @@ public class ClubMemberFragment extends Fragment{
 
                     }
                 });
-                sp_position.setAdapter(positionAdapter);
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle("Add a player to your club");

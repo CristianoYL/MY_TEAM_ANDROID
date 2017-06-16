@@ -1,6 +1,7 @@
 package com.example.cristiano.myteam.adapter;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -29,6 +30,7 @@ public class MemberListAdapter extends BaseAdapter {
     private List<Member> memberInfo;
     private int selfID;
     private int priority;
+    private Resources resources;
 
     public MemberListAdapter(@NonNull Context context, @NonNull List<Player> playerList,
                              @NonNull List<Member> memberInfo, int selfID, int priority) {
@@ -37,6 +39,7 @@ public class MemberListAdapter extends BaseAdapter {
         this.memberInfo = memberInfo;
         this.selfID = selfID;
         this.priority = priority;
+        this.resources = context.getResources();
 
     }
     private class ViewHolder{
@@ -165,12 +168,46 @@ public class MemberListAdapter extends BaseAdapter {
                 viewHolder.view_admin.setVisibility(View.GONE);
                 break;
         }
-        viewHolder.tv_position.setText(player.getRole());
+        String roleTag = getAbbreviatedRole(player.getRole());
+        viewHolder.tv_position.setText(roleTag);
 //        if ( player.isLeftFooted() ) {
 //            viewHolder.iv_foot.setImageResource(R.drawable.ic_leftfoot);
 //        } else {
 //            viewHolder.iv_foot.setImageResource(R.drawable.ic_rightfoot);
 //        }
         return convertView;
+    }
+
+    private String getAbbreviatedRole(String role) {
+        if ( role.equals(resources.getString(R.string.position_gk)) ) {
+            return resources.getString(R.string.position_abbr_gk);
+        } else if ( role.equals(resources.getString(R.string.position_cb)) ) {
+            return resources.getString(R.string.position_abbr_cb);
+        } else if ( role.equals(resources.getString(R.string.position_rb)) ) {
+            return resources.getString(R.string.position_abbr_rb);
+        } else if ( role.equals(resources.getString(R.string.position_lb)) ) {
+            return resources.getString(R.string.position_abbr_lb);
+        } else if ( role.equals(resources.getString(R.string.position_cm)) ) {
+            return resources.getString(R.string.position_abbr_cm);
+        } else if ( role.equals(resources.getString(R.string.position_cdm)) ) {
+            return resources.getString(R.string.position_abbr_cdm);
+        } else if ( role.equals(resources.getString(R.string.position_cam)) ) {
+            return resources.getString(R.string.position_abbr_cam);
+        } else if ( role.equals(resources.getString(R.string.position_lm)) ) {
+            return resources.getString(R.string.position_abbr_lm);
+        } else if ( role.equals(resources.getString(R.string.position_rm)) ) {
+            return resources.getString(R.string.position_abbr_rm);
+        } else if ( role.equals(resources.getString(R.string.position_lw)) ) {
+            return resources.getString(R.string.position_abbr_lw);
+        } else if ( role.equals(resources.getString(R.string.position_rw)) ) {
+            return resources.getString(R.string.position_abbr_rw);
+        } else if ( role.equals(resources.getString(R.string.position_st)) ) {
+            return resources.getString(R.string.position_abbr_st);
+        } else if ( role.equals(resources.getString(R.string.position_cf)) ) {
+            return resources.getString(R.string.position_abbr_cf);
+        } else {
+            return role;
+        }
+
     }
 }

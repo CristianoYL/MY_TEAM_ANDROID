@@ -127,8 +127,16 @@ public class TournamentResultFragment extends Fragment {
                                 penScore, info, eventType,eventPlayer,eventTime;
                         for ( int i = 0; i < jsonArray.length(); i++ ) {
                             id = jsonArray.getJSONObject(i).getInt(Constant.RESULT_ID);
-                            home = jsonArray.getJSONObject(i).getInt(Constant.RESULT_HOME_ID);
-                            away = jsonArray.getJSONObject(i).getInt(Constant.RESULT_AWAY_ID);
+                            try{
+                                home = jsonArray.getJSONObject(i).getInt(Constant.RESULT_HOME_ID);
+                            } catch (JSONException e) {
+                                home = 0;
+                            }
+                            try{
+                                away = jsonArray.getJSONObject(i).getInt(Constant.RESULT_AWAY_ID);
+                            } catch (JSONException e) {
+                                away = 0;
+                            }
                             tournamentID = jsonArray.getJSONObject(i).getInt(Constant.RESULT_TOURNAMENT_ID);
                             homeName = jsonArray.getJSONObject(i).getString(Constant.RESULT_HOME_NAME);
                             awayName = jsonArray.getJSONObject(i).getString(Constant.RESULT_AWAY_NAME);

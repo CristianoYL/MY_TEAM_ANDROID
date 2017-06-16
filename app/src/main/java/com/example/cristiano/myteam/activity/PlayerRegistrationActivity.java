@@ -1,6 +1,7 @@
 package com.example.cristiano.myteam.activity;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -41,6 +42,7 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
     private Switch sw_unit, sw_leftFooted;
     private Spinner sp_role, sp_position;
     private ArrayAdapter<String> roleAdapter,positionAdapter;
+    private Resources resources;
 
 
     @Override
@@ -58,15 +60,18 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
         sw_leftFooted = (Switch) findViewById(R.id.sw_leftFooted);
         sp_role = (Spinner) findViewById(R.id.sp_role);
         sp_position = (Spinner) findViewById(R.id.sp_position);
+        resources = getResources();
         this.roleAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_dropdown_item, Constant.roles);
+                android.R.layout.simple_spinner_dropdown_item,
+                resources.getStringArray(R.array.array_user_roles));
         sp_role.setAdapter(this.roleAdapter);
         this.positionAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_dropdown_item, Constant.positions);
+                android.R.layout.simple_spinner_dropdown_item,
+                resources.getStringArray(R.array.array_player_positions));
         sp_role.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if ( (sp_role.getItemAtPosition(i)).equals(Constant.ROLE_PLAYER)){
+                if ( (sp_role.getItemAtPosition(i)).equals(resources.getString(R.string.role_player))){
                     sp_position.setVisibility(View.VISIBLE);
                 } else {
                     sp_position.setVisibility(View.GONE);
