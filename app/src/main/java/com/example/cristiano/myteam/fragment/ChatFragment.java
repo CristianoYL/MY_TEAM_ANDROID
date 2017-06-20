@@ -1,9 +1,14 @@
 package com.example.cristiano.myteam.fragment;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -16,7 +21,6 @@ import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.adapter.ChatListAdapter;
-import com.example.cristiano.myteam.database.LocalDBHelper;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Chat;
@@ -32,7 +36,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -46,7 +49,10 @@ public class ChatFragment extends Fragment {
     private static final String ARG_RECV = "receiver";
     private static final String ARG_SELF = "self";
 
+    private static final String TAG = "ChatFragment";
+
     private final static int CHAT_LIMIT = 30;
+    private int headIndex, tailIndex;
 
     private Tournament tournament;
     private Club club;
@@ -54,7 +60,7 @@ public class ChatFragment extends Fragment {
 
     private int tournamentID, clubID, receiverID, selfID;
 
-    private LinkedList<Chat> chatArray;
+    private LinkedList<Chat> chatList;
 
     private View view_chat,view_functions;
     private FloatingActionButton fab_send,fab_more,fab_less,fab_gallery,fab_camera,fab_location;
@@ -108,6 +114,9 @@ public class ChatFragment extends Fragment {
             }
             self = gson.fromJson(bundle.getString(ARG_SELF),Player.class);
             selfID = self.getId();
+            headIndex = 0;
+            tailIndex = 0;
+            chatList = new LinkedList<>();
         }
     }
 
@@ -119,10 +128,53 @@ public class ChatFragment extends Fragment {
         return view_chat;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMessageReceiver,
+                new IntentFilter(Constant.INTENT_NEW_MESSAGE));
+        Log.d(TAG,"Register broadcast listener");
+    }
+
+    @Override
+    public void onStop() {
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mMessageReceiver);
+        Log.d(TAG,"Unregister broadcast listener");
+        super.onStop();
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Extract data included in the Intent
+            Bundle bundle = intent.getExtras();
+            int messageCID = bundle.getInt("clubID",0);
+            int messageTID = bundle.getInt("tournamentID",0);
+            if ( tournamentID != 0 ) {  // tournament chat
+                if ( messageTID == tournamentID ) {
+                    Log.d(TAG,"New Tournament Chat");
+                    loadMoreRecentChat();
+                }
+            } else if ( clubID != 0) {  // club chat
+                if ( clubID == messageCID ) {
+                    Log.d(TAG,"New Club Chat");
+                    loadMoreRecentChat();
+                }
+            } else {
+                Log.d(TAG,"Unknown Notification");
+                loadMoreRecentChat();
+            }
+
+        }
+    };
+
     /**
      * render the chat page and show chat messages
      */
     private void showChatPage(){
+        lv_chat = (ListView) view_chat.findViewById(R.id.lv_chat);
+        adapter = new ChatListAdapter(getContext(), chatList, self.getId());
+        lv_chat.setAdapter(adapter);
         loadChatHistory(CHAT_LIMIT,0,0);  // load most recent CHAT_LIMIT chats
         fab_send = (FloatingActionButton) view_chat.findViewById(R.id.fab_send);
         fab_more = (FloatingActionButton) view_chat.findViewById(R.id.fab_more);
@@ -184,9 +236,7 @@ public class ChatFragment extends Fragment {
     }
 
     private void showMessages() {
-        lv_chat = (ListView) view_chat.findViewById(R.id.lv_chat);
-        adapter = new ChatListAdapter(getContext(),chatArray, self.getId());
-        lv_chat.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 
     /**
@@ -198,20 +248,19 @@ public class ChatFragment extends Fragment {
             return;
         }
         DateFormat localDateFormat = Constant.getServerDateFormat();
-        final Chat chat = new Chat(0,tournamentID,clubID,receiverID, selfID,self.getDisplayName(),
+        Chat chat = new Chat(0,tournamentID,clubID,receiverID, selfID,self.getDisplayName(),
                 Constant.MESSAGE_TYPE_TEXT,message,localDateFormat.format(new Date()));
         RequestAction actionPostChatText = new RequestAction() {
             @Override
             public void actOnPre() {
+                et_message.setText("");
             }
 
             @Override
             public void actOnPost(int responseCode, String response) {
-                chatArray.offer(chat);  // add to tail
-                adapter.notifyDataSetChanged();
-                lv_chat.setSelection(adapter.getCount()-1);
-                adapter.notifyDataSetChanged();
-                et_message.setText("");
+                if ( responseCode == 201 ) {
+                    Log.d(TAG,"Message sent successfully!");
+                }
             }
         };
         String url;
@@ -223,19 +272,19 @@ public class ChatFragment extends Fragment {
             url = UrlHelper.urlPostPrivateChat(receiver.getId());
         } else {
             Toast.makeText(getContext(), "Unknown error!", Toast.LENGTH_SHORT).show();
-            Log.e("Chat Error","Unspecified chat type.");
+            Log.e(TAG,"Unspecified chat type.");
             return;
         }
         RequestHelper.sendPostRequest(url,chat.toJson(),actionPostChatText);
     }
 
     /**
-     * load the according chat messages
+     * load the according range chat messages
      * @param limit number of chat messages to load
      * @param beforeID  if beforeID is 0, ignore this param; else load chat with ID < beforeID
      * @param afterID  if afterID is 0, ignore this param; else load chat with ID > afterID
      */
-    private void loadChatHistory(int limit, final int beforeID, final int afterID){
+    private void loadChatHistory(int limit, int beforeID, int afterID){
         RequestAction actionGetChat = new RequestAction() {
             @Override
             public void actOnPre() {
@@ -247,7 +296,7 @@ public class ChatFragment extends Fragment {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         JSONArray jsonArray = jsonObject.getJSONArray(Constant.TABLE_CHAT);
-                        chatArray = new LinkedList<>();
+                        Chat[] chats = new Chat[jsonArray.length()];
                         for ( int i = 0; i < jsonArray.length(); i++ ) {
                             JSONObject json = jsonArray.getJSONObject(i);
                             JSONObject jsonChat = json.getJSONObject(Constant.TABLE_CHAT);
@@ -273,16 +322,10 @@ public class ChatFragment extends Fragment {
                             String messageContent = jsonChat.getString(Constant.CHAT_MESSAGE_CONTENT);
                             String time = jsonChat.getString(Constant.CHAT_TIME);
                             String senderName = json.getString(Constant.CHAT_SENDER_NAME);
-                            if ( afterID != 0 ) {
-                                // TODO: should sort messages asc in time
-                                chatArray.offer(new Chat(id,tournamentID,clubID,receiverID,senderID,
-                                        senderName,messageType,messageContent,time));
-                            } else {
-                                chatArray.push(new Chat(id,tournamentID,clubID,receiverID,senderID,
-                                        senderName,messageType,messageContent,time));
-                            }
-
+                            chats[i] = new Chat(id,tournamentID,clubID,receiverID,senderID,
+                                    senderName,messageType,messageContent,time);
                         }
+                        addToChatList(chats);
                         showMessages();
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -292,5 +335,52 @@ public class ChatFragment extends Fragment {
         };
         String url = UrlHelper.urlGetChat(tournamentID,clubID,receiverID,selfID,limit,beforeID,afterID);
         RequestHelper.sendGetRequest(url,actionGetChat);
+    }
+
+    /**
+     *  Load chat prior to current chats
+     */
+    private void loadMoreHistoryChat(){
+        loadChatHistory(CHAT_LIMIT,headIndex,0);
+    }
+
+    /**
+     *  Load chat after current chats
+     */
+    private void loadMoreRecentChat(){
+        loadChatHistory(CHAT_LIMIT,0,tailIndex);
+    }
+
+    /**
+     *  Combine the current chat list and the newly loaded chat list.
+     *  Use the head and tail ID to decide how to combine the two lists.
+     *  Note that the input should not have duplicated items with the current list
+     * @param newChats the loaded chats
+     */
+    private void addToChatList(Chat[] newChats){
+        if ( newChats == null || newChats.length == 0 ) {
+            return;
+        }
+        if ( chatList.size() == 0 ) {   // no chat history loaded yet
+            for ( Chat chat : newChats ) {
+                chatList.offer(chat);
+            }
+            headIndex = newChats[0].id; // update the tail index
+            tailIndex = newChats[newChats.length-1].id; // update the tail index
+        } else if ( newChats[newChats.length-1].id < chatList.get(0).id ) {   // new.tail is prior to current.head
+            // prepend the new chats to the head of the current chat
+            for ( int i = newChats.length-1; i >= 0; i-- ) {
+                chatList.push(newChats[i]);
+            }
+            headIndex = newChats[0].id; // update the headIndex
+        } else if ( newChats[0].id > chatList.get(chatList.size()-1).id ) {  // new.head is after current.tail
+            // append the new chats to the tail of the current chat
+            for ( Chat chat : newChats ) {
+                chatList.offer(chat);
+            }
+            tailIndex = newChats[newChats.length-1].id; // update the tail index
+        } else {
+            Log.e(TAG,"Loaded duplicated chat!");
+        }
     }
 }

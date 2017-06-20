@@ -83,7 +83,7 @@ public class ClubListAdapter extends BaseAdapter{
                 clubs.get(position).isDefault = true;
                 SharedPreferences sharedPreferences = context.getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putInt(Constant.KEY_DEFAULT_CLUB_ID,clubs.get(position).id);
+                editor.putInt(Constant.CACHE_DEFAULT_CLUB_ID,clubs.get(position).id);
                 editor.apply();
                 Toast.makeText(context, R.string.set_club_as_default, Toast.LENGTH_SHORT).show();
                 notifyDataSetChanged();

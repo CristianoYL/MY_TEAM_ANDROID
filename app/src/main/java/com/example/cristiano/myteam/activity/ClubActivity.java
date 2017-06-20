@@ -24,6 +24,7 @@ import com.example.cristiano.myteam.fragment.ClubFragment;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
+import com.example.cristiano.myteam.util.LogOutHelper;
 import com.google.gson.Gson;
 
 /**
@@ -151,18 +152,12 @@ public class ClubActivity extends AppCompatActivity
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = new Intent(ClubActivity.this,LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(Constant.KEY_AUTO_LOGIN,false);
-                editor.apply();
-                startActivity(intent);
+                LogOutHelper.logOut(ClubActivity.this);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-
             }
         });
         builder.show();

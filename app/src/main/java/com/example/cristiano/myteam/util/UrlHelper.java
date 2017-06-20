@@ -10,9 +10,9 @@ public class UrlHelper {
     //AWS URL
 //    private static final String URL = "https://my-team-rest-api.herokuapp.com";
     // Heroku URL
-    private static final String URL = "https://my-team-rest-api.herokuapp.com";
+//    private static final String URL = "https://my-team-rest-api.herokuapp.com";
     //local testing URL
-//    private static final String URL = "http://192.168.1.9:5000";
+    private static final String URL = "http://192.168.1.12:5000";
 
     public static String urlLogin(){
         return URL + "/auth";
@@ -20,6 +20,10 @@ public class UrlHelper {
 
     public static String urlRegister(){
         return URL + "/user";
+    }
+
+    public static String urlPutToken(int playerID){
+        return URL + "/token/player/" + playerID;
     }
 
     public static String urlGetPlayerInfo(int playerID){

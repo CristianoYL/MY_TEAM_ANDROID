@@ -26,8 +26,7 @@ public class Constant {
 
     public static final String KEY_USER_PREF = "user preference";
     public static final String KEY_USERNAME = "username";
-    public static final String KEY_REMEMBER = "remember username";
-    public static final String KEY_AUTO_LOGIN = "auto login";
+    public static final String KEY_PASSWORD = "password";
     public static final String KEY_DESC = "description";
     public static final String KEY_MSG = "message";
     public static final String KEY_CLUB_ID = "clubID";
@@ -41,6 +40,15 @@ public class Constant {
     public static final String KEY_CLUB_INFO = "clubInfo";
     public static final String KEY_GAME_PERFORMANCE = "gamePerformance";
     public static final String KEY_DEFAULT_CLUB_ID = "defaultClubID";
+
+    public static final String INTENT_NEW_MESSAGE = "new message";
+
+    // user preference keys
+    public static final String PREF_REMEMBER_USERNAME = "remember username";
+    public static final String PREF_AUTO_LOGIN = "auto login";
+    public static final String CACHE_PLAYER_ID = "my player ID";
+    public static final String CACHE_DEFAULT_CLUB_ID = "my default club ID";
+    public static final String CACHE_CACHED_TOKEN = "cached token";
 
     public static final String METHOD_POST = "POST";
     public static final String METHOD_GET = "GET";

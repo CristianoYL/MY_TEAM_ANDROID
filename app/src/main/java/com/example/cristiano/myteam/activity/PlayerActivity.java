@@ -42,19 +42,21 @@ import com.example.cristiano.myteam.structure.Member;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.PlayerInfo;
 import com.example.cristiano.myteam.structure.Stats;
+import com.example.cristiano.myteam.structure.Token;
 import com.example.cristiano.myteam.structure.Tournament;
 import com.example.cristiano.myteam.adapter.ClubListAdapter;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
+import com.example.cristiano.myteam.util.LogOutHelper;
 import com.example.cristiano.myteam.util.UrlHelper;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  *  this activity displays the main profile page of the player, which presents:
@@ -139,7 +141,6 @@ public class PlayerActivity extends AppCompatActivity
         }
         this.email = bundle.getString(Constant.PLAYER_EMAIL,null);
         this.playerID = bundle.getInt(Constant.KEY_PLAYER_ID,0);
-        sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
     }
 
     @Override
@@ -148,6 +149,54 @@ public class PlayerActivity extends AppCompatActivity
         if ( this.isVisitor ) {
             this.setVisitorMode();
         }
+        sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
+        String instanceToken = FirebaseInstanceId.getInstance().getToken();
+        if ( sharedPreferences.getString(Constant.CACHE_CACHED_TOKEN,null) == null ) {
+
+            Log.d("Token","token=" + instanceToken);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(Constant.CACHE_CACHED_TOKEN,instanceToken);
+            editor.apply();
+        }
+        // see if user's playerID is cached
+        int myPlayerID = playerID;
+        if ( myPlayerID == 0 ) {
+            /**
+             *  if playerID not cached, it means this is a new user
+             *  do not send the token to server for now
+             *  wait till the user register as player and then send the token to app server
+             */
+            Log.d("Token","Not logged in yet. No playerID available");
+            return;
+        }
+        // else the playerID is cached, upload the token to server
+        Token token = new Token(myPlayerID,instanceToken);
+        RequestAction actionPutToken = new RequestAction() {
+            @Override
+            public void actOnPre() {
+                Log.d("Token", "Preparing to send new token to server");
+            }
+
+            @Override
+            public void actOnPost(int responseCode, String response) {
+                if ( responseCode == 201 ) {
+                    Log.d("Token", "New token created!");
+                } else if ( responseCode == 200 ) {
+                    Log.d("Token", "Token Updated!");
+                } else {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        String message = jsonObject.getString(Constant.KEY_MSG);
+                        Log.e("Token", "Uploading token failed with response message:" + message);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e("Token", "Uploading token failed with response message:" + response);
+                    }
+                }
+            }
+        };
+        String url = UrlHelper.urlPutToken(myPlayerID);
+        RequestHelper.sendPutRequest(url,token.toJson(),actionPutToken);
         loadPlayerInfo();   // load player info in onResume() allows info updated when navigating back to this activity
     }
 
@@ -650,12 +699,7 @@ public class PlayerActivity extends AppCompatActivity
         builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = new Intent(PlayerActivity.this,LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(Constant.KEY_AUTO_LOGIN,false);
-                editor.apply();
-                startActivity(intent);
+                LogOutHelper.logOut(PlayerActivity.this);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -737,7 +781,7 @@ public class PlayerActivity extends AppCompatActivity
                             club.priority = priority;
                             myClubs.add(club);
                         }
-                        int defaultClubID = sharedPreferences.getInt(Constant.KEY_DEFAULT_CLUB_ID,0);
+                        int defaultClubID = sharedPreferences.getInt(Constant.CACHE_DEFAULT_CLUB_ID,0);
                         if ( defaultClubID != 0 ) { // if default club has been set
                             for ( Club club : myClubs ) {
                                 if ( club.id == defaultClubID ) {

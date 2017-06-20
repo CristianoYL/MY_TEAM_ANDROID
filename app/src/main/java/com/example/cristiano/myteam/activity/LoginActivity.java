@@ -38,15 +38,12 @@ import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Player;
-import com.example.cristiano.myteam.structure.PlayerInfo;
-import com.example.cristiano.myteam.structure.Stats;
 import com.example.cristiano.myteam.structure.User;
 import com.example.cristiano.myteam.structure.UserCredential;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.util.UrlHelper;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -139,8 +136,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         });
         // retrieve the user's login preference. e.g. auto login
         sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
-        rememberUsername = sharedPreferences.getBoolean(Constant.KEY_REMEMBER,false);
-        autoLogin = sharedPreferences.getBoolean(Constant.KEY_AUTO_LOGIN,false);
+        rememberUsername = sharedPreferences.getBoolean(Constant.PREF_REMEMBER_USERNAME,false);
+        autoLogin = sharedPreferences.getBoolean(Constant.PREF_AUTO_LOGIN,false);
     }
 
     @Override
@@ -150,7 +147,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         cb_auto.setChecked(autoLogin);
         if ( autoLogin ) {
             et_email.setText(sharedPreferences.getString(Constant.KEY_USERNAME,""));
-            et_password.setText(sharedPreferences.getString(Constant.USER_PASSWORD,""));
+            et_password.setText(sharedPreferences.getString(Constant.KEY_PASSWORD,""));
             attemptLogin();
         } else if (rememberUsername) {
             et_email.setText(sharedPreferences.getString(Constant.KEY_USERNAME,""));
@@ -345,11 +342,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(Constant.KEY_REMEMBER,cb_remember.isChecked());
-            editor.putBoolean(Constant.KEY_AUTO_LOGIN,cb_auto.isChecked());
+            editor.putBoolean(Constant.PREF_REMEMBER_USERNAME,cb_remember.isChecked());
+            editor.putBoolean(Constant.PREF_AUTO_LOGIN,cb_auto.isChecked());
             if ( cb_auto.isChecked() ) {
                 editor.putString(Constant.KEY_USERNAME,email);
-                editor.putString(Constant.USER_PASSWORD,password);
+                editor.putString(Constant.KEY_PASSWORD,password);
             } else if (cb_remember.isChecked() ) {
                 editor.putString(Constant.KEY_USERNAME,email);
             }
@@ -553,7 +550,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * (PlayerRegistration, Player Profile or Club Page)
      */
     private void navigateToNextPage(){
-        RequestAction actionGetPlayerInfo = new RequestAction() {
+        RequestAction actionGetPlayer = new RequestAction() {
             @Override
             public void actOnPre() {
                 showProgress(true);
@@ -562,7 +559,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void actOnPost(int responseCode, String response) {
                 showProgress(false);
-                if ( responseCode == 200 ) {
+                if ( responseCode == 200 ) {  // player is found
                     try {
                         JSONObject jsonPlayer = new JSONObject(response);
                         int playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
@@ -578,7 +575,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
                         // use the retrieve info to create a Player instance
                         Player player = new Player(playerID,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
-                        int defaultClubID = sharedPreferences.getInt(Constant.KEY_DEFAULT_CLUB_ID,0);
+                        int defaultClubID = sharedPreferences.getInt(Constant.CACHE_DEFAULT_CLUB_ID,0);
                         if ( defaultClubID != 0 ) { // if default club has been set
                             getClub(defaultClubID, player); // go to default club's page
                         } else {    // if not set
@@ -588,6 +585,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         e.printStackTrace();
                     }
                 } else if ( responseCode == 404 ) { // if player not found, go to registration page
+                    Log.d("LoginActivity","New user login");
                     showRegistrationPage(email);
                 } else {
                     Toast.makeText(LoginActivity.this, "Unknown Error!", Toast.LENGTH_SHORT).show();
@@ -595,7 +593,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         };
         String url = UrlHelper.urlGetPlayer(email);
-        RequestHelper.sendGetRequest(url,actionGetPlayerInfo);
+        RequestHelper.sendGetRequest(url,actionGetPlayer);
     }
 
     private void getClub(int clubID, final Player player) {
@@ -628,7 +626,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void showPlayerPage(int playerID) {
         Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
-        intent.putExtra(Constant.PLAYER_ID, playerID);
+        intent.putExtra(Constant.KEY_PLAYER_ID, playerID);
         startActivity(intent);
     }
 
@@ -640,7 +638,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void showRegistrationPage(String email) {
-        Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
+        Intent intent = new Intent(LoginActivity.this,PlayerRegistrationActivity.class);
         intent.putExtra(Constant.PLAYER_EMAIL,email);
         startActivity(intent);
     }
