@@ -217,7 +217,7 @@ public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
         String latitude = location.getLatitude()+"";
         String longitude = location.getLongitude()+"";
         com.example.cristiano.myteam.structure.Location locationData = new com.example.cristiano.myteam.structure.Location(club.id,player.getId(),latitude,longitude,null);
-        String url = UrlHelper.urlPutLocation(club.id, player.getId());
+        String url = UrlHelper.urlLocationByClubPlayer(club.id, player.getId());
         RequestHelper.sendPutRequest(url,locationData.toJson(),actionPutLocation);
     }
 
@@ -271,7 +271,7 @@ public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
 
             }
         };
-        String url = UrlHelper.urlGetAllLocations(club.id);
+        String url = UrlHelper.urlLocationByClub(club.id);
         RequestHelper.sendGetRequest(url,actionGetAllLocations);
     }
 

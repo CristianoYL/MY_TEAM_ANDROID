@@ -111,7 +111,12 @@ public class ClubMemberFragment extends Fragment{
                             String firstName = jsonPlayer.getString(Constant.PLAYER_FIRST_NAME);
                             String lastName = jsonPlayer.getString(Constant.PLAYER_LAST_NAME);
                             String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
-                            String email = jsonPlayer.getString(Constant.PLAYER_EMAIL);
+                            int userID = 0;
+                            try{
+                                userID = jsonPlayer.getInt(Constant.PLAYER_USER_ID);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                             int age = jsonPlayer.getInt(Constant.PLAYER_AGE);
                             int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
                             float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
@@ -128,7 +133,7 @@ public class ClubMemberFragment extends Fragment{
                             if ( playerID == player.getId() ) { // get self priority
                                 selfPriority = priority;
                             }
-                            clubPlayers.add(new Player(playerID,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar));
+                            clubPlayers.add(new Player(playerID,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar));
                             memberList.add(new Member(clubID,pID,memberSince,isActive,priority));
                         }
                         showMembers();
@@ -148,7 +153,7 @@ public class ClubMemberFragment extends Fragment{
 
             }
         };
-        String url = UrlHelper.urlGetClubMembers(club.id);
+        String url = UrlHelper.urlMembersByClub(club.id);
         RequestHelper.sendGetRequest(url,actionGetTeamsheetPlayers);
     }
 
@@ -243,8 +248,6 @@ public class ClubMemberFragment extends Fragment{
      * send a POST request to upload the new player
      */
     private void uploadPlayerInfo(){
-        int id = 0;
-        String email = null;
         String firstName = et_firstName.getText().toString();
         String lastName = et_lastName.getText().toString();
         String displayName = et_displayName.getText().toString();
@@ -279,9 +282,10 @@ public class ClubMemberFragment extends Fragment{
             height = height * 30.3f;
         }
         boolean leftFooted = sw_leftFooted.isChecked();
+        int id = 0;
+        int userID = 0;
         int avatar = 0;
-
-        Player player = new Player(id,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+        Player player = new Player(id,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
         RequestAction actionPostRegPlayer = new RequestAction() {
             @Override
             public void actOnPre() {
@@ -295,7 +299,7 @@ public class ClubMemberFragment extends Fragment{
                         JSONObject jsonObject = new JSONObject(response);
                         JSONObject jsonPlayer = jsonObject.getJSONObject(Constant.TABLE_PLAYER);
                         int playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
-                        String email = null;
+                        int userID = 0;
                         String firstName = jsonPlayer.getString(Constant.PLAYER_FIRST_NAME);
                         String lastName = jsonPlayer.getString(Constant.PLAYER_LAST_NAME);
                         String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
@@ -306,7 +310,7 @@ public class ClubMemberFragment extends Fragment{
                         float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
                         float weight = (float) jsonPlayer.getDouble(Constant.PLAYER_WEIGHT);
                         boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
-                        Player newPlayer = new Player(playerID,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+                        Player newPlayer = new Player(playerID,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
                         clubPlayers.add(newPlayer);
                         JSONObject jsonMember = jsonObject.getJSONObject(Constant.TABLE_MEMBER);
                         int clubID = jsonMember.getInt(Constant.MEMBER_C_ID);

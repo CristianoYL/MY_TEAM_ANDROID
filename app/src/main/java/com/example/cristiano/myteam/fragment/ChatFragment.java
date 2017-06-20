@@ -265,11 +265,11 @@ public class ChatFragment extends Fragment {
         };
         String url;
         if ( tournament != null ) {  // tournament chat
-            url = UrlHelper.urlPostTournamentChat(tournament.id,club.id);
+            url = UrlHelper.urlChatByTournament(tournament.id,club.id);
         } else if ( club != null ) {// club chat
-            url = UrlHelper.urlPostClubChat(club.id);
+            url = UrlHelper.urlChatByClub(club.id);
         } else if ( receiver != null ) { // private chat
-            url = UrlHelper.urlPostPrivateChat(receiver.getId());
+            url = UrlHelper.urlPrivateChat(receiver.getId());
         } else {
             Toast.makeText(getContext(), "Unknown error!", Toast.LENGTH_SHORT).show();
             Log.e(TAG,"Unspecified chat type.");
@@ -333,7 +333,7 @@ public class ChatFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetChat(tournamentID,clubID,receiverID,selfID,limit,beforeID,afterID);
+        String url = UrlHelper.urlChat(tournamentID,clubID,receiverID,selfID,limit,beforeID,afterID);
         RequestHelper.sendGetRequest(url,actionGetChat);
     }
 

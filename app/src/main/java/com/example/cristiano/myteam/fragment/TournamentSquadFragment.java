@@ -129,7 +129,7 @@ public class TournamentSquadFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetTournamentClubSquad(tournamentID,clubID);
+        String url = UrlHelper.urlSquadByTournamentClub(tournamentID,clubID);
         RequestHelper.sendGetRequest(url,actionGetTournamentClubSquad);
     }
 
@@ -287,7 +287,7 @@ public class TournamentSquadFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetClubMembers(clubID);
+        String url = UrlHelper.urlMembersByClub(clubID);
         RequestHelper.sendGetRequest(url,actionGetTeamsheet);
     }
 
@@ -323,7 +323,7 @@ public class TournamentSquadFragment extends Fragment {
 
             }
         };
-        String url = UrlHelper.urlPostTournamentSquad(tournamentID,clubID);
+        String url = UrlHelper.urlTournamentSquad(tournamentID,clubID);
         RequestHelper.sendPostRequest(url, playerIDList.toJson(),actionAddToSquad);
     }
 
@@ -391,7 +391,7 @@ public class TournamentSquadFragment extends Fragment {
             }
         };
         squad.setNumber(newNumber);
-        String url = UrlHelper.urlPutSquad();
+        String url = UrlHelper.urlSquad();
         RequestHelper.sendPutRequest(url,squad.toJson(),actionUpdateNumber);
     }
 

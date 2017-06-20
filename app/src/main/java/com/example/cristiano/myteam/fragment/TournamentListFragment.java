@@ -191,7 +191,7 @@ public class TournamentListFragment extends Fragment {
                         }
                     }
                 };
-                String url = UrlHelper.urlPostRegTournament(club.id,player.getId());
+                String url = UrlHelper.urlRegTournamentFromClub(club.id,player.getId());
                 RequestHelper.sendPostRequest(url,regTournament.toJson(),actionPostRegTournament);
             }
         });

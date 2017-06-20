@@ -73,17 +73,17 @@
 
         <ImageView
             android:id="@+id/iv_negative"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:background="@color/colorRed"/>
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_downward_grey_24dp"/>
 
         <ImageView
             android:id="@+id/iv_positive"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:layout_marginLeft="20dp"
             android:layout_marginStart="20dp"
-            android:background="@color/colorGreen"/>
+            android:src="@drawable/ic_arrow_upward_green_24dp"/>
 
     </LinearLayout>
 

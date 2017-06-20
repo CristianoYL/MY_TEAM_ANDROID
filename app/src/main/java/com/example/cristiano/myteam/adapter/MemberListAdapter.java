@@ -33,12 +33,12 @@ public class MemberListAdapter extends BaseAdapter {
     private Resources resources;
 
     public MemberListAdapter(@NonNull Context context, @NonNull List<Player> playerList,
-                             @NonNull List<Member> memberInfo, int selfID, int priority) {
+                             @NonNull List<Member> memberInfo, int selfID, int selfPriority) {
         this.context = context;
         this.playerList = playerList;
         this.memberInfo = memberInfo;
         this.selfID = selfID;
-        this.priority = priority;
+        this.priority = selfPriority;
         this.resources = context.getResources();
 
     }
@@ -126,8 +126,8 @@ public class MemberListAdapter extends BaseAdapter {
                 viewHolder.tv_clubRole.setText(R.string.priority_applicant);
                 if ( priority > Constant.PRIORITY_REGULAR ) {
                     viewHolder.view_admin.setVisibility(View.VISIBLE);
-//                    viewHolder.iv_negative.setImageResource(R.drawable.ic_leftfoot);
-//                    viewHolder.iv_positive.setImageResource(R.drawable.ic_rightfoot);
+                    viewHolder.iv_negative.setImageResource(R.drawable.ic_block_red_24dp);
+                    viewHolder.iv_positive.setImageResource(R.drawable.ic_check_circle_green_24dp);
                     OnMemberListClickListener memberListClickListener = new OnMemberListClickListener(position);
                     viewHolder.iv_negative.setOnClickListener(memberListClickListener);
                     viewHolder.iv_positive.setOnClickListener(memberListClickListener);
@@ -140,8 +140,8 @@ public class MemberListAdapter extends BaseAdapter {
                 viewHolder.tv_clubRole.setText(R.string.priority_member);
                 if ( priority > Constant.PRIORITY_REGULAR ) {
                     viewHolder.view_admin.setVisibility(View.VISIBLE);
-//                    viewHolder.iv_negative.setImageResource(R.drawable.ic_leftfoot);
-//                    viewHolder.iv_positive.setImageResource(R.drawable.avatar_scholes);
+                    viewHolder.iv_negative.setImageResource(R.drawable.ic_delete_red_24dp);
+                    viewHolder.iv_positive.setImageResource(R.drawable.ic_arrow_upward_green_24dp);
                     OnMemberListClickListener memberListClickListener = new OnMemberListClickListener(position);
                     viewHolder.iv_negative.setOnClickListener(memberListClickListener);
                     viewHolder.iv_positive.setOnClickListener(memberListClickListener);
@@ -154,7 +154,7 @@ public class MemberListAdapter extends BaseAdapter {
                 viewHolder.tv_clubRole.setText(R.string.priority_co_cap);
                 if ( priority > Constant.PRIORITY_REGULAR ) {
                     viewHolder.view_admin.setVisibility(View.VISIBLE);
-//                    viewHolder.iv_negative.setImageResource(R.drawable.avatar_rooney);
+                    viewHolder.iv_negative.setImageResource(R.drawable.ic_arrow_downward_grey_24dp);
                     viewHolder.iv_positive.setVisibility(View.GONE);
                     OnMemberListClickListener memberListClickListener = new OnMemberListClickListener(position);
                     viewHolder.iv_negative.setOnClickListener(memberListClickListener);
@@ -208,6 +208,20 @@ public class MemberListAdapter extends BaseAdapter {
         } else {
             return role;
         }
+    }
+    private void rejectApplicant(){
+
+    }
+    private void acceptApplicant(){
+
+    }
+    private void promoteMember(){
+
+    }
+    private void demoteMember(){
+
+    }
+    private void kickMember(){
 
     }
 }

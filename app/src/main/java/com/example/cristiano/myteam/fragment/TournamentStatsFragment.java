@@ -129,7 +129,7 @@ public class TournamentStatsFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetTournamentClubStats(tournamentID,clubID);
+        String url = UrlHelper.urlStatsByTournamentClub(tournamentID,clubID);
         RequestHelper.sendGetRequest(url,actionGetClubStats);
     }
 

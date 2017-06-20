@@ -31,125 +31,109 @@ public class UrlHelper {
     }
 
 
-    public static String urlGetPlayer(String playerEmail){
-        return URL + "/player/email/" + playerEmail;
+    public static String urlPlayerByUser(int userID){
+        return URL + "/player/user/" + userID;
     }
 
-    public static String urlGetPlayerInfo(String playerEmail){
-        return URL + "/player_info/email/" + playerEmail;
-    }
-
-    public static String urlGetPlayerClubInfo(int clubID, int playerID){
-        return URL + "/player_info/" + playerID + "/club/" + clubID;
-    }
-
-    public static String urlPutPlayer(int playerID){
+    public static String urlPlayerByID(int playerID){
         return URL + "/player/id/" + playerID;
     }
 
-    public static String urlPutPlayer(String playerEmail){
-        return URL + "/player/email/" + playerEmail;
+    public static String urlGetPlayerByToken(){
+        return URL + "/player/token";
+    }
+
+    public static String urlPlayerInfoByUser(int userID){
+        return URL + "/player_info/user/" + userID;
+    }
+
+    public static String urlPlayerClubInfo(int clubID, int playerID){
+        return URL + "/player_info/" + playerID + "/club/" + clubID;
     }
 
     public static String urlPostRegPlayer(int clubID){
         return URL + "/player/club/" + clubID;
     }
 
-    public static String urlGetClubByID(int clubID){
+    public static String urlClubByID(int clubID){
         return URL + "/club/id/" + clubID;
     }
 
-    public static String urlGetClubByName(String name){
+    public static String urlClubByName(String name){
         return URL + "/club/name/" + name;
     }
 
-    public static String urlGetClubInfo(int clubID){
+    public static String urlClubInfoByID(int clubID){
         return URL + "/club_info/id/" + clubID;
     }
 
-    public static String urlPostClubRequest(int clubID) {
+    public static String urlMemberRequest(int clubID) {
         return URL + "/member/request/" + clubID;
     }
 
-    public static String urlPostRegClub(int playerID){
+    public static String urlRegClubFromPlayer(int playerID){
         return URL + "/club/player/" + playerID;
     }
 
-    public static String urlPostSquad() {
+    public static String urlSquad() {
         return URL + "/squad";
     }
 
-    public static String urlPutSquad() {
-        return URL + "/squad";
-    }
-
-    public static String urlGetClubMembers(int clubID){
+    public static String urlMembersByClub(int clubID){
         return URL + "/member/club/" + clubID;
     }
 
-    public static String urlPostRegTournament(int clubID, int playerID){
+    public static String urlRegTournamentFromClub(int clubID, int playerID){
         return URL + "/tournament/club/" + clubID + "/player/" + playerID;
     }
 
-    public static String urlPostTournament(){
-        return URL + "/tournament/register";
-    }
-
-    public static String urlPostTournamentSquad(int tournamentID, int clubID){
+    public static String urlTournamentSquad(int tournamentID, int clubID){
         return URL + "/tournament/" + tournamentID + "/club/" + clubID;
     }
 
-    public static String urlGetPlayerTournamentStats(int tournamentID, int clubID, int playerID){
+    public static String urlStatsByTournamentClubPlayer(int tournamentID, int clubID, int playerID){
         return URL + "/stats/tournament/" + tournamentID + "/club/" + clubID + "/player/" + playerID;
     }
 
-    public static String urlGetClubResults(int clubID){
-        return URL + "/result/club/" + clubID;
-    }
-
-    public static String urlGetClubTournamentResults(int tournamentID, int clubID){
+    public static String urlResultsByTournamentClub(int tournamentID, int clubID){
         return URL + "/result/tournament/"+tournamentID+"/club/" + clubID;
     }
 
-    public static String urlPostClubTournamentResults(int tournamentID, int clubID){
-        return URL + "/result/tournament/"+tournamentID+"/club/" + clubID;
-    }
-
-    public static String urlGetClubTournaments(int clubID){
+    public static String urlTournamentsByClub(int clubID){
         return URL + "/tournament/club/" + clubID;
     }
 
-    public static String urlGetTournamentClubStats (int tournamentID, int clubID) {
+    public static String urlStatsByTournamentClub(int tournamentID, int clubID) {
         return URL + "/stats/tournament/" + tournamentID + "/club/" + clubID;
     }
 
-    public static String urlGetTournamentClubSquad (int tournamentID, int clubID) {
+    public static String urlSquadByTournamentClub (int tournamentID, int clubID) {
         return URL + "/squad/tournament/" + tournamentID + "/club/" + clubID;
     }
 
-    public static String urlGetChat (int tournamentID, int clubID, int receiverID, int senderID, int limit, int beforeID, int afterID) {
+    public static String urlChat(int tournamentID, int clubID, int receiverID, int senderID, int limit, int beforeID, int afterID) {
         return URL + "/chat/tournament/" + tournamentID + "/club/" + clubID + "/receiver/"
                 + receiverID + "/sender/" + senderID + "/limit/" + limit
                 + "/before/" + beforeID + "/after/" + afterID;
     }
 
-    public static String urlPostTournamentChat (int tournamentID, int clubID) {
+    public static String urlChatByTournament(int tournamentID, int clubID) {
         return URL + "/chat/tournament/" + tournamentID + "/club/" + clubID;
     }
 
-    public static String urlPostClubChat (int clubID) {
+    public static String urlChatByClub(int clubID) {
         return URL + "/chat/club/" + clubID;
     }
 
-    public static String urlPostPrivateChat (int receiverID) {
+    public static String urlPrivateChat(int receiverID) {
         return URL + "/chat/private/" + receiverID;
     }
 
-    public static String urlPutLocation (int clubID, int playerID) {
+    public static String urlLocationByClubPlayer(int clubID, int playerID) {
         return URL + "/location/club/" + clubID + "/player/" + playerID;
     }
 
-    public static String urlGetAllLocations (int clubID) {
+    public static String urlLocationByClub(int clubID) {
         return URL + "/location/club/" + clubID;
     }
 

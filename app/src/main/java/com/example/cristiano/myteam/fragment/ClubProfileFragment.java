@@ -141,7 +141,7 @@ public class ClubProfileFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetClubInfo(club.id);
+        String url = UrlHelper.urlClubInfoByID(club.id);
         RequestHelper.sendGetRequest(url,actionGetClubInfo);
     }
 

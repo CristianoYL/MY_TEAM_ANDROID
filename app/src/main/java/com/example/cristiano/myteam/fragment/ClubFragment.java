@@ -142,4 +142,16 @@ public class ClubFragment extends Fragment {
                 Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(clubView.getWindowToken(), 0);
     }
+
+    public boolean onBackPressed(){
+        int position = tab_club.getSelectedTabPosition();
+        if ( position > 0 ) {
+            TabLayout.Tab tab = tab_club.getTabAt(--position);
+            if ( tab != null ) {
+                tab.select();
+                return true;
+            }
+        }
+        return false;
+    }
 }

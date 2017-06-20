@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 public class Player {
     private int id;
-    private String email;
+    private int userID;
     private String firstName;
     private String lastName;
     private String displayName;
@@ -22,10 +22,10 @@ public class Player {
     private boolean leftFooted;
     private int avatar;
 
-    public Player(int id, String email, String firstName, String lastName, String displayName, String role,
+    public Player(int id, int userID, String firstName, String lastName, String displayName, String role,
                   String phone, int age, float weight, float height, boolean leftFooted, int avatar) {
         this.id = id;
-        this.email = email;
+        this.userID = userID;
         this.firstName = firstName;
         this.lastName = lastName;
         this.displayName = displayName;
@@ -47,8 +47,8 @@ public class Player {
         return id;
     }
 
-    public String getEmail() {
-        return email;
+    public int getUserID() {
+        return userID;
     }
 
     public String getFirstName() {

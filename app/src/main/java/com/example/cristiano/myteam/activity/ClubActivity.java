@@ -74,9 +74,11 @@ public class ClubActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             FragmentManager fragmentManager = getSupportFragmentManager();
-            Fragment fragment = fragmentManager.findFragmentByTag(Constant.FRAGMENT_CLUB);
+            ClubFragment fragment = (ClubFragment)fragmentManager.findFragmentByTag(Constant.FRAGMENT_CLUB);
             if ( fragment != null && fragment.isVisible() ) {
-                showLogoutPage();
+                if ( !fragment.onBackPressed() ) {
+                    showLogoutPage();
+                }
             } else {
                 showClubPage();
             }

@@ -190,7 +190,7 @@ public class TournamentResultFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetClubTournamentResults(tournament.id,club.id);
+        String url = UrlHelper.urlResultsByTournamentClub(tournament.id,club.id);
         RequestHelper.sendGetRequest(url,actionGetClubResults);
     }
 
@@ -710,7 +710,7 @@ public class TournamentResultFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetTournamentClubSquad(tournament.id,club.id);
+        String url = UrlHelper.urlSquadByTournamentClub(tournament.id,club.id);
         RequestHelper.sendGetRequest(url,actionGetTournamentClubSquad);
     }
 
@@ -763,7 +763,7 @@ public class TournamentResultFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlPostClubTournamentResults(tournament.id,club.id);
+        String url = UrlHelper.urlResultsByTournamentClub(tournament.id,club.id);
         RequestHelper.sendPostRequest(url,gameResultAndStats.toJson(),actionPostResultAndStats);
     }
 }

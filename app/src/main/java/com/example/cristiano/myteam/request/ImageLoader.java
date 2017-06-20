@@ -1,4 +1,4 @@
-package com.example.cristiano.myteam.util;
+package com.example.cristiano.myteam.request;
 
 /**
  * Created by Cristiano on 2017/6/1.

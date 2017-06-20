@@ -61,6 +61,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     private RequestAction requestAction = null;
 
+    private static final String TAG = "LoginActivity";
+
     // UI references.
     private AutoCompleteTextView et_email;
     private EditText et_password,et_passwordConfirm;
@@ -70,7 +72,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private boolean isLogin, rememberUsername,autoLogin;
     private CheckBox cb_remember, cb_auto;
 
-    private String email, password;
+    private String email, password, jwtToken;
     SharedPreferences sharedPreferences;
 
 
@@ -206,7 +208,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void attemptRegister() {
         if (requestAction != null) {
-            Log.d("REGISTER","another request in being sent...");
+            Log.d(TAG,"another request in being sent...");
             return;
         }
 
@@ -262,7 +264,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 @Override
                 public void actOnPost(int responseCode, String response) {
-                    Log.d("Register response",response);
+                    Log.d(TAG,response);
                     showProgress(false);
                     if ( responseCode == 201 ) {
                         Toast.makeText(LoginActivity.this,"Registration Succeeded!",Toast.LENGTH_SHORT).show();
@@ -282,7 +284,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             et_email.setError(message);
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Log.e("LOGIN","unexpected response");
+                            Log.e(TAG,"unexpected response");
                             et_email.setError(response);
                         }
                         et_email.requestFocus();
@@ -290,7 +292,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     requestAction = null;
                 }
             };
-            Log.d("LOGIN_TEST","registering...");
+            Log.d(TAG,"registering...");
             String url = UrlHelper.urlRegister();
             User user = new User(this.email,this.password);
             RequestHelper.sendPostRequest(url,user.toJson(),requestAction);
@@ -300,7 +302,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     private void attemptLogin() {
         if (requestAction != null) {
-            Log.d("LOGIN","another request in being sent...");
+            Log.d(TAG,"another request in being sent...");
             return;
         }
 
@@ -361,9 +363,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                 @Override
                 public void actOnPost(int responseCode, String response) {
-                    Log.d("Response",response);
                     showProgress(false);
                     if ( responseCode == 200 ) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            jwtToken = jsonObject.getString(Constant.USER_ACCESS_TOKEN);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.e(TAG,"Missing access_token");
+                            return;
+                        }
                         navigateToNextPage();
                     } else {
                         try {
@@ -377,7 +386,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             et_password.setError(message);
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            Log.e("LOGIN","unexpected response");
+                            Log.e(TAG,"unexpected response");
                             if ( response == null || response.length() < 1 ) {
                                 et_password.setError(getString(R.string.error_no_connection));
                             } else {
@@ -389,7 +398,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     requestAction = null;
                 }
             };
-            Log.d("LOGIN_TEST","login...");
             String url = UrlHelper.urlLogin();
             RequestHelper.sendPostRequest(url,credentials,requestAction);
         }
@@ -563,6 +571,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     try {
                         JSONObject jsonPlayer = new JSONObject(response);
                         int playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
+                        int userID = jsonPlayer.getInt(Constant.PLAYER_USER_ID);
                         String firstName = jsonPlayer.getString(Constant.PLAYER_FIRST_NAME);
                         String lastName = jsonPlayer.getString(Constant.PLAYER_LAST_NAME);
                         String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
@@ -574,7 +583,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
                         int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
                         // use the retrieve info to create a Player instance
-                        Player player = new Player(playerID,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+                        Player player = new Player(playerID,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
                         int defaultClubID = sharedPreferences.getInt(Constant.CACHE_DEFAULT_CLUB_ID,0);
                         if ( defaultClubID != 0 ) { // if default club has been set
                             getClub(defaultClubID, player); // go to default club's page
@@ -585,15 +594,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         e.printStackTrace();
                     }
                 } else if ( responseCode == 404 ) { // if player not found, go to registration page
-                    Log.d("LoginActivity","New user login");
-                    showRegistrationPage(email);
+                    Log.d(TAG,"New user login");
+                    showRegistrationPage(jwtToken);
                 } else {
                     Toast.makeText(LoginActivity.this, "Unknown Error!", Toast.LENGTH_SHORT).show();
                 }
             }
         };
-        String url = UrlHelper.urlGetPlayer(email);
-        RequestHelper.sendGetRequest(url,actionGetPlayer);
+        String url = UrlHelper.urlGetPlayerByToken();
+        RequestHelper.sendGetRequest(url,jwtToken,actionGetPlayer); // try to use access_token to get the player
     }
 
     private void getClub(int clubID, final Player player) {
@@ -620,7 +629,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             }
         };
-        String url = UrlHelper.urlGetClubByID(clubID);
+        String url = UrlHelper.urlClubByID(clubID);
         RequestHelper.sendGetRequest(url,actionGetClub);
     }
 
@@ -637,9 +646,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         startActivity(intent);
     }
 
-    private void showRegistrationPage(String email) {
+    private void showRegistrationPage(String jwt) {
         Intent intent = new Intent(LoginActivity.this,PlayerRegistrationActivity.class);
-        intent.putExtra(Constant.PLAYER_EMAIL,email);
+        intent.putExtra(Constant.USER_ACCESS_TOKEN,jwt);
         startActivity(intent);
     }
 }

@@ -21,7 +21,6 @@ import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.Gson;
 
 import org.json.JSONException;
@@ -35,9 +34,8 @@ import java.util.Locale;
  */
 public class PlayerRegistrationActivity extends AppCompatActivity {
 
-    private String email;
+    private String jwt;
     private Player player;
-    private boolean isVisitor;
 
     private EditText et_firstName, et_lastName, et_displayName, et_age, et_phone, et_height, et_weight;
     private Switch sw_unit, sw_leftFooted;
@@ -92,11 +90,10 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             Log.e("PlayerRegActivity","Missing player bundle");
             return;
         }
-        this.email = bundle.getString(Constant.PLAYER_EMAIL,null);  // creating the player for the first time
+        this.jwt = bundle.getString(Constant.USER_ACCESS_TOKEN,null);  // creating the player for the first time
         if ( bundle.containsKey(Constant.KEY_PLAYER) ) {    // updating an existing player
             setTitle("Update Profile");
             this.player = new Gson().fromJson(bundle.getString(Constant.KEY_PLAYER),Player.class);
-            this.isVisitor = bundle.getBoolean(Constant.KEY_IS_VISITOR,false);
             if ( this.player == null ) {
                 Log.e("PlayerRegActivity","Missing player info");
                 return;
@@ -166,10 +163,11 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             height = height * 30.48f;   // convert ft to cm
         }
         boolean leftFooted = sw_leftFooted.isChecked();
+        int userID = 0;
         int avatar = 0;
 
-        Player player = new Player(id,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
-        RequestAction actionPutPlayer = new RequestAction() {
+        Player player = new Player(id,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+        RequestAction actionRegPlayer = new RequestAction() {
             @Override
             public void actOnPre() {
 
@@ -207,10 +205,11 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
         };
         String url;
         if ( this.player != null ) {
-            url = UrlHelper.urlPutPlayer(this.player.getId());
-        } else {
-            url = UrlHelper.urlPutPlayer(email);
+            url = UrlHelper.urlPlayerByID(this.player.getId());
+            RequestHelper.sendPutRequest(url, player.toJson() ,actionRegPlayer);
+        } else if ( this.jwt != null ){
+            url = UrlHelper.urlGetPlayerByToken();
+            RequestHelper.sendPostRequest(url, player.toJson(), jwt ,actionRegPlayer);
         }
-        RequestHelper.sendPutRequest(url, player.toJson() ,actionPutPlayer);
     }
 }

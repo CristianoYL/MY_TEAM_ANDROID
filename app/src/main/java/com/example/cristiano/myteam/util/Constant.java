@@ -80,7 +80,7 @@ public class Constant {
     public static final String TABLE_PLAYER = "player";
     // player table column
     public static final String PLAYER_ID = "id";
-    public static final String PLAYER_EMAIL = "email";
+    public static final String PLAYER_USER_ID = "userID";
     public static final String PLAYER_FIRST_NAME = "firstName";
     public static final String PLAYER_LAST_NAME = "lastName";
     public static final String PLAYER_DISPLAY_NAME = "displayName";
@@ -98,6 +98,7 @@ public class Constant {
     // user columns
     public static final String USER_EMAIL = "email";
     public static final String USER_PASSWORD = "password";
+    public static final String USER_ACCESS_TOKEN = "access_token";
 
     // table club
     public static final String TABLE_CLUB = "club";

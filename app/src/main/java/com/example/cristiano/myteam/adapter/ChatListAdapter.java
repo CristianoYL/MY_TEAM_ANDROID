@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.structure.Chat;
 import com.example.cristiano.myteam.util.Constant;
-import com.example.cristiano.myteam.util.ImageLoader;
+import com.example.cristiano.myteam.request.ImageLoader;
 
 import java.text.ParseException;
 import java.util.Date;

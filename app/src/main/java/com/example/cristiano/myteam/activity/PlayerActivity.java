@@ -70,6 +70,8 @@ import java.util.ArrayList;
 public class PlayerActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private final static String TAG = "PlayerActivity";
+
     private TextView tv_name, tv_role,tv_playerTournament;
     private ImageView iv_avatar;
     private ConstraintLayout layout_profile,layout_club;
@@ -83,7 +85,6 @@ public class PlayerActivity extends AppCompatActivity
     private ActionBarDrawerToggle toggle;
     private Toolbar toolbar;
 
-    private String email;
     private int playerID;
     private PlayerInfo playerInfo;
     private boolean isVisitor = false;
@@ -129,8 +130,13 @@ public class PlayerActivity extends AppCompatActivity
         if ( bundle == null ) {
             return;
         }
-        if ( !bundle.containsKey(Constant.PLAYER_EMAIL) && !bundle.containsKey(Constant.KEY_PLAYER_ID) ) {
-            Log.e("PlayerActivity","Missing player email / id");
+        if ( !bundle.containsKey(Constant.KEY_PLAYER_ID) ) {
+            Log.e(TAG,"Missing player id");
+            return;
+        }
+        playerID = bundle.getInt(Constant.KEY_PLAYER_ID);
+        if ( playerID < 1 ) {
+            Log.e(TAG,"Wrong player id (id<0)");
             return;
         }
         if ( bundle.containsKey(Constant.KEY_IS_VISITOR) ) {
@@ -139,8 +145,6 @@ public class PlayerActivity extends AppCompatActivity
                 setVisitorMode();
             }
         }
-        this.email = bundle.getString(Constant.PLAYER_EMAIL,null);
-        this.playerID = bundle.getInt(Constant.KEY_PLAYER_ID,0);
     }
 
     @Override
@@ -153,7 +157,7 @@ public class PlayerActivity extends AppCompatActivity
         String instanceToken = FirebaseInstanceId.getInstance().getToken();
         if ( sharedPreferences.getString(Constant.CACHE_CACHED_TOKEN,null) == null ) {
 
-            Log.d("Token","token=" + instanceToken);
+            Log.d(TAG,"token=" + instanceToken);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(Constant.CACHE_CACHED_TOKEN,instanceToken);
             editor.apply();
@@ -166,7 +170,7 @@ public class PlayerActivity extends AppCompatActivity
              *  do not send the token to server for now
              *  wait till the user register as player and then send the token to app server
              */
-            Log.d("Token","Not logged in yet. No playerID available");
+            Log.d(TAG,"Not logged in yet. No playerID available");
             return;
         }
         // else the playerID is cached, upload the token to server
@@ -174,23 +178,23 @@ public class PlayerActivity extends AppCompatActivity
         RequestAction actionPutToken = new RequestAction() {
             @Override
             public void actOnPre() {
-                Log.d("Token", "Preparing to send new token to server");
+                Log.d(TAG, "Preparing to send new token to server");
             }
 
             @Override
             public void actOnPost(int responseCode, String response) {
                 if ( responseCode == 201 ) {
-                    Log.d("Token", "New token created!");
+                    Log.d(TAG, "New token created!");
                 } else if ( responseCode == 200 ) {
-                    Log.d("Token", "Token Updated!");
+                    Log.d(TAG, "Token Updated!");
                 } else {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         String message = jsonObject.getString(Constant.KEY_MSG);
-                        Log.e("Token", "Uploading token failed with response message:" + message);
+                        Log.e(TAG, "Uploading token failed with response message:" + message);
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Log.e("Token", "Uploading token failed with response message:" + response);
+                        Log.e(TAG, "Uploading token failed with response message:" + response);
                     }
                 }
             }
@@ -300,7 +304,6 @@ public class PlayerActivity extends AppCompatActivity
         sp_playerClub.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("SELECTION CLUB",parent.getItemAtPosition(position).toString());
                 if ( position == 0 ) {  // position[0] == All Clubs
                     showPlayerTotalStats();
                 } else {    // show sp_playerTournament and let the user choose tournaments
@@ -347,7 +350,7 @@ public class PlayerActivity extends AppCompatActivity
                 if ( tab != null ) {
                     tab.select();
                 } else {
-                    Log.e("PlayerStatsViewPager","ERROR: No Tab Found For Selected Page.");
+                    Log.e(TAG,"ERROR: No Tab Found For Selected Page.");
                 }
             }
 
@@ -374,18 +377,11 @@ public class PlayerActivity extends AppCompatActivity
 
     /**
      * go to the player registration page
-     * @param email the email used to login
      * @param player  the Player instance
      */
-    private void showRegistrationPage(String email, Player player){
+    private void showRegistrationPage(Player player){
         Intent intent = new Intent(PlayerActivity.this,PlayerRegistrationActivity.class);
-        intent.putExtra(Constant.PLAYER_EMAIL,email);
-        if ( player != null ) {
-            intent.putExtra(Constant.KEY_PLAYER,player.toJson());
-        }
-        if ( isVisitor ) {
-            intent.putExtra(Constant.KEY_IS_VISITOR,true);
-        }
+        intent.putExtra(Constant.KEY_PLAYER,player.toJson());
         startActivity(intent);
     }
 
@@ -486,14 +482,13 @@ public class PlayerActivity extends AppCompatActivity
                         }
                     }
                 };
-                String url = UrlHelper.urlPostRegClub(playerInfo.getPlayer().getId());
+                String url = UrlHelper.urlRegClubFromPlayer(playerInfo.getPlayer().getId());
                 RequestHelper.sendPostRequest(url,regClub.toJson(),actionPostClub);
             }
         });
         dialogBuilder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-//                dialog.cancel();
             }
         });
         dialogBuilder.setView(v_event);
@@ -584,7 +579,7 @@ public class PlayerActivity extends AppCompatActivity
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 Toast.makeText(PlayerActivity.this, "Error while searching for club", Toast.LENGTH_SHORT).show();
-                                Log.e("SEARCH CLUB",response);
+                                Log.e(TAG,"Error response" + response);
                             }
                         }
                     }
@@ -634,17 +629,17 @@ public class PlayerActivity extends AppCompatActivity
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 Toast.makeText(PlayerActivity.this, "Error while searching for club", Toast.LENGTH_SHORT).show();
-                                Log.e("SEARCH CLUB",response);
+                                Log.e(TAG,"Error response:" + response);
                             }
                         }
                     }
                 };
                 String url;
                 if ( et_search.getInputType() == InputType.TYPE_CLASS_NUMBER) {
-                    url = UrlHelper.urlGetClubByID(Integer.parseInt(et_search.getText().toString()));
+                    url = UrlHelper.urlClubByID(Integer.parseInt(et_search.getText().toString()));
                     RequestHelper.sendGetRequest(url,actionGetClubByID);
                 } else {
-                    url = UrlHelper.urlGetClubByName(et_search.getText().toString());
+                    url = UrlHelper.urlClubByName(et_search.getText().toString());
                     RequestHelper.sendGetRequest(url,actionGetClubByName);
                 }
             }
@@ -680,7 +675,7 @@ public class PlayerActivity extends AppCompatActivity
                     }
                 };
                 int clubID = clubList.get(lv_searchResult.getCheckedItemPosition()).id;
-                String url = UrlHelper.urlPostClubRequest(clubID);
+                String url = UrlHelper.urlMemberRequest(clubID);
                 Member member = new Member(clubID,playerID,null,false,0);
                 RequestHelper.sendPostRequest(url,member.toJson(),actionPostClubRequest);
             }
@@ -719,7 +714,7 @@ public class PlayerActivity extends AppCompatActivity
      * currently, the setting page is the player profile update page
      */
     private void showSettingsPage() {
-        showRegistrationPage(email,playerInfo.getPlayer());
+        showRegistrationPage(playerInfo.getPlayer());
     }
 
     /**
@@ -753,6 +748,12 @@ public class PlayerActivity extends AppCompatActivity
                         // get player's profile info
                         JSONObject jsonPlayer = jsonPlayerInfo.getJSONObject(Constant.PLAYER_INFO_PLAYER);
                         playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
+                        int userID = 0;
+                        try {
+                            userID = jsonPlayer.getInt(Constant.PLAYER_USER_ID);
+                        } catch ( JSONException e ) {
+                            e.printStackTrace();
+                        }
                         String firstName = jsonPlayer.getString(Constant.PLAYER_FIRST_NAME);
                         String lastName = jsonPlayer.getString(Constant.PLAYER_LAST_NAME);
                         String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
@@ -764,7 +765,7 @@ public class PlayerActivity extends AppCompatActivity
                         boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
                         int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
                         // use the retrieve info to create a Player instance
-                        Player player = new Player(playerID,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+                        Player player = new Player(playerID,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
 
                         // get player's all clubs' info
                         JSONArray jsonPlayerClubs = jsonPlayerInfo.getJSONArray(Constant.PLAYER_INFO_CLUBS);
@@ -828,29 +829,23 @@ public class PlayerActivity extends AppCompatActivity
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                } else if ( responseCode == 404 ){  // if the player's info is not found
-                    // it means it's a new user, let the user create his player profile first
-                    showRegistrationPage(email,null);
+                } else if ( responseCode == 404 ){
+                    finish();
                 } else {
+                    Toast.makeText(PlayerActivity.this, "Failed to retrieve player info.", Toast.LENGTH_LONG).show();
                     try {
                         JSONObject jsonObject = new JSONObject(response);
-                        Toast.makeText(PlayerActivity.this,jsonObject.getString(Constant.KEY_MSG),
-                                Toast.LENGTH_LONG).show();
+                        String message = jsonObject.getString(Constant.KEY_MSG);
+                        Log.e(TAG,"Error Message:" + message);
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Toast.makeText(PlayerActivity.this,response,Toast.LENGTH_LONG).show();
+                        Log.e(TAG,"Error response:" + response);
                     }
                 }
             }
         };
         String url;
-        if ( playerID != 0) {   // if the playerID is specified, use the playerID to retrieve the info
-            url = UrlHelper.urlGetPlayerInfo(playerID);
-            Log.d("PlayerActivity","Load by ID");
-        } else {    // otherwise use the email to retrieve the info
-            url = UrlHelper.urlGetPlayerInfo(email);
-            Log.d("PlayerActivity","Load by email");
-        }
+        url = UrlHelper.urlGetPlayerInfo(playerID);
         RequestHelper.sendGetRequest(url,actionGetPlayerInfo);
     }
 
@@ -925,7 +920,7 @@ public class PlayerActivity extends AppCompatActivity
 
             }
         };
-        String url = UrlHelper.urlGetPlayerClubInfo(selectedClubID,playerInfo.getPlayer().getId());
+        String url = UrlHelper.urlPlayerClubInfo(selectedClubID,playerInfo.getPlayer().getId());
         RequestHelper.sendGetRequest(url,actionGetPlayerClubStats);
     }
 
@@ -993,7 +988,7 @@ public class PlayerActivity extends AppCompatActivity
                 }
             }
         };
-        String url = UrlHelper.urlGetPlayerTournamentStats(tournamentID,selectedClubID,playerInfo.getPlayer().getId());
+        String url = UrlHelper.urlStatsByTournamentClubPlayer(tournamentID,selectedClubID,playerInfo.getPlayer().getId());
         RequestHelper.sendGetRequest(url,actionGetPlayerTournamentStats);
     }
 
@@ -1092,7 +1087,6 @@ public class PlayerActivity extends AppCompatActivity
         sp_playerTournament.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("SELECTION TOUR",parent.getItemAtPosition(position).toString());
                 if ( position == 0 ) {  // show player's club total stats
                     showPlayerClubStats();
                 } else {    // show player's tournament stats

@@ -23,14 +23,15 @@ import java.net.URL;
  *  sends the request and process the response in the background thread
  */
 
-public class BackgroundTask extends AsyncTask<String, Object, String> {
+public class HttpBackgroundTask extends AsyncTask<String, Object, String> {
 
     private int responseCode = 400;
     private InputStream inputStream;
     private OutputStream outputStream;
     private RequestAction action = null;
+    private final static String TAG = "HttpBackgroundTask";
 
-    public BackgroundTask(RequestAction action){
+    public HttpBackgroundTask(RequestAction action){
         this.action = action;
     }
 
@@ -39,12 +40,17 @@ public class BackgroundTask extends AsyncTask<String, Object, String> {
         String method = params[0];
         String url = params[1];
         String data;
+        String jwt;
         if ( method.equals(Constant.METHOD_GET) ) {
             data = null;
         } else {
             data = params[2];
         }
-        return sendRequest(url,method,data);
+        if ( params.length == 4 ) {
+            jwt = params[3];
+            return sendRequest(url,method,data,jwt);
+        }
+        return sendRequest(url,method,data,null);
     }
 
     @Override
@@ -62,13 +68,17 @@ public class BackgroundTask extends AsyncTask<String, Object, String> {
         }
         super.onPostExecute(response);
     }
-    private String sendRequest(String url, String method, String jsonData){
-        Log.d("SendRequest","sending " + method +" request to " + url);
+    private String sendRequest(String url, String method, String jsonData, String jwtToken){
+        Log.d(TAG,"sending " + method +" request to " + url);
         String response = "";
         HttpURLConnection httpURLConnection = null;
         try {
             httpURLConnection = (HttpURLConnection) (new URL(url)).openConnection();
             httpURLConnection.setRequestMethod(method);
+            if ( jwtToken != null ) {
+                Log.d(TAG,"Using JWT:" + jwtToken);
+                httpURLConnection.setRequestProperty("Authorization", "JWT " + jwtToken);
+            }
             if (jsonData != null) {
                 httpURLConnection.setRequestProperty("content-type", "application/json");
                 httpURLConnection.setDoOutput(true);
@@ -96,12 +106,12 @@ public class BackgroundTask extends AsyncTask<String, Object, String> {
                 while ((line = reader.readLine()) != null) {
                     stringBuilder.append("\n");
                     stringBuilder.append(line);
-                    Log.d("REQUEST_SENDER", "readLine=" + line + ";");
+                    Log.d(TAG, "readLine=" + line + ";");
                 }
             }
             inputStream.close();
             response = stringBuilder.toString();
-            Log.d("RESPONSE", response + ";");
+            Log.d(TAG, response + ";");
         } catch (SocketTimeoutException e) {
             response = Constant.MSG_TIME_OUT;
         } catch (IOException e) {
