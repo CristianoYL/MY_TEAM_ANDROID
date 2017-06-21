@@ -48,7 +48,7 @@ public class Constant {
     public static final String PREF_AUTO_LOGIN = "auto login";
     public static final String CACHE_PLAYER_ID = "my player ID";
     public static final String CACHE_DEFAULT_CLUB_ID = "my default club ID";
-    public static final String CACHE_CACHED_TOKEN = "cached token";
+    public static final String CACHE_IDD_TOKEN = "cached token";
 
     public static final String METHOD_POST = "POST";
     public static final String METHOD_GET = "GET";

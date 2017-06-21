@@ -139,11 +139,18 @@ public class PlayerActivity extends AppCompatActivity
             Log.e(TAG,"Wrong player id (id<0)");
             return;
         }
-        if ( bundle.containsKey(Constant.KEY_IS_VISITOR) ) {
-            this.isVisitor = bundle.getBoolean(Constant.KEY_IS_VISITOR);
-            if ( isVisitor ) {
-                setVisitorMode();
-            }
+        sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
+        int myPlayerID = sharedPreferences.getInt(Constant.CACHE_PLAYER_ID,0);
+        if ( myPlayerID == 0 || myPlayerID != playerID ){   // update cached playerID
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(Constant.CACHE_PLAYER_ID,playerID);
+            editor.apply();
+        }
+        this.isVisitor = bundle.getBoolean(Constant.KEY_IS_VISITOR,false);
+        if ( isVisitor ) {
+            setVisitorMode();
+        } else {
+            uploadIIDToken();
         }
     }
 
@@ -153,54 +160,6 @@ public class PlayerActivity extends AppCompatActivity
         if ( this.isVisitor ) {
             this.setVisitorMode();
         }
-        sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
-        String instanceToken = FirebaseInstanceId.getInstance().getToken();
-        if ( sharedPreferences.getString(Constant.CACHE_CACHED_TOKEN,null) == null ) {
-
-            Log.d(TAG,"token=" + instanceToken);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putString(Constant.CACHE_CACHED_TOKEN,instanceToken);
-            editor.apply();
-        }
-        // see if user's playerID is cached
-        int myPlayerID = playerID;
-        if ( myPlayerID == 0 ) {
-            /**
-             *  if playerID not cached, it means this is a new user
-             *  do not send the token to server for now
-             *  wait till the user register as player and then send the token to app server
-             */
-            Log.d(TAG,"Not logged in yet. No playerID available");
-            return;
-        }
-        // else the playerID is cached, upload the token to server
-        Token token = new Token(myPlayerID,instanceToken);
-        RequestAction actionPutToken = new RequestAction() {
-            @Override
-            public void actOnPre() {
-                Log.d(TAG, "Preparing to send new token to server");
-            }
-
-            @Override
-            public void actOnPost(int responseCode, String response) {
-                if ( responseCode == 201 ) {
-                    Log.d(TAG, "New token created!");
-                } else if ( responseCode == 200 ) {
-                    Log.d(TAG, "Token Updated!");
-                } else {
-                    try {
-                        JSONObject jsonObject = new JSONObject(response);
-                        String message = jsonObject.getString(Constant.KEY_MSG);
-                        Log.e(TAG, "Uploading token failed with response message:" + message);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Uploading token failed with response message:" + response);
-                    }
-                }
-            }
-        };
-        String url = UrlHelper.urlPutToken(myPlayerID);
-        RequestHelper.sendPutRequest(url,token.toJson(),actionPutToken);
         loadPlayerInfo();   // load player info in onResume() allows info updated when navigating back to this activity
     }
 
@@ -1122,5 +1081,44 @@ public class PlayerActivity extends AppCompatActivity
                 finish();
             }
         });
+    }
+
+    /**
+     * upload player's FireBase Instance ID Token to server
+     */
+    private void uploadIIDToken(){
+        String instanceToken = FirebaseInstanceId.getInstance().getToken();
+        if ( instanceToken == null ) {
+            Log.e(TAG,"Null IID Token error.");
+            return;
+        }
+        // upload the token to server
+        Token token = new Token(playerID,instanceToken);
+        RequestAction actionPutToken = new RequestAction() {
+            @Override
+            public void actOnPre() {
+                Log.d(TAG, "Preparing to send new token to server");
+            }
+
+            @Override
+            public void actOnPost(int responseCode, String response) {
+                if ( responseCode == 201 ) {
+                    Log.d(TAG, "New token created!");
+                } else if ( responseCode == 200 ) {
+                    Log.d(TAG, "Token Updated!");
+                } else {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        String message = jsonObject.getString(Constant.KEY_MSG);
+                        Log.e(TAG, "Uploading token failed with response message:" + message);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "Uploading token failed with response message:" + response);
+                    }
+                }
+            }
+        };
+        String url = UrlHelper.urlPutToken(playerID);
+        RequestHelper.sendPutRequest(url,token.toJson(),actionPutToken);
     }
 }

@@ -10,6 +10,7 @@ import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,7 +32,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
-
+        FirebaseMessaging.getInstance().subscribeToTopic("all");
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
@@ -50,21 +51,21 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
     private void storeAndUploadToken(String instanceToken){
         SharedPreferences preferences
                 = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
-        String cachedToken = preferences.getString(Constant.CACHE_CACHED_TOKEN,null);
+        String cachedToken = preferences.getString(Constant.CACHE_IDD_TOKEN,null);
         // if token not cached or cached token not matching new ones, update cache and sent to server
         if ( cachedToken == null || !cachedToken.equals(instanceToken) ) {
             // update cache
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(Constant.CACHE_CACHED_TOKEN,instanceToken);
+            editor.putString(Constant.CACHE_IDD_TOKEN,instanceToken);
             editor.apply();
 
             // see if user's playerID is cached
             int myPlayerID = preferences.getInt(Constant.CACHE_PLAYER_ID,0);
             if ( myPlayerID == 0 ) {
                 /**
-                 *  if playerID not cached, it means this is a new user
+                 *  if playerID not cached, it means this is a new user or user not logged in yet
                  *  do not send the token to server for now
-                 *  wait till the user register as player and then send the token to app server
+                 *  wait till the user login/register as player and then send the token to app server
                  */
                 Log.d(TAG,"Not logged in yet. No playerID available");
                 return;
@@ -82,7 +83,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
                     if ( responseCode == 201 ) {
                         Log.d(TAG, "New token created!");
                     } else if ( responseCode == 200 ) {
-                        Log.d(TAG, "Token Updated!");
+                        Log.d(TAG, "Token updated!");
                     } else {
                         try {
                             JSONObject jsonObject = new JSONObject(response);

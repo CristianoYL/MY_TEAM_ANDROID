@@ -24,9 +24,6 @@ public class PercentPieValueFormatter extends PercentFormatter {
     // value
     @Override
     public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
-        if ( value == 0 ) {
-            return "";
-        }
         return super.getFormattedValue(value, entry, dataSetIndex, viewPortHandler);
     }
 }
