@@ -208,7 +208,7 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             url = UrlHelper.urlPlayerByID(this.player.getId());
             RequestHelper.sendPutRequest(url, player.toJson() ,actionRegPlayer);
         } else if ( this.jwt != null ){
-            url = UrlHelper.urlGetPlayerByToken();
+            url = UrlHelper.urlPlayerByToken();
             RequestHelper.sendPostRequest(url, player.toJson(), jwt ,actionRegPlayer);
         }
     }

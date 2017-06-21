@@ -36,13 +36,11 @@ public class ClubActivity extends AppCompatActivity
 
     private Club club;
     private Player player;
-    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_club);
-        sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_club);
         setSupportActionBar(toolbar);
 

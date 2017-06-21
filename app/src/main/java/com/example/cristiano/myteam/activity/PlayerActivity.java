@@ -140,16 +140,17 @@ public class PlayerActivity extends AppCompatActivity
             return;
         }
         sharedPreferences = getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
-        int myPlayerID = sharedPreferences.getInt(Constant.CACHE_PLAYER_ID,0);
-        if ( myPlayerID == 0 || myPlayerID != playerID ){   // update cached playerID
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt(Constant.CACHE_PLAYER_ID,playerID);
-            editor.apply();
-        }
         this.isVisitor = bundle.getBoolean(Constant.KEY_IS_VISITOR,false);
         if ( isVisitor ) {
             setVisitorMode();
         } else {
+            // update cached user's player ID
+            int myPlayerID = sharedPreferences.getInt(Constant.CACHE_PLAYER_ID,0);
+            if ( myPlayerID == 0 || myPlayerID != playerID ){   // update cached playerID
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(Constant.CACHE_PLAYER_ID,playerID);
+                editor.apply();
+            }
             uploadIIDToken();
         }
     }
@@ -631,6 +632,7 @@ public class PlayerActivity extends AppCompatActivity
                             }
                         }
                         dialog.dismiss();
+                        showPlayerClubPage();   // refresh the list
                     }
                 };
                 int clubID = clubList.get(lv_searchResult.getCheckedItemPosition()).id;
@@ -706,7 +708,6 @@ public class PlayerActivity extends AppCompatActivity
 
                         // get player's profile info
                         JSONObject jsonPlayer = jsonPlayerInfo.getJSONObject(Constant.PLAYER_INFO_PLAYER);
-                        playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
                         int userID = 0;
                         try {
                             userID = jsonPlayer.getInt(Constant.PLAYER_USER_ID);
@@ -747,10 +748,6 @@ public class PlayerActivity extends AppCompatActivity
                                 if ( club.id == defaultClubID ) {
                                     club.isDefault = true;
                                 }
-                            }
-                        } else {    // if not set
-                            if ( myClubs.size() > 0 ) {
-                                myClubs.get(0).isDefault = true;
                             }
                         }
                         JSONObject jsonPlayerTotalStats = jsonPlayerInfo.getJSONObject(Constant.PLAYER_INFO_TOTAL_STATS);
@@ -804,7 +801,7 @@ public class PlayerActivity extends AppCompatActivity
             }
         };
         String url;
-        url = UrlHelper.urlGetPlayerInfo(playerID);
+        url = UrlHelper.urlPlayerInfoByID(playerID);
         RequestHelper.sendGetRequest(url,actionGetPlayerInfo);
     }
 

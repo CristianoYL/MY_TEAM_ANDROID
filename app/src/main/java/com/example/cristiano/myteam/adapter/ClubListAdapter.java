@@ -62,10 +62,8 @@ public class ClubListAdapter extends BaseAdapter{
 
     private class OnListButtonClickListener implements View.OnClickListener{
         private int position;
-        private ViewGroup parent;
-        private OnListButtonClickListener(int position, ViewGroup parent) {
+        private OnListButtonClickListener(int position) {
             this.position = position;
-            this.parent = parent;
         }
         @Override
         public void onClick(View v) {
@@ -126,7 +124,7 @@ public class ClubListAdapter extends BaseAdapter{
             viewHolder.iv_default.setImageResource(android.R.drawable.star_big_off);
         }
 
-        viewHolder.iv_default.setOnClickListener(new OnListButtonClickListener(position,parent));
+        viewHolder.iv_default.setOnClickListener(new OnListButtonClickListener(position));
         return convertView;
     }
 }

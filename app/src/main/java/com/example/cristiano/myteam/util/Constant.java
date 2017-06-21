@@ -279,4 +279,8 @@ public class Constant {
     public static final String FRAGMENT_CLUB_TOURNAMENT_LIST = "fragment_club_tournament_list";
     public static final String FRAGMENT_CLUB_TOURNAMENT_DETAIL = "fragment_club_tournament_detail";
     public static final String FRAGMENT_CLUB_MEMBER = "fragment_club_member";
+
+    // FireBase Cloud Messaging Topics
+    public static final String KEY_TOPICS = "topics";
+    public static final String FCM_TOPIC_ALL = "all";
 }

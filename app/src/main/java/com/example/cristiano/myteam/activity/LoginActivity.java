@@ -42,8 +42,10 @@ import com.example.cristiano.myteam.structure.User;
 import com.example.cristiano.myteam.structure.UserCredential;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.request.RequestHelper;
+import com.example.cristiano.myteam.util.FCMHelper;
 import com.example.cristiano.myteam.util.UrlHelper;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -90,6 +92,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         pb_progress = findViewById(R.id.login_progress);
         cb_remember = (CheckBox) findViewById(R.id.cb_remember);
         cb_auto = (CheckBox) findViewById(R.id.cb_autoLogin);
+        FCMHelper.getInstance().subscribeToAppNotification();
         // Set up the login form.
         setRegistrationMode(false);
 //        populateAutoComplete();
@@ -368,12 +371,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             jwtToken = jsonObject.getString(Constant.USER_ACCESS_TOKEN);
+                            navigateToNextPage();
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Log.e(TAG,"Missing access_token");
                             return;
                         }
-                        navigateToNextPage();
                     } else {
                         try {
                             JSONObject jsonObject = new JSONObject(response);
@@ -569,7 +572,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 showProgress(false);
                 if ( responseCode == 200 ) {  // player is found
                     try {
-                        JSONObject jsonPlayer = new JSONObject(response);
+                        JSONObject jsonObject = new JSONObject(response);
+                        JSONObject jsonPlayer = jsonObject.getJSONObject(Constant.TABLE_PLAYER);
                         int playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
                         int userID = jsonPlayer.getInt(Constant.PLAYER_USER_ID);
                         String firstName = jsonPlayer.getString(Constant.PLAYER_FIRST_NAME);
@@ -584,11 +588,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
                         // use the retrieve info to create a Player instance
                         Player player = new Player(playerID,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+                        JSONArray jsonTopics = jsonObject.getJSONArray(Constant.KEY_TOPICS);
+                        String[] topics = new String[jsonTopics.length()];
+                        for ( int i = 0; i < jsonTopics.length(); i++ ) {
+                            topics[i] = jsonTopics.getString(i);
+                        }
+                        FCMHelper.getInstance().subscribeToTopics(topics);
                         int defaultClubID = sharedPreferences.getInt(Constant.CACHE_DEFAULT_CLUB_ID,0);
+                        Log.d(TAG,"Default Club:" + defaultClubID);
                         if ( defaultClubID != 0 ) { // if default club has been set
                             getClub(defaultClubID, player); // go to default club's page
                         } else {    // if not set
-                            showPlayerPage(player.getId()); // go to player's profile page
+                            showPlayerPage(playerID); // go to player's profile page
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -601,7 +612,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             }
         };
-        String url = UrlHelper.urlGetPlayerByToken();
+        String url = UrlHelper.urlPlayerByToken();
         RequestHelper.sendGetRequest(url,jwtToken,actionGetPlayer); // try to use access_token to get the player
     }
 

@@ -5,6 +5,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 import com.example.cristiano.myteam.activity.LoginActivity;
+import com.example.cristiano.myteam.structure.Club;
+import com.example.cristiano.myteam.structure.PlayerInfo;
+import com.example.cristiano.myteam.structure.Tournament;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 /**
  * Created by Cristiano on 2017/6/18.
@@ -20,7 +24,7 @@ import com.example.cristiano.myteam.activity.LoginActivity;
  */
 
 public class LogOutHelper {
-    public static void logOut(Context context){
+    public static void logOut(Context context ){
         SharedPreferences sharedPreferences =
                 context.getSharedPreferences(Constant.KEY_USER_PREF,Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -28,7 +32,8 @@ public class LogOutHelper {
         editor.putInt(Constant.CACHE_PLAYER_ID,0);   // clear my player ID
         editor.putInt(Constant.CACHE_DEFAULT_CLUB_ID,0); // clear default club ID
         editor.apply();
-        //TODO: unregister this device for push notifications
+        // unsubscribe this device from the player's club and tournament chat push notifications
+        FCMHelper.getInstance().unsubscribeAllTopics();
         // go to login page
         Intent intent = new Intent(context,LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);

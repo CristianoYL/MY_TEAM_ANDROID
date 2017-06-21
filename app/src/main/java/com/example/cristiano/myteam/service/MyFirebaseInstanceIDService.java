@@ -7,10 +7,10 @@ import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Token;
 import com.example.cristiano.myteam.util.Constant;
+import com.example.cristiano.myteam.util.FCMHelper;
 import com.example.cristiano.myteam.util.UrlHelper;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +32,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
-        FirebaseMessaging.getInstance().subscribeToTopic("all");
+        FCMHelper.getInstance().subscribeToAppNotification();
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
@@ -54,7 +54,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         String cachedToken = preferences.getString(Constant.CACHE_IDD_TOKEN,null);
         // if token not cached or cached token not matching new ones, update cache and sent to server
         if ( cachedToken == null || !cachedToken.equals(instanceToken) ) {
-            // update cache
+            // update cached IID token
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constant.CACHE_IDD_TOKEN,instanceToken);
             editor.apply();

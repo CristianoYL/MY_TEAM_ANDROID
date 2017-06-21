@@ -127,12 +127,12 @@ public class ChatListAdapter extends BaseAdapter {
     private void setVisibility(boolean isSelf, boolean isText, ViewHolder viewHolder) {
         if ( isText ) { // the message is text
             // hide ImageViews
-            viewHolder.iv_otherImage.setVisibility(View.GONE);
-            viewHolder.iv_selfImage.setVisibility(View.GONE);
+            viewHolder.iv_otherImage.setVisibility(View.INVISIBLE);
+            viewHolder.iv_selfImage.setVisibility(View.INVISIBLE);
             if ( isSelf ) { // if it's a sent text message
                 viewHolder.iv_otherAvatar.setVisibility(View.INVISIBLE);  // hide sender icon
-                viewHolder.tv_otherName.setVisibility(View.GONE);    // hide sender name
-                viewHolder.tv_otherText.setVisibility(View.GONE);   // hide received TextView
+                viewHolder.tv_otherName.setVisibility(View.INVISIBLE);    // hide sender name
+                viewHolder.tv_otherText.setVisibility(View.INVISIBLE);   // hide received TextView
                 viewHolder.iv_selfAvatar.setVisibility(View.VISIBLE);  // show self icon
                 viewHolder.tv_selfName.setVisibility(View.VISIBLE);    // show self name
                 viewHolder.tv_selfText.setVisibility(View.VISIBLE);    // show self TextView
@@ -141,17 +141,17 @@ public class ChatListAdapter extends BaseAdapter {
                 viewHolder.tv_otherName.setVisibility(View.VISIBLE);    // show sender name
                 viewHolder.tv_otherText.setVisibility(View.VISIBLE);    // show received TextView
                 viewHolder.iv_selfAvatar.setVisibility(View.INVISIBLE);  // hide self icon
-                viewHolder.tv_selfName.setVisibility(View.GONE);    // hide self name
-                viewHolder.tv_selfText.setVisibility(View.GONE);       // hide self TextView
+                viewHolder.tv_selfName.setVisibility(View.INVISIBLE);    // hide self name
+                viewHolder.tv_selfText.setVisibility(View.INVISIBLE);       // hide self TextView
             }
         } else {
             // hide TextViews
-            viewHolder.tv_otherText.setVisibility(View.GONE);
-            viewHolder.tv_selfText.setVisibility(View.GONE);
+            viewHolder.tv_otherText.setVisibility(View.INVISIBLE);
+            viewHolder.tv_selfText.setVisibility(View.INVISIBLE);
             if ( isSelf ) { // if it's a sent image message
                 viewHolder.iv_otherAvatar.setVisibility(View.INVISIBLE);  // hide sender icon
-                viewHolder.tv_otherName.setVisibility(View.GONE);    // hide sender name
-                viewHolder.iv_otherImage.setVisibility(View.GONE);   // hide received ImageView
+                viewHolder.tv_otherName.setVisibility(View.INVISIBLE);    // hide sender name
+                viewHolder.iv_otherImage.setVisibility(View.INVISIBLE);   // hide received ImageView
                 viewHolder.iv_selfAvatar.setVisibility(View.VISIBLE);  // show self icon
                 viewHolder.tv_selfName.setVisibility(View.VISIBLE);    // show self name
                 viewHolder.iv_selfImage.setVisibility(View.VISIBLE);    // show self ImageView
@@ -160,8 +160,8 @@ public class ChatListAdapter extends BaseAdapter {
                 viewHolder.tv_otherName.setVisibility(View.VISIBLE);    // show sender name
                 viewHolder.iv_otherImage.setVisibility(View.VISIBLE);    // show received ImageView
                 viewHolder.iv_selfAvatar.setVisibility(View.INVISIBLE);  // hide self icon
-                viewHolder.tv_selfName.setVisibility(View.GONE);    // hide self name
-                viewHolder.iv_selfImage.setVisibility(View.GONE);       // hide self ImageView
+                viewHolder.tv_selfName.setVisibility(View.INVISIBLE);    // hide self name
+                viewHolder.iv_selfImage.setVisibility(View.INVISIBLE);       // hide self ImageView
             }
         }
     }

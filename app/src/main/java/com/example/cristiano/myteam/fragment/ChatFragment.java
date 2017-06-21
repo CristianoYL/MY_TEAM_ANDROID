@@ -15,8 +15,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
@@ -28,7 +30,9 @@ import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.Tournament;
 import com.example.cristiano.myteam.util.Constant;
+import com.example.cristiano.myteam.util.FCMHelper;
 import com.example.cristiano.myteam.util.UrlHelper;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -117,6 +121,7 @@ public class ChatFragment extends Fragment {
             headIndex = 0;
             tailIndex = 0;
             chatList = new LinkedList<>();
+            subscribeToTopic();
         }
     }
 
@@ -175,6 +180,19 @@ public class ChatFragment extends Fragment {
         lv_chat = (ListView) view_chat.findViewById(R.id.lv_chat);
         adapter = new ChatListAdapter(getContext(), chatList, self.getId());
         lv_chat.setAdapter(adapter);
+        lv_chat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String message = adapter.getItem(position).messageContent;
+                TextView textView = (TextView) view.findViewById(R.id.tv_otherText);
+                int visibility = textView.getVisibility();
+                if ( visibility == View.VISIBLE ) {
+                    Log.d(TAG, "<" + message + "> is visible");
+                } else {
+                    Log.d(TAG, "<" + message + "> is invisible");
+                }
+            }
+        });
         loadChatHistory(CHAT_LIMIT,0,0);  // load most recent CHAT_LIMIT chats
         fab_send = (FloatingActionButton) view_chat.findViewById(R.id.fab_send);
         fab_more = (FloatingActionButton) view_chat.findViewById(R.id.fab_more);
@@ -235,6 +253,9 @@ public class ChatFragment extends Fragment {
         });
     }
 
+    /**
+     * refresh the chat list to show latest data
+     */
     private void showMessages() {
         adapter.notifyDataSetChanged();
     }
@@ -381,6 +402,14 @@ public class ChatFragment extends Fragment {
             tailIndex = newChats[newChats.length-1].id; // update the tail index
         } else {
             Log.e(TAG,"Loaded duplicated chat!");
+        }
+    }
+
+    private void subscribeToTopic(){
+        if ( tournamentID != 0 && clubID != 0) {    // tournament chat
+            FCMHelper.getInstance().subscribeToTournamentChat(clubID,tournamentID);
+        } else if ( clubID != 0 ) { // club chat
+            FCMHelper.getInstance().subscribeToClubChat(clubID);
         }
     }
 }
