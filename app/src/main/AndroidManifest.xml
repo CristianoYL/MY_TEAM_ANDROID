@@ -48,7 +48,7 @@
             android:name=".activity.ClubActivity"
             android:label="@string/title_activity_club"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateAlwaysHidden"/>
+            android:windowSoftInputMode="stateHidden"/>
 
         <service
             android:name=".service.MyFirebaseInstanceIDService">

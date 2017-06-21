@@ -1,9 +1,11 @@
 package com.example.cristiano.myteam.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +15,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
+import com.example.cristiano.myteam.request.RequestAction;
+import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Member;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
+import com.example.cristiano.myteam.util.UrlHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -29,7 +37,7 @@ public class MemberListAdapter extends BaseAdapter {
     private List<Player> playerList;
     private List<Member> memberInfo;
     private int selfID;
-    private int priority;
+    private int selfPriority;
     private Resources resources;
 
     public MemberListAdapter(@NonNull Context context, @NonNull List<Player> playerList,
@@ -38,7 +46,7 @@ public class MemberListAdapter extends BaseAdapter {
         this.playerList = playerList;
         this.memberInfo = memberInfo;
         this.selfID = selfID;
-        this.priority = selfPriority;
+        this.selfPriority = selfPriority;
         this.resources = context.getResources();
 
     }
@@ -60,31 +68,7 @@ public class MemberListAdapter extends BaseAdapter {
         }
     }
 
-    private class OnMemberListClickListener implements View.OnClickListener{
-        private int position;
 
-        private OnMemberListClickListener(int position) {
-            this.position = position;
-        }
-        @Override
-        public void onClick(View v) {
-            if ( v.getId() == R.id.iv_negative ) {
-                if ( memberInfo.get(position).getPriority() == Constant.PRIORITY_APPLICANT ) {
-                    Toast.makeText(context, "Reject!", Toast.LENGTH_SHORT).show();
-                } else if ( memberInfo.get(position).getPriority() == Constant.PRIORITY_REGULAR ) {
-                    Toast.makeText(context, "Kick!", Toast.LENGTH_SHORT).show();
-                } else if ( memberInfo.get(position).getPriority() == Constant.PRIORITY_CO_CAP ) {
-                    Toast.makeText(context, "Demote!", Toast.LENGTH_SHORT).show();
-                }
-            } else if ( v.getId() == R.id.iv_positive ) {
-                if ( memberInfo.get(position).getPriority() == Constant.PRIORITY_APPLICANT ) {
-                    Toast.makeText(context, "Accept!", Toast.LENGTH_SHORT).show();
-                } else if ( memberInfo.get(position).getPriority() == Constant.PRIORITY_REGULAR ) {
-                    Toast.makeText(context, "Promote!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
 
     @Override
     public int getCount() {
@@ -115,17 +99,14 @@ public class MemberListAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
         viewHolder.tv_name.setText(player.getDisplayName());
-        if ( member.getPlayerID() == selfID ) {
-            convertView.setBackgroundResource(R.drawable.card_border_light_green);
-        } else {
-            convertView.setBackgroundResource(R.drawable.card_border_light_grey);
-        }
         switch ( member.getPriority() ) {
             case Constant.PRIORITY_APPLICANT:
                 viewHolder.tv_belt.setBackgroundResource(R.color.colorDarkGrey);
                 viewHolder.tv_clubRole.setText(R.string.priority_applicant);
-                if ( priority > Constant.PRIORITY_REGULAR ) {
+                if ( selfPriority > Constant.PRIORITY_REGULAR ) {
                     viewHolder.view_admin.setVisibility(View.VISIBLE);
+                    viewHolder.iv_positive.setVisibility(View.VISIBLE);
+                    viewHolder.iv_negative.setVisibility(View.VISIBLE);
                     viewHolder.iv_negative.setImageResource(R.drawable.ic_block_red_24dp);
                     viewHolder.iv_positive.setImageResource(R.drawable.ic_check_circle_green_24dp);
                     OnMemberListClickListener memberListClickListener = new OnMemberListClickListener(position);
@@ -138,8 +119,10 @@ public class MemberListAdapter extends BaseAdapter {
             case Constant.PRIORITY_REGULAR:
                 viewHolder.tv_belt.setBackgroundResource(R.color.colorBlue);
                 viewHolder.tv_clubRole.setText(R.string.priority_member);
-                if ( priority > Constant.PRIORITY_REGULAR ) {
+                if ( selfPriority > Constant.PRIORITY_REGULAR ) {
                     viewHolder.view_admin.setVisibility(View.VISIBLE);
+                    viewHolder.iv_positive.setVisibility(View.VISIBLE);
+                    viewHolder.iv_negative.setVisibility(View.VISIBLE);
                     viewHolder.iv_negative.setImageResource(R.drawable.ic_delete_red_24dp);
                     viewHolder.iv_positive.setImageResource(R.drawable.ic_arrow_upward_green_24dp);
                     OnMemberListClickListener memberListClickListener = new OnMemberListClickListener(position);
@@ -152,10 +135,11 @@ public class MemberListAdapter extends BaseAdapter {
             case Constant.PRIORITY_CO_CAP:
                 viewHolder.tv_belt.setBackgroundResource(R.color.colorGreen);
                 viewHolder.tv_clubRole.setText(R.string.priority_co_cap);
-                if ( priority > Constant.PRIORITY_REGULAR ) {
+                if ( selfPriority > Constant.PRIORITY_CO_CAP ) {
                     viewHolder.view_admin.setVisibility(View.VISIBLE);
                     viewHolder.iv_negative.setImageResource(R.drawable.ic_arrow_downward_grey_24dp);
                     viewHolder.iv_positive.setVisibility(View.GONE);
+                    viewHolder.iv_negative.setVisibility(View.VISIBLE);
                     OnMemberListClickListener memberListClickListener = new OnMemberListClickListener(position);
                     viewHolder.iv_negative.setOnClickListener(memberListClickListener);
                 } else {
@@ -167,6 +151,12 @@ public class MemberListAdapter extends BaseAdapter {
                 viewHolder.tv_clubRole.setText(R.string.priority_captain);
                 viewHolder.view_admin.setVisibility(View.GONE);
                 break;
+        }
+        if ( member.getPlayerID() == selfID ) {
+            convertView.setBackgroundResource(R.drawable.card_border_light_green);
+            viewHolder.view_admin.setVisibility(View.GONE);
+        } else {
+            convertView.setBackgroundResource(R.drawable.card_border_light_grey);
         }
         String roleTag = getAbbreviatedRole(player.getRole());
         viewHolder.tv_position.setText(roleTag);
@@ -209,19 +199,181 @@ public class MemberListAdapter extends BaseAdapter {
             return role;
         }
     }
-    private void rejectApplicant(){
 
-    }
-    private void acceptApplicant(){
+    private class OnMemberListClickListener implements View.OnClickListener{
 
-    }
-    private void promoteMember(){
+        private int position;
 
-    }
-    private void demoteMember(){
+        public OnMemberListClickListener(int position) {
+            this.position = position;
+        }
 
-    }
-    private void kickMember(){
+        @Override
+        public void onClick(View v) {
+            if ( v.getId() == R.id.iv_negative ) {
+                if ( memberInfo.get(position).getPriority() == Constant.PRIORITY_APPLICANT ) {
+                    rejectApplicant(memberInfo.get(position));
+                } else if ( memberInfo.get(position).getPriority() == Constant.PRIORITY_REGULAR ) {
+                    kickMember(memberInfo.get(position));
+                } else if ( memberInfo.get(position).getPriority() == Constant.PRIORITY_CO_CAP ) {
+                    demoteMember(memberInfo.get(position));
+                }
+            } else if ( v.getId() == R.id.iv_positive ) {
+                if ( memberInfo.get(position).getPriority() == Constant.PRIORITY_APPLICANT ) {
+                    acceptApplicant(memberInfo.get(position));
+                } else if ( memberInfo.get(position).getPriority() == Constant.PRIORITY_REGULAR ) {
+                    promoteMember(memberInfo.get(position));
+                }
+            }
+        }
 
+        /**
+         *  change player's selfPriority
+         * @param member the member whose selfPriority is to be changed
+         * @param isPromotion true if it's increasing the selfPriority
+         */
+        private void manageMember(final Member member, boolean isPromotion){
+            RequestAction action = new RequestAction() {
+                @Override
+                public void actOnPre() {
+                }
+
+                @Override
+                public void actOnPost(int responseCode, String response) {
+                    if ( responseCode == 200 ) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            try {
+                                JSONObject jsonMember = jsonObject.getJSONObject(Constant.TABLE_MEMBER);
+                                int priority = jsonMember.getInt(Constant.MEMBER_PRIORITY);
+                                int previousPriority = member.getPriority();
+                                member.setPriority(priority);
+                                if ( priority > previousPriority ) {
+                                    if ( previousPriority == 0 ) {
+                                        Toast.makeText(context, playerList.get(position).getDisplayName()
+                                                + " has been accepted to the club!", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(context, playerList.get(position).getDisplayName()
+                                                + " has been promoted!", Toast.LENGTH_SHORT).show();
+                                    }
+                                } else {
+                                    Toast.makeText(context, playerList.get(position).getDisplayName()
+                                            + " has been demoted!", Toast.LENGTH_SHORT).show();
+                                }
+                            } catch (JSONException e) {
+                                // do nothing
+                                playerList.remove(position);
+                                memberInfo.remove(position);
+                            }
+                            try {
+                                String message = jsonObject.getString(Constant.KEY_MSG);
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                            } catch (JSONException e) {
+                                // do nothing
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        try {
+                            String message = new JSONObject(response).getString(Constant.KEY_MSG);
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(context, response, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    notifyDataSetChanged();
+                }
+            };
+            String url = UrlHelper.urlMemberManagement(member.getClubID(),member.getPlayerID(),isPromotion);
+            RequestHelper.sendPostRequest(url,null,action);
+        }
+
+        private void rejectApplicant(final Member member){
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(resources.getString(R.string.notice));
+            builder.setMessage(resources.getString(R.string.prompt_reject));
+            builder.setPositiveButton(resources.getString(R.string.label_confirm), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    manageMember(member,false);
+                }
+            });
+            builder.setNegativeButton(resources.getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
+        }
+        private void acceptApplicant(final Member member){
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(resources.getString(R.string.notice));
+            builder.setMessage(resources.getString(R.string.prompt_accept));
+            builder.setPositiveButton(resources.getString(R.string.label_confirm), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    manageMember(member,true);
+                }
+            });
+            builder.setNegativeButton(resources.getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
+        }
+        private void promoteMember(final Member member){
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(resources.getString(R.string.notice));
+            builder.setMessage(resources.getString(R.string.prompt_promote));
+            builder.setPositiveButton(resources.getString(R.string.label_confirm), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    manageMember(member,true);
+                }
+            });
+            builder.setNegativeButton(resources.getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
+        }
+        private void demoteMember(final Member member){
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(resources.getString(R.string.notice));
+            builder.setMessage(resources.getString(R.string.prompt_demote));
+            builder.setPositiveButton(resources.getString(R.string.label_confirm), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    manageMember(member,false);
+                }
+            });
+            builder.setNegativeButton(resources.getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
+        }
+        private void kickMember(final Member member){
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(resources.getString(R.string.notice));
+            builder.setMessage(resources.getString(R.string.prompt_kick));
+            builder.setPositiveButton(resources.getString(R.string.label_confirm), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    manageMember(member,false);
+                }
+            });
+            builder.setNegativeButton(resources.getString(R.string.label_cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+            builder.show();
+        }
     }
 }

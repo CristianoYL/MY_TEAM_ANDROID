@@ -747,7 +747,7 @@ public class TournamentResultFragment extends Fragment {
                     Toast.makeText(getContext(),"Result uploaded!",Toast.LENGTH_SHORT).show();
                     getResult();
                     FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    Fragment fragment = getActivity().getSupportFragmentManager().findFragmentByTag(Constant.FRAGMENT_CLUB_TOURNAMENT_DETAIL);
+                    Fragment fragment = getActivity().getSupportFragmentManager().findFragmentByTag(Constant.FRAGMENT_TOURNAMENT);
                     transaction.detach(fragment);
                     transaction.attach(fragment);
                     transaction.commit();

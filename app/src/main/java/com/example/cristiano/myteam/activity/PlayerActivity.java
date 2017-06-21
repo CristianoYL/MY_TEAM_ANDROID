@@ -1,11 +1,12 @@
 package com.example.cristiano.myteam.activity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
@@ -24,12 +25,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -90,7 +92,7 @@ public class PlayerActivity extends AppCompatActivity
     private boolean isVisitor = false;
     private int selectedClubID = 0;
     private ArrayList<String> clubNames, tournamentNames;
-    private ArrayList<Club> clubList;
+    private ArrayList<Club> searchResultList;
     private Stats playerClubStats;
     private SharedPreferences sharedPreferences;
 
@@ -460,7 +462,7 @@ public class PlayerActivity extends AppCompatActivity
      *  show the join club page to let the user search and join club
      */
 
-    EditText et_search;
+    SearchView sv_club;
     ListView lv_searchResult;
     Button btn_join;
     AlertDialog dialog;
@@ -468,8 +470,7 @@ public class PlayerActivity extends AppCompatActivity
         LayoutInflater inflater = LayoutInflater.from(PlayerActivity.this);
         View view_search = inflater.inflate(R.layout.layout_search_club, null);
         Spinner sp_searchKey = (Spinner) view_search.findViewById(R.id.sp_searchKey);
-        et_search = (EditText) view_search.findViewById(R.id.et_search);
-        FloatingActionButton fab_search = (FloatingActionButton) view_search.findViewById(R.id.fab_search);
+        sv_club = (SearchView) view_search.findViewById(R.id.sv_club);
         btn_join = (Button) view_search.findViewById(R.id.btn_join);
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(PlayerActivity.this);
         dialogBuilder.setTitle("Join Club");
@@ -483,11 +484,12 @@ public class PlayerActivity extends AppCompatActivity
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if ( parent.getSelectedItem().toString().equals("Club ID")) {
-                    et_search.setHint("Club ID");
-                    et_search.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    sv_club.setQueryHint("Club ID");
+                    sv_club.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    sv_club.setQuery(null,false);
                 } else {
-                    et_search.setHint("Club Name");
-                    et_search.setInputType(InputType.TYPE_NULL);
+                    sv_club.setQueryHint("Club Name");
+                    sv_club.setInputType(InputType.TYPE_CLASS_TEXT);
                 }
             }
             @Override
@@ -496,12 +498,15 @@ public class PlayerActivity extends AppCompatActivity
             }
         });
 
-        fab_search.setOnClickListener(new View.OnClickListener() {
+        sv_club.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void onClick(View v) {
-                if (TextUtils.isEmpty(et_search.getText())) {
-                    return;
+            public boolean onQueryTextSubmit(String query) {
+                if (TextUtils.isEmpty(query)) {
+                    return false;
                 }
+                // hide keyboard
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(sv_club.getWindowToken(), 0);
 
                 RequestAction actionGetClubByID = new RequestAction() {
                     @Override
@@ -518,8 +523,8 @@ public class PlayerActivity extends AppCompatActivity
                                 String info = jsonObject.getString(Constant.CLUB_INFO);
                                 Club club = new Club(clubID,name,info);
                                 ArrayList<String> clubNames = new ArrayList<>();
-                                clubList = new ArrayList<Club>();
-                                clubList.add(club);
+                                searchResultList = new ArrayList<Club>();
+                                searchResultList.add(club);
                                 clubNames.add(club.name);
                                 lv_searchResult.setAdapter(new ArrayAdapter<String>(
                                         PlayerActivity.this,
@@ -532,6 +537,7 @@ public class PlayerActivity extends AppCompatActivity
                                 Toast.makeText(PlayerActivity.this, "Error while searching for club", Toast.LENGTH_SHORT).show();
                             }
                         } else {
+                            lv_searchResult.setAdapter(null);
                             try {
                                 JSONObject jsonObject = new JSONObject(response);
                                 String message = jsonObject.getString(Constant.KEY_MSG);
@@ -557,9 +563,10 @@ public class PlayerActivity extends AppCompatActivity
                                 JSONObject jsonObject = new JSONObject(response);
                                 JSONArray jsonArray = jsonObject.getJSONArray(Constant.CLUB_LIST);
                                 ArrayList<String> clubNames = new ArrayList<>();
-                                clubList = new ArrayList<Club>();
+                                searchResultList = new ArrayList<Club>();
                                 if ( jsonArray.length() == 0 ) {
-                                    Toast.makeText(PlayerActivity.this, "No club named<" + et_search.getText() + "> found!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(PlayerActivity.this, "No club named<" + sv_club.getQuery() + "> found!", Toast.LENGTH_SHORT).show();
+                                    lv_searchResult.setAdapter(null);
                                     return;
                                 }
                                 for ( int i = 0; i < jsonArray.length(); i++ ) {
@@ -568,7 +575,7 @@ public class PlayerActivity extends AppCompatActivity
                                     String name = jsonClub.getString(Constant.CLUB_NAME);
                                     String info = jsonClub.getString(Constant.CLUB_INFO);
                                     Club club = new Club(clubID,name,info);
-                                    clubList.add(club);
+                                    searchResultList.add(club);
                                     clubNames.add(club.name);
                                 }
                                 lv_searchResult.setAdapter(new ArrayAdapter<String>(
@@ -595,15 +602,32 @@ public class PlayerActivity extends AppCompatActivity
                     }
                 };
                 String url;
-                if ( et_search.getInputType() == InputType.TYPE_CLASS_NUMBER) {
-                    url = UrlHelper.urlClubByID(Integer.parseInt(et_search.getText().toString()));
-                    RequestHelper.sendGetRequest(url,actionGetClubByID);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    if ( sv_club.getInputType() == InputType.TYPE_CLASS_NUMBER) {
+                        url = UrlHelper.urlClubByID(Integer.parseInt(sv_club.getQuery().toString()));
+                        RequestHelper.sendGetRequest(url,actionGetClubByID);
+                    } else {
+                        url = UrlHelper.urlClubByName(sv_club.getQuery().toString());
+                        RequestHelper.sendGetRequest(url,actionGetClubByName);
+                    }
                 } else {
-                    url = UrlHelper.urlClubByName(et_search.getText().toString());
-                    RequestHelper.sendGetRequest(url,actionGetClubByName);
+                    try{
+                        url = UrlHelper.urlClubByID(Integer.parseInt(sv_club.getQuery().toString()));
+                        RequestHelper.sendGetRequest(url,actionGetClubByID);
+                    } catch ( NumberFormatException e ) {
+                        url = UrlHelper.urlClubByName(sv_club.getQuery().toString());
+                        RequestHelper.sendGetRequest(url,actionGetClubByName);
+                    }
                 }
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
             }
         });
+
         btn_join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -635,7 +659,7 @@ public class PlayerActivity extends AppCompatActivity
                         showPlayerClubPage();   // refresh the list
                     }
                 };
-                int clubID = clubList.get(lv_searchResult.getCheckedItemPosition()).id;
+                int clubID = searchResultList.get(lv_searchResult.getCheckedItemPosition()).id;
                 String url = UrlHelper.urlMemberRequest(clubID);
                 Member member = new Member(clubID,playerID,null,false,0);
                 RequestHelper.sendPostRequest(url,member.toJson(),actionPostClubRequest);

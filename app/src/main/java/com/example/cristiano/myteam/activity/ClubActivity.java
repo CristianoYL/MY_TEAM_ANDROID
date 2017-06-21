@@ -2,9 +2,7 @@ package com.example.cristiano.myteam.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
@@ -21,6 +19,7 @@ import android.view.MenuItem;
 import com.example.cristiano.myteam.R;
 
 import com.example.cristiano.myteam.fragment.ClubFragment;
+import com.example.cristiano.myteam.fragment.TournamentFragment;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
@@ -72,10 +71,15 @@ public class ClubActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             FragmentManager fragmentManager = getSupportFragmentManager();
-            ClubFragment fragment = (ClubFragment)fragmentManager.findFragmentByTag(Constant.FRAGMENT_CLUB);
-            if ( fragment != null && fragment.isVisible() ) {
-                if ( !fragment.onBackPressed() ) {
+            ClubFragment clubFragment = (ClubFragment)fragmentManager.findFragmentByTag(Constant.FRAGMENT_CLUB);
+            TournamentFragment tournamentFragment = (TournamentFragment) fragmentManager.findFragmentByTag(Constant.FRAGMENT_TOURNAMENT);
+            if ( clubFragment != null && clubFragment.isVisible() ) {
+                if ( !clubFragment.onBackPressed() ) {
                     showLogoutPage();
+                }
+            } else if ( tournamentFragment != null && tournamentFragment.isVisible() ) {
+                if ( !tournamentFragment.onBackPressed() ) {
+                    showClubPage();
                 }
             } else {
                 showClubPage();

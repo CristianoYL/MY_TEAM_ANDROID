@@ -111,7 +111,7 @@ public class HttpBackgroundTask extends AsyncTask<String, Object, String> {
             }
             inputStream.close();
             response = stringBuilder.toString();
-            Log.d(TAG, response + ";");
+            Log.d(TAG, "response = " + response + ";");
         } catch (SocketTimeoutException e) {
             response = Constant.MSG_TIME_OUT;
         } catch (IOException e) {

@@ -32,6 +32,7 @@ public class FCMHelper {
     public void subscribeToAppNotification(){
         // do not add to currentTopics to prevent unsubscription
         firebaseMessaging.subscribeToTopic(Constant.FCM_TOPIC_ALL);
+        Log.d(TAG,"Subscribe to App Topic<all>");
     }
 
     /**
@@ -41,6 +42,7 @@ public class FCMHelper {
     private void subscribeToTopic(String topic){
         firebaseMessaging.subscribeToTopic(topic);
         currentTopics.add(topic);
+        Log.d(TAG,"Subscribe to topic <"+topic+">");
     }
 
     /**
@@ -51,6 +53,7 @@ public class FCMHelper {
         for ( String topic : topics ) {
             firebaseMessaging.subscribeToTopic(topic);
             currentTopics.add(topic);
+            Log.d(TAG,"Subscribe to topic <"+topic+">");
         }
     }
 
@@ -61,6 +64,7 @@ public class FCMHelper {
     public void unsubscribeFromTopic(String topic){
         firebaseMessaging.unsubscribeFromTopic(topic);
         currentTopics.remove(topic);
+        Log.d(TAG,"Unsubscribe topic <"+topic+">");
     }
 
     /**
@@ -72,6 +76,7 @@ public class FCMHelper {
             firebaseMessaging.unsubscribeFromTopic(topic);
         }
         currentTopics.clear();
+        Log.d(TAG,"Unsubscribe all topics");
     }
 
     /**

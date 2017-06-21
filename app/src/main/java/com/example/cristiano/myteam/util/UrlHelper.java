@@ -66,6 +66,14 @@ public class UrlHelper {
         return URL + "/member/request/" + clubID;
     }
 
+    public static String urlMemberManagement(int clubID, int playerID, boolean isPromotion) {
+        if ( isPromotion ) {
+            return URL + "/member/manage/club/" + clubID + "/player/" + playerID + "/promote/true";
+        } else {
+            return URL + "/member/manage/club/" + clubID + "/player/" + playerID + "/promote/false";
+        }
+    }
+
     public static String urlRegClubFromPlayer(int playerID){
         return URL + "/club/player/" + playerID;
     }

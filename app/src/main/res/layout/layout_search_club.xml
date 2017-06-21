@@ -37,32 +37,13 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <SearchView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-
-
-        <EditText
-            android:id="@+id/et_search"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ems="10"
-            android:maxLines="1"
-            android:imeOptions="actionSearch"
-            />
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:backgroundTint="@color/colorGrey"
-            android:clickable="true"
-            app:fabSize="mini"
-            app:srcCompat="@android:drawable/ic_menu_search" />
-    </LinearLayout>
+        android:id="@+id/sv_club"
+        android:textAlignment="center"
+        android:iconifiedByDefault="false"
+        />
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"

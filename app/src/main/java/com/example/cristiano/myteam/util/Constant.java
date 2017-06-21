@@ -275,10 +275,9 @@ public class Constant {
     public static final String[] LABEL_PLAYER_TOTAL_STATS = {"played","start","goal","assist","yellow","red"};
 
     public static final String FRAGMENT_CLUB = "fragment_club";
-    public static final String FRAGMENT_CLUB_PROFILE = "fragment_club_profile";
-    public static final String FRAGMENT_CLUB_TOURNAMENT_LIST = "fragment_club_tournament_list";
-    public static final String FRAGMENT_CLUB_TOURNAMENT_DETAIL = "fragment_club_tournament_detail";
     public static final String FRAGMENT_CLUB_MEMBER = "fragment_club_member";
+    public static final String FRAGMENT_CLUB_TOURNAMENT_LIST = "fragment_club_tournament_list";
+    public static final String FRAGMENT_TOURNAMENT = "fragment_tournament";
 
     // FireBase Cloud Messaging Topics
     public static final String KEY_TOPICS = "topics";

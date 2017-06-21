@@ -137,4 +137,16 @@ public class TournamentFragment extends Fragment {
         adapter.setFragments(fragments);
         viewPager_tournament.setAdapter(adapter);
     }
+
+    public boolean onBackPressed(){
+        int position = tab_tournament.getSelectedTabPosition();
+        if ( position > 0 ) {
+            TabLayout.Tab tab = tab_tournament.getTabAt(--position);
+            if ( tab != null ) {
+                tab.select();
+                return true;
+            }
+        }
+        return false;
+    }
 }
