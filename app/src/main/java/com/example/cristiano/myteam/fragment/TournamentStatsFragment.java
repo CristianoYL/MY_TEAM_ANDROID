@@ -142,15 +142,18 @@ public class TournamentStatsFragment extends Fragment {
         viewPager = (ViewPager) tabViewPager.findViewById(R.id.viewPager);
         tab_clubStats = (TabLayout) tabViewPager.findViewById(R.id.tabLayout);
 
-        Fragment[] fragments = new Fragment[Constant.CLUB_STATS_TABS.length];
+        Fragment[] fragments = new Fragment[2];
+//        Fragment[] fragments = new Fragment[Constant.CLUB_STATS_TABS.length];
         tab_clubStats.removeAllTabs();
 
+        // create game performance tab and viewpager
         tab_clubStats.addTab(tab_clubStats.newTab().setText("Game Performance"));
         String[] resultLabels = Constant.LABEL_GAME_PERFORMANCE;
         float[] resultValues = new float[]{clubStats.getWin(),clubStats.getDraw(),clubStats.getLoss()};
         fragments[0] = PieChartFragment.newInstance(Constant.CLUB_STATS_TABS[0],
                 Constant.CLUB_STATS_CENTER_TEXT[0],resultLabels,resultValues,Constant.CLUB_STATS_IS_INT[0]);
 
+        // create team stats tab and viewpager
         tab_clubStats.addTab(tab_clubStats.newTab().setText("Team Stats"));
         resultLabels = new String[]{"goal","goalsConceded","penalty","freekick",
                 "header","yellow", "red","cleanSheet"};
@@ -160,9 +163,12 @@ public class TournamentStatsFragment extends Fragment {
         fragments[1] = BarChartFragment.newInstance(Constant.CLUB_STATS_TABS[1],
                 resultLabels,resultValues,Constant.CLUB_STATS_IS_INT[1]);
 
-        tab_clubStats.addTab(tab_clubStats.newTab().setText("Player Stats"));
-        fragments[2] = BarChartFragment.newInstance(Constant.CLUB_STATS_TABS[2],
-                resultLabels,resultValues,Constant.CLUB_STATS_IS_INT[2]);
+//        // create player stats tab and viewpager
+//        tab_clubStats.addTab(tab_clubStats.newTab().setText("Player Stats"));
+//        fragments[2] = BarChartFragment.newInstance(Constant.CLUB_STATS_TABS[2],
+//                resultLabels,resultValues,Constant.CLUB_STATS_IS_INT[2]);
+
+        tab_clubStats.setTabMode(TabLayout.MODE_FIXED);
 
         tab_clubStats.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

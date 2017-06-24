@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -38,6 +40,8 @@ import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.fragment.ChartFragmentFactory;
+import com.example.cristiano.myteam.fragment.ClubListFragment;
+import com.example.cristiano.myteam.fragment.TournamentListFragment;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Member;
@@ -47,10 +51,10 @@ import com.example.cristiano.myteam.structure.Stats;
 import com.example.cristiano.myteam.structure.Token;
 import com.example.cristiano.myteam.structure.Tournament;
 import com.example.cristiano.myteam.adapter.ClubListAdapter;
+import com.example.cristiano.myteam.util.AppController;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
-import com.example.cristiano.myteam.util.LogOutHelper;
 import com.example.cristiano.myteam.util.UrlHelper;
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -70,13 +74,13 @@ import java.util.ArrayList;
  *  an optional isVisitor boolean value can be passed to identify if the user is viewing other's profile
  */
 public class PlayerActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, ClubListFragment.OnClubListChangeListener {
 
     private final static String TAG = "PlayerActivity";
 
     private TextView tv_name, tv_role,tv_playerTournament;
     private ImageView iv_avatar;
-    private ConstraintLayout layout_profile,layout_club;
+    private View layout_profile,layout_club;
     private ListView lv_club;
     private Button btn_club, btn_createClub, btn_joinClub;
     private NavigationView navigationView;
@@ -109,8 +113,8 @@ public class PlayerActivity extends AppCompatActivity
         setContentView(R.layout.activity_player);
         toolbar = (Toolbar) findViewById(R.id.toolbar_player);
         setSupportActionBar(toolbar);
-        layout_profile = (ConstraintLayout) findViewById(R.id.layout_profile);
-        layout_club = (ConstraintLayout) findViewById(R.id.layout_club_list);
+        layout_profile = findViewById(R.id.layout_profile);
+        layout_club = findViewById(R.id.layout_club_list);
         tv_name = (TextView) findViewById(R.id.et_name);
         tv_role = (TextView) findViewById(R.id.tv_role);
         iv_avatar = (ImageView) findViewById(R.id.iv_otherAvatar);
@@ -176,7 +180,7 @@ public class PlayerActivity extends AppCompatActivity
         }else if (isVisitor){   // if it's other user's profile page
             super.onBackPressed();  // return to the previous page
         } else {
-            showLogoutPage();   // ask if to log out
+            AppController.minimizeOnDoubleBack(this);    // minimizeOnDoubleBack the app on double click
         }
     }
 
@@ -354,34 +358,40 @@ public class PlayerActivity extends AppCompatActivity
         pageID = PAGE_CLUB;
         layout_profile.setVisibility(View.GONE);
         layout_club.setVisibility(View.VISIBLE);
-        setTitle("My Clubs");
-        ClubListAdapter clubListAdapter = new ClubListAdapter(PlayerActivity.this,playerInfo.getClubs());
-        lv_club.setAdapter(clubListAdapter);
-        lv_club.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Club club = playerInfo.getClubs().get(i);
-                if ( club.priority > 0 ) {
-                    viewClub(playerInfo.getClubs().get(i));
-                } else {
-                    Toast.makeText(PlayerActivity.this, R.string.error_view_pending_club, Toast.LENGTH_SHORT).show();
-                }
+        ClubListFragment fragment = ClubListFragment.newInstance(playerInfo.getClubs(),playerInfo.getPlayer());
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.frame_content,fragment,Constant.FRAGMENT_PLAYER_CLUB_LIST);
+        transaction.commit();
 
-            }
-        });
-        btn_createClub.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCreateClubPage();
-            }
-        });
-
-        btn_joinClub.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showJoinClubPage();
-            }
-        });
+//        setTitle("My Clubs");
+//        ClubListAdapter clubListAdapter = new ClubListAdapter(PlayerActivity.this,playerInfo.getClubs());
+//        lv_club.setAdapter(clubListAdapter);
+//        lv_club.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//                Club club = playerInfo.getClubs().get(i);
+//                if ( club.priority > 0 ) {
+//                    viewClub(playerInfo.getClubs().get(i));
+//                } else {
+//                    Toast.makeText(PlayerActivity.this, R.string.error_view_pending_club, Toast.LENGTH_SHORT).show();
+//                }
+//
+//            }
+//        });
+//        btn_createClub.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                showCreateClubPage();
+//            }
+//        });
+//
+//        btn_joinClub.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                showJoinClubPage();
+//            }
+//        });
     }
 
     /**
@@ -674,15 +684,15 @@ public class PlayerActivity extends AppCompatActivity
      */
     private void showLogoutPage() {
         AlertDialog.Builder builder = new AlertDialog.Builder(PlayerActivity.this,0);
-        builder.setTitle("Warning");
-        builder.setMessage("Are you sure to logout?");
-        builder.setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.warning);
+        builder.setMessage(R.string.prompt_logout);
+        builder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                LogOutHelper.logOut(PlayerActivity.this);
+                AppController.logOut(PlayerActivity.this);
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if( pageID == PAGE_PROFILE ){
@@ -1141,5 +1151,10 @@ public class PlayerActivity extends AppCompatActivity
         };
         String url = UrlHelper.urlPutToken(playerID);
         RequestHelper.sendPutRequest(url,token.toJson(),actionPutToken);
+    }
+
+    @Override
+    public void addNewClub(Club club) {
+        this.playerInfo.addClub(club);
     }
 }

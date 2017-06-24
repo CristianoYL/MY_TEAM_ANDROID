@@ -274,6 +274,7 @@ public class Constant {
     public static final String[] LABEL_GOAL_DISTRIBUTION = {"Strong Foot","Weak Foot","Header","Other"};
     public static final String[] LABEL_PLAYER_TOTAL_STATS = {"played","start","goal","assist","yellow","red"};
 
+    public static final String FRAGMENT_PLAYER_CLUB_LIST = "fragment_player_club_list";
     public static final String FRAGMENT_CLUB = "fragment_club";
     public static final String FRAGMENT_CLUB_MEMBER = "fragment_club_member";
     public static final String FRAGMENT_CLUB_TOURNAMENT_LIST = "fragment_club_tournament_list";

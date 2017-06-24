@@ -7,6 +7,10 @@
             android:icon="@drawable/ic_menu_club"
             android:title="@string/menu_my_club" />
         <item
+            android:id="@+id/nav_tournament"
+            android:icon="@drawable/ic_menu_trophy"
+            android:title="@string/menu_my_tournaments" />
+        <item
             android:id="@+id/nav_profile"
             android:icon="@drawable/ic_menu_profile"
             android:title="@string/menu_my_profile" />

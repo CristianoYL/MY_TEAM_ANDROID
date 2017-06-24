@@ -55,7 +55,9 @@
 
     <!-- Menu text -->
     <string name="menu_my_profile">My Profile</string>
+    <string name="menu_my_clubs">My Clubs</string>
     <string name="menu_my_club">My Club</string>
+    <string name="menu_my_tournaments">My Tournaments</string>
     <string name="menu_log_out">Log Out</string>
     <string name="menu_settings">Settings</string>
 
@@ -102,6 +104,7 @@
     <string name="prompt_accept">Are you sure to accept this player\'s application to the club?</string>
     <string name="prompt_promote">Are you sure to promote this player?</string>
     <string name="prompt_demote">Are you sure to demote this player?</string>
+    <string name="prompt_logout">Are you sure to log out?</string>
 
     <!-- firebase notifications -->
     <string name="fcm_club_application_approved">Club Application approved!</string>

@@ -16,6 +16,7 @@ import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Player;
+import com.example.cristiano.myteam.util.AppController;
 import com.google.gson.Gson;
 
 /**
@@ -96,7 +97,7 @@ public class ClubFragment extends Fragment {
         viewPager_club.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                hideKeyboard();
+                AppController.hideKeyboard(getContext(),clubView);
             }
 
             @Override
@@ -105,7 +106,7 @@ public class ClubFragment extends Fragment {
                 if ( tab != null ) {
                     tab.select();
                 }
-                hideKeyboard();
+                AppController.hideKeyboard(getContext(),clubView);
             }
 
             @Override
@@ -135,12 +136,6 @@ public class ClubFragment extends Fragment {
         CustomFragmentAdapter adapter = new CustomFragmentAdapter(getChildFragmentManager());
         adapter.setFragments(fragments);
         viewPager_club.setAdapter(adapter);
-    }
-
-    private void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager)getContext().getSystemService(
-                Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(clubView.getWindowToken(), 0);
     }
 
     public boolean onBackPressed(){

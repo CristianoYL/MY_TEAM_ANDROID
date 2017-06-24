@@ -216,7 +216,7 @@ public class TournamentSquadFragment extends Fragment {
                 if ( responseCode == 200 ) {
                     try {
                         JSONObject jsonResponse = new JSONObject(response);
-                        JSONArray jsonArray = jsonResponse.getJSONArray(Constant.TABLE_MEMBER);
+                        JSONArray jsonArray = jsonResponse.getJSONArray(Constant.MEMBER_LIST);
                         playerList = new ArrayList<>(jsonArray.length());
                         playerIDMap = new HashMap<>(jsonArray.length());
                         for ( int i = 0; i < jsonArray.length(); i++ ) {
