@@ -106,7 +106,7 @@ public class HttpBackgroundTask extends AsyncTask<String, Object, String> {
                 while ((line = reader.readLine()) != null) {
                     stringBuilder.append("\n");
                     stringBuilder.append(line);
-                    Log.d(TAG, "readLine=" + line + ";");
+//                    Log.d(TAG, "readLine=" + line + ";");
                 }
             }
             inputStream.close();

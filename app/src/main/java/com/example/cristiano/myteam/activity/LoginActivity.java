@@ -148,6 +148,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onResume() {
         super.onResume();
+        if (getIntent().getExtras() != null) {
+            for (String key : getIntent().getExtras().keySet()) {
+                Object value = getIntent().getExtras().get(key);
+                Log.d("FCM NOTIFICATION", "Key: " + key + " Value: " + value);
+            }
+        }
         cb_remember.setChecked(rememberUsername);
         cb_auto.setChecked(autoLogin);
         if ( autoLogin ) {

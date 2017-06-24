@@ -103,6 +103,11 @@
     <string name="prompt_promote">Are you sure to promote this player?</string>
     <string name="prompt_demote">Are you sure to demote this player?</string>
 
+    <!-- firebase notifications -->
+    <string name="fcm_club_application_approved">Club Application approved!</string>
+    <string name="fcm_club_application_approved_detail">You\'re now a member of %1$s!</string>
+    <string name="fcm_tap_to_view">Tap here to view.</string>
+
     <!-- content description -->
     <string name="desc_club_icon">badge of the club</string>
 
