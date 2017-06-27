@@ -1,6 +1,6 @@
 package com.example.cristiano.myteam.fragment;
 
-import android.content.Context;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,7 +10,6 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
@@ -61,8 +60,14 @@ public class ClubFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         clubView = inflater.inflate(R.layout.fragment_club, container, false);
-        showClub();
+        AppController.setNavigationMenu(getActivity(),AppController.MENU_CLUB);
         return clubView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        showClub();
     }
 
     /**
@@ -90,7 +95,6 @@ public class ClubFragment extends Fragment {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-
             }
         });
 
@@ -138,6 +142,11 @@ public class ClubFragment extends Fragment {
         viewPager_club.setAdapter(adapter);
     }
 
+    /**
+     * defines the onBackPressed behavior for ClubFragment
+     * navigate back to previous tab if the first tab is not being displayed
+     * @return if the onBackPressed event is handled by this fragment
+     */
     public boolean onBackPressed(){
         int position = tab_club.getSelectedTabPosition();
         if ( position > 0 ) {

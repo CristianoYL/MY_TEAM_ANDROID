@@ -71,6 +71,7 @@
     <string name="error_empty_tour_info">Tournament description cannot be empty!</string>
     <string name="error_pending_club_as_default">Your application to this club is still pending. You can only set your active club as default.</string>
     <string name="set_club_as_default">New default club set!</string>
+    <string name="unset_default_club">Default club unset!</string>
     <string name="error_view_pending_club">Your application to this club is still pending.Please wait for captain\'s approval.</string>
 
     <!-- labels-->
@@ -107,7 +108,7 @@
     <string name="prompt_logout">Are you sure to log out?</string>
 
     <!-- firebase notifications -->
-    <string name="fcm_club_application_approved">Club Application approved!</string>
+    <string name="fcm_club_application_approved">Club application approved!</string>
     <string name="fcm_club_application_approved_detail">You\'re now a member of %1$s!</string>
     <string name="fcm_tap_to_view">Tap here to view.</string>
 
@@ -142,7 +143,7 @@
     </string-array>
 
 
-    <!-- player positions -->
+    <!-- menu_player positions -->
     <string name="position_gk">Goalkeeper</string>
     <string name="position_cb">Center Back</string>
     <string name="position_rb">Right Back</string>

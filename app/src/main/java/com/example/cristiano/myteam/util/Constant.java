@@ -16,7 +16,7 @@ public class Constant {
     public static final String SERVER_CHARSET = "UTF-8";
 
     public static final String MSG_TIME_OUT = "{ \"" + Constant.KEY_MSG + "\":\"Connection Timeout\"}";
-    public static final int CONN_TIME_OUT = 10000;
+    public static final int CONN_TIME_OUT = 20000;
     public static final int READ_TIME_OUT = 5000;
 
     public static final String CLUB_LIST = "clubs";
@@ -274,10 +274,13 @@ public class Constant {
     public static final String[] LABEL_GOAL_DISTRIBUTION = {"Strong Foot","Weak Foot","Header","Other"};
     public static final String[] LABEL_PLAYER_TOTAL_STATS = {"played","start","goal","assist","yellow","red"};
 
+    public static final String FRAGMENT_PLAYER_PROFILE = "fragment_player_profile";
+    public static final String FRAGMENT_VISITOR = "fragment_visitor";
     public static final String FRAGMENT_PLAYER_CLUB_LIST = "fragment_player_club_list";
     public static final String FRAGMENT_CLUB = "fragment_club";
     public static final String FRAGMENT_CLUB_MEMBER = "fragment_club_member";
     public static final String FRAGMENT_CLUB_TOURNAMENT_LIST = "fragment_club_tournament_list";
+    public static final String FRAGMENT_MAP = "fragment_map";
     public static final String FRAGMENT_TOURNAMENT = "fragment_tournament";
 
     // FireBase Cloud Messaging Topics

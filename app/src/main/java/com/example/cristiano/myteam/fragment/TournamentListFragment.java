@@ -1,5 +1,6 @@
 package com.example.cristiano.myteam.fragment;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -28,6 +29,7 @@ import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,6 +47,7 @@ public class TournamentListFragment extends Fragment {
     private static final String ARG_TOURS = "tournaments";
     private static final String ARG_CLUB = "club";
     private static final String ARG_PLAYER = "player";
+    private static final String TAG = "TournamentListFragment";
 
     private ArrayList<Tournament> tournaments;
     private Club club;
@@ -53,14 +56,9 @@ public class TournamentListFragment extends Fragment {
     private TextView tv_name, tv_info;
     private View view;
 
-    public static TournamentListFragment newInstance(List<Tournament> tournaments, Club club, Player player){
+    public static TournamentListFragment newInstance(Club club, Player player){
         TournamentListFragment fragment = new TournamentListFragment();
         Bundle bundle = new Bundle();
-        String[] jsonArray = new String[tournaments.size()];
-        for ( int i = 0; i < jsonArray.length; i++ ) {
-            jsonArray[i] = tournaments.get(i).toJson();
-        }
-        bundle.putStringArray(ARG_TOURS,jsonArray);
         bundle.putString(ARG_CLUB,club.toJson());
         bundle.putString(ARG_PLAYER,player.toJson());
         fragment.setArguments(bundle);
@@ -73,14 +71,6 @@ public class TournamentListFragment extends Fragment {
         Bundle bundle = getArguments();
         if (bundle != null) {
             Gson gson = new Gson();
-            String[] jsonArray = bundle.getStringArray(ARG_TOURS);
-            tournaments = new ArrayList<>();
-            if ( jsonArray != null ) {
-                for ( int i = 0; i < jsonArray.length; i++ ) {
-                    tournaments.add(gson.fromJson(jsonArray[i],Tournament.class));
-                    Log.d("TOURNAMENT:",tournaments.get(i).name);
-                }
-            }
             club = gson.fromJson(bundle.getString(ARG_CLUB),Club.class);
             player = gson.fromJson(bundle.getString(ARG_PLAYER),Player.class);
         }
@@ -90,8 +80,50 @@ public class TournamentListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_tournament_list, container, false);
-        showTournamentList();
+        loadTournamentList();
         return view;
+    }
+
+    private void loadTournamentList(){
+        RequestAction actionGetTournaments = new RequestAction() {
+            @Override
+            public void actOnPre() {
+            }
+
+            @Override
+            public void actOnPost(int responseCode, String response) {
+                tournaments = new ArrayList<>();
+                if ( responseCode == 200 ) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        JSONArray jsonTournaments = jsonObject.getJSONArray(Constant.TOURNAMENT_LIST);
+                        for ( int i = 0; i < jsonTournaments.length(); i++ ) {
+                            JSONObject jsonTournament = jsonTournaments.getJSONObject(i);
+                            int tournamentID = jsonTournament.getInt(Constant.TOURNAMENT_ID);
+                            String name = jsonTournament.getString(Constant.TOURNAMENT_NAME);
+                            String info = jsonTournament.getString(Constant.TOURNAMENT_INFO);
+                            tournaments.add(new Tournament(tournamentID,name,info));
+                            Log.d(TAG,"loaded tournament:"+tournaments.get(i).name);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getContext(), response, Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response);
+                        String message = jsonObject.getString(Constant.KEY_MSG);
+                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getContext(), response, Toast.LENGTH_SHORT).show();
+                    }
+                }
+                showTournamentList();
+            }
+        };
+        String url = UrlHelper.urlTournamentsByClub(club.id);
+        RequestHelper.sendGetRequest(url,actionGetTournaments);
     }
 
     /**
@@ -117,7 +149,8 @@ public class TournamentListFragment extends Fragment {
                 TournamentFragment tournamentFragment = TournamentFragment.newInstance(tournaments.get(position),club,player);
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_content,tournamentFragment,Constant.FRAGMENT_TOURNAMENT);
+                fragmentTransaction.replace(R.id.frame_content,tournamentFragment,Constant.FRAGMENT_TOURNAMENT);
+                fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
             }
         });

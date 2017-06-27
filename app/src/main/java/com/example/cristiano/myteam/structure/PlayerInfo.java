@@ -11,7 +11,7 @@ import java.util.List;
 public class PlayerInfo {
     private Player player;
     private ArrayList<Club> clubs;
-    private HashMap<Integer,Tournament[]> clubTournaments;
+    private HashMap<Integer,ArrayList<Tournament>> clubTournaments;
     private Stats totalStats;
 
     public PlayerInfo(Player player, ArrayList<Club> clubs, Stats totalStats) {
@@ -33,12 +33,21 @@ public class PlayerInfo {
         this.clubs.add(club);
     }
 
-    public void addClubTournament(int clubID, Tournament[] tournaments) {
-        this.clubTournaments.put(clubID,tournaments);
+    public void setClubs(ArrayList<Club> clubs){
+        this.clubs = clubs;
     }
 
-    public Tournament[] getClubTournaments(int clubID) {
-        return this.clubTournaments.get(clubID);
+    public void addClubTournament(int clubID, Tournament tournament) {
+        ArrayList<Tournament> tournaments = clubTournaments.get(clubID);
+        if ( tournaments == null ) {
+            tournaments = new ArrayList<>();
+        }
+        tournaments.add(tournament);
+        clubTournaments.put(clubID,tournaments);
+    }
+
+    public ArrayList<Tournament> getClubTournaments(int clubID) {
+        return clubTournaments.get(clubID);
     }
 
     public Stats getTotalStats() {

@@ -183,9 +183,9 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         int playerID = jsonObject.getInt(Constant.PLAYER_ID);
-                        Intent intent = new Intent(PlayerRegistrationActivity.this,PlayerActivity.class);
+                        Intent intent = new Intent(PlayerRegistrationActivity.this,MainActivity.class);
                         intent.putExtra(Constant.KEY_PLAYER_ID, playerID);
-                        startActivity(intent);  // start the PlayerActivity with the created player's ID
+                        startActivity(intent);  // start the MainActivity with the created player's ID
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -198,7 +198,7 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                         e.printStackTrace();
                         Toast.makeText(PlayerRegistrationActivity.this,response,Toast.LENGTH_LONG).show();
                     }
-                    Log.e("PlayerActivity","Error in loading player profile.\nError Message:\n" + response);
+                    Log.e("MainActivity","Error in loading player profile.\nError Message:\n" + response);
                 }
                 finish();   // finish PlayerRegistration activity after request sent, clear it in stack to prevent navigate back to it
             }

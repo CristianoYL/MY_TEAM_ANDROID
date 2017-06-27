@@ -193,7 +193,7 @@ public class ClubProfileFragment extends Fragment {
         ClubMemberFragment fragment = ClubMemberFragment.newInstance(club,player);
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_MEMBER);
+        transaction.replace(R.id.frame_content,fragment,Constant.FRAGMENT_CLUB_MEMBER);
         transaction.commit();
     }
 
@@ -201,10 +201,11 @@ public class ClubProfileFragment extends Fragment {
      * view tournament list fragment
      */
     private void viewTournamentList() {
-        TournamentListFragment fragment = TournamentListFragment.newInstance(clubInfo.getTournaments(),clubInfo.getClub(),player);
+        TournamentListFragment fragment = TournamentListFragment.newInstance(clubInfo.getClub(),player);
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.fragment_content,fragment,Constant.FRAGMENT_CLUB_TOURNAMENT_LIST);
+        transaction.replace(R.id.frame_content,fragment,Constant.FRAGMENT_CLUB_TOURNAMENT_LIST);
+        transaction.addToBackStack(null);
         transaction.commit();
     }
 }

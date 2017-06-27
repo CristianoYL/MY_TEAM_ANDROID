@@ -36,19 +36,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.PlayerActivity"
+            android:name=".activity.MainActivity"
             android:label="@string/title_activity_profile"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden"/>
         <activity
             android:name=".activity.PlayerRegistrationActivity"
             android:label="@string/title_activity_player_registration"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".activity.ClubActivity"
-            android:label="@string/title_activity_club"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateHidden"/>
 
         <service
             android:name=".service.MyFirebaseInstanceIDService">

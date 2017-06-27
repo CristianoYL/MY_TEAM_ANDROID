@@ -12,6 +12,8 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -106,84 +108,17 @@ public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
         fab_locate = (FloatingActionButton) view.findViewById(R.id.fab_locate);
         fab_share = (FloatingActionButton) view.findViewById(R.id.fab_share);
         fab_view = (FloatingActionButton) view.findViewById(R.id.fab_view);
-        checkPermission();
-
-        locationListener =  new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                locationUpdateCount++;
-                mMap.clear();
-                LatLng newLocation = new LatLng(location.getLatitude(),location.getLongitude());
-                mMap.addMarker(new MarkerOptions().position(newLocation).icon(BitmapDescriptorFactory.fromResource(android.R.drawable.ic_menu_mylocation)));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(newLocation));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
-                if ( isBetterLocation(location,currentBestLocation) ) {
-                    currentBestLocation = location;
-                    Log.d("LOCATION_","Use new location");
-                } else {
-                    Log.d("LOCATION_","Use previous best location");
-                }
-                if ( locationUpdateCount >= ENOUGH_LOCATION_UPDATES ) {
-                    removeLocationUpdateAndReport();
-                }
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-            }
-        };
-
-        fab_view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getAllLocations();
-            }
-        });
-
-        fab_locate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startLocating();
-            }
-        });
-
-        fab_share.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ( locationUpdateCount >= ENOUGH_LOCATION_UPDATES ) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle("Notice");
-                    builder.setMessage("Are you sure to share your location info with your teammates?");
-                    builder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            uploadLocation(currentBestLocation);
-                        }
-                    });
-                    builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    });
-                    builder.setCancelable(true);
-                    builder.show();
-                } else {
-                    Toast.makeText(getContext(),"No location data available. Please try to locate yourself first.",Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.fragment);
+        FragmentManager fragmentManager = getChildFragmentManager();
+        SupportMapFragment mapFragment = (SupportMapFragment) fragmentManager.findFragmentByTag(Constant.FRAGMENT_MAP);
+        if ( mapFragment == null ) {
+            mapFragment = SupportMapFragment.newInstance();
+            FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+            transaction.add(R.id.frame_map,mapFragment,Constant.FRAGMENT_MAP);
+            transaction.commit();
+            fragmentManager.executePendingTransactions();
+        }
         mapFragment.getMapAsync(this);
+        checkPermission();
         return view;
     }
 
@@ -430,10 +365,82 @@ public class ClubMapFragment extends Fragment implements OnMapReadyCallback{
         }
     }
 
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        locationListener =  new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                locationUpdateCount++;
+                mMap.clear();
+                LatLng newLocation = new LatLng(location.getLatitude(),location.getLongitude());
+                mMap.addMarker(new MarkerOptions().position(newLocation).icon(BitmapDescriptorFactory.fromResource(android.R.drawable.ic_menu_mylocation)));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(newLocation));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
+                if ( isBetterLocation(location,currentBestLocation) ) {
+                    currentBestLocation = location;
+                    Log.d("LOCATION_","Use new location");
+                } else {
+                    Log.d("LOCATION_","Use previous best location");
+                }
+                if ( locationUpdateCount >= ENOUGH_LOCATION_UPDATES ) {
+                    removeLocationUpdateAndReport();
+                }
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+            }
+        };
+
+        fab_view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getAllLocations();
+            }
+        });
+
+        fab_locate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startLocating();
+            }
+        });
+
+        fab_share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ( locationUpdateCount >= ENOUGH_LOCATION_UPDATES ) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Notice");
+                    builder.setMessage("Are you sure to share your location info with your teammates?");
+                    builder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            uploadLocation(currentBestLocation);
+                        }
+                    });
+                    builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    builder.setCancelable(true);
+                    builder.show();
+                } else {
+                    Toast.makeText(getContext(),"No location data available. Please try to locate yourself first.",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
         // use Sydney as the default location
         // Add a marker in Sydney and move the camera
     }

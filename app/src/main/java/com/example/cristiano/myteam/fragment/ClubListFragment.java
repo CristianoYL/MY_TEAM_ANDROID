@@ -7,12 +7,16 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -25,7 +29,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
-import com.example.cristiano.myteam.activity.ClubActivity;
 import com.example.cristiano.myteam.adapter.ClubListAdapter;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
@@ -66,7 +69,8 @@ public class ClubListFragment extends Fragment {
     OnClubListChangeListener onClubListChangeListener;
 
     public interface OnClubListChangeListener{
-        public void addNewClub(Club club);
+        void addNewClub(Club club);
+        void selectClub(Club club);
     }
 
     public static ClubListFragment newInstance(ArrayList<Club> clubs, Player player){
@@ -117,6 +121,8 @@ public class ClubListFragment extends Fragment {
         btn_createClub = (Button) clubView.findViewById(R.id.btn_createClub);
         btn_joinClub = (Button) clubView.findViewById(R.id.btn_joinClub);
         lv_club = (ListView) clubView.findViewById(R.id.lv_club);
+        NavigationView navigationView = (NavigationView) getActivity().findViewById(R.id.nav_view_player);
+        navigationView.setCheckedItem(R.id.nav_club_list);
         showClub();
         return clubView;
     }
@@ -156,10 +162,13 @@ public class ClubListFragment extends Fragment {
     }
 
     private void viewClub(Club club) {
-        Intent intent = new Intent(getActivity(),ClubActivity.class);
-        intent.putExtra(Constant.TABLE_CLUB,club.toJson());
-        intent.putExtra(Constant.TABLE_PLAYER,player.toJson());
-        startActivity(intent);
+        onClubListChangeListener.selectClub(club);
+        ClubFragment clubFragment = ClubFragment.newInstance(club,player);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.frame_content,clubFragment,Constant.FRAGMENT_CLUB);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     /**
@@ -250,7 +259,7 @@ public class ClubListFragment extends Fragment {
         Spinner sp_searchKey = (Spinner) view_search.findViewById(R.id.sp_searchKey);
         sv_club = (SearchView) view_search.findViewById(R.id.sv_club);
         btn_join = (Button) view_search.findViewById(R.id.btn_join);
-        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getContext());
         dialogBuilder.setTitle("Join Club");
         dialogBuilder.setView(view_search);
         dialogBuilder.setCancelable(true);
@@ -282,6 +291,7 @@ public class ClubListFragment extends Fragment {
                 if (TextUtils.isEmpty(query)) {
                     return false;
                 }
+                btn_join.setVisibility(View.INVISIBLE);
                 // hide keyboard
                 AppController.hideKeyboard(getContext(),sv_club);
 
@@ -405,6 +415,14 @@ public class ClubListFragment extends Fragment {
             }
         });
 
+        lv_searchResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(TAG,"Selected!");
+                btn_join.setVisibility(View.VISIBLE);
+            }
+        });
+
         btn_join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -445,17 +463,4 @@ public class ClubListFragment extends Fragment {
         dialog = dialogBuilder.show();
 
     }
-
-//    public boolean onBackPressed(){
-//        int position = tab_club.getSelectedTabPosition();
-//        if ( position > 0 ) {
-//            TabLayout.Tab tab = tab_club.getTabAt(--position);
-//            if ( tab != null ) {
-//                tab.select();
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
 }

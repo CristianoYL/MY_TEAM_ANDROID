@@ -34,6 +34,8 @@ public class ClubListAdapter extends BaseAdapter{
 
     private List<Club> clubs;
     private Context context;
+    private int defaultClubID;
+    private SharedPreferences sharedPreferences;
 
     private class ViewHolder{
         TextView tv_clubName, tv_clubInfo,tv_status;
@@ -58,6 +60,8 @@ public class ClubListAdapter extends BaseAdapter{
     public ClubListAdapter(@NonNull Context context, @NonNull List<Club> clubs) {
         this.clubs = clubs;
         this.context = context;
+        sharedPreferences = context.getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
+        defaultClubID = sharedPreferences.getInt(Constant.CACHE_DEFAULT_CLUB_ID,0);
     }
 
     private class OnListButtonClickListener implements View.OnClickListener{
@@ -71,19 +75,20 @@ public class ClubListAdapter extends BaseAdapter{
                 Toast.makeText(context, R.string.error_pending_club_as_default, Toast.LENGTH_SHORT).show();
                 return;
             }
-            if ( !clubs.get(position).isDefault ) {
-                for ( Club club : clubs ) {
-                    if ( club.isDefault ) {
-                        club.isDefault = false;
-                        break;
-                    }
-                }
-                clubs.get(position).isDefault = true;
-                SharedPreferences sharedPreferences = context.getSharedPreferences(Constant.KEY_USER_PREF,MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            if ( clubs.get(position).id != defaultClubID ) {
+                // set and cache new default club ID
                 editor.putInt(Constant.CACHE_DEFAULT_CLUB_ID,clubs.get(position).id);
+                defaultClubID = clubs.get(position).id;
                 editor.apply();
                 Toast.makeText(context, R.string.set_club_as_default, Toast.LENGTH_SHORT).show();
+                notifyDataSetChanged();
+            } else {
+                // unset default club ID
+                editor.putInt(Constant.CACHE_DEFAULT_CLUB_ID,0);
+                defaultClubID = 0;
+                editor.apply();
+                Toast.makeText(context, R.string.unset_default_club, Toast.LENGTH_SHORT).show();
                 notifyDataSetChanged();
             }
         }
@@ -118,7 +123,7 @@ public class ClubListAdapter extends BaseAdapter{
             viewHolder.tv_status.setTextColor(ContextCompat.getColor(context,R.color.colorGreen));
             viewHolder.tv_clubName.setTextColor(ContextCompat.getColor(context,R.color.colorGreen));
         }
-        if ( club.isDefault ) {
+        if ( club.id == defaultClubID ) {
             viewHolder.iv_default.setImageResource(android.R.drawable.star_big_on);
         } else {
             viewHolder.iv_default.setImageResource(android.R.drawable.star_big_off);

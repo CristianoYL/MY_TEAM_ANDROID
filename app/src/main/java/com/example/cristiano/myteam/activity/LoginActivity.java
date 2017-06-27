@@ -605,7 +605,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         if ( defaultClubID != 0 ) { // if default club has been set
                             getClub(defaultClubID, player); // go to default club's page
                         } else {    // if not set
-                            showPlayerPage(playerID); // go to player's profile page
+                            showPlayerPage(player); // go to player's profile page
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -650,14 +650,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         RequestHelper.sendGetRequest(url,actionGetClub);
     }
 
-    private void showPlayerPage(int playerID) {
-        Intent intent = new Intent(LoginActivity.this,PlayerActivity.class);
-        intent.putExtra(Constant.KEY_PLAYER_ID, playerID);
+    private void showPlayerPage(Player player) {
+        Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+        intent.putExtra(Constant.TABLE_PLAYER, player.toJson());
         startActivity(intent);
     }
 
     private void showClubPage(Club club, Player player) {
-        Intent intent = new Intent(LoginActivity.this,ClubActivity.class);
+        Intent intent = new Intent(LoginActivity.this,MainActivity.class);
         intent.putExtra(Constant.TABLE_PLAYER, player.toJson());
         intent.putExtra(Constant.TABLE_CLUB, club.toJson());
         startActivity(intent);

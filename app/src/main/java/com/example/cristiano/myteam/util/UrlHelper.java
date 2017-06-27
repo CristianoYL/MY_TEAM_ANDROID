@@ -12,7 +12,7 @@ public class UrlHelper {
     // Heroku FLASK_URL
     private static final String FLASK_URL = "https://my-team-rest-api.herokuapp.com";
     //local testing FLASK_URL
-//    private static final String FLASK_URL = "http://192.168.1.12:5000";
+//    private static final String FLASK_URL = "http://192.168.1.5:5000";
 
     public static String urlLogin(){
         return FLASK_URL + "/auth";

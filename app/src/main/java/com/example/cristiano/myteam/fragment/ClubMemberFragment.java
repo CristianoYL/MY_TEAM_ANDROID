@@ -6,8 +6,9 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
-import com.example.cristiano.myteam.activity.PlayerActivity;
+import com.example.cristiano.myteam.activity.MainActivity;
 import com.example.cristiano.myteam.adapter.MemberListAdapter;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
@@ -174,10 +175,12 @@ public class ClubMemberFragment extends Fragment{
         lv_teamsheet.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getContext(), PlayerActivity.class);
-                intent.putExtra(Constant.KEY_PLAYER_ID, clubPlayers.get(position).getId());
-                intent.putExtra(Constant.KEY_IS_VISITOR,true);
-                startActivity(intent);
+                VisitorViewFragment visitorViewFragment = VisitorViewFragment.newInstance(clubPlayers.get(position).getId());
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.frame_content,visitorViewFragment,Constant.FRAGMENT_VISITOR);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
         // create new player and add to the teamsheet

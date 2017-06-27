@@ -5,10 +5,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.support.design.widget.NavigationView;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.activity.LoginActivity;
 
 /**
@@ -16,6 +23,7 @@ import com.example.cristiano.myteam.activity.LoginActivity;
  */
 
 public class AppController {
+    private static final String TAG = "AppController";
 
     private static boolean isBackPressed = false;
     /**
@@ -71,5 +79,31 @@ public class AppController {
         Intent intent = new Intent(context,LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
         context.startActivity(intent);
+    }
+
+    public static final int MENU_PLAYER = 0;
+    public static final int MENU_CLUB = 1;
+    public static final int MENU_REGISTER = 2;
+    public static void setNavigationMenu(Activity activity, int menuType){
+        NavigationView navigationView = (NavigationView) activity.findViewById(R.id.nav_view_player);
+        Menu menu = navigationView.getMenu();
+        menu.clear();
+        switch ( menuType ) {
+            case MENU_PLAYER:
+                navigationView.inflateMenu(R.menu.menu_player_profile);
+                navigationView.setCheckedItem(R.id.nav_player_profile);
+                break;
+            case MENU_CLUB:
+                navigationView.inflateMenu(R.menu.menu_club);
+                navigationView.setCheckedItem(R.id.nav_club);
+                break;
+            case MENU_REGISTER:
+                navigationView.inflateMenu(R.menu.menu_player_registration);
+                break;
+            default:
+                Log.e(TAG,"setNavigationMenu with invalid menu type.");
+                navigationView.inflateMenu(R.menu.menu_player_profile);
+                break;
+        }
     }
 }

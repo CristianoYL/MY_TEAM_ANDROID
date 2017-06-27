@@ -91,4 +91,8 @@ public class MyFirebaseMessageService extends FirebaseMessagingService {
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
     }
+
+    private void handleNotificationMessage(RemoteMessage.Notification notification){
+
+    }
 }

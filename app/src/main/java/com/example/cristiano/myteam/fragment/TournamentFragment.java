@@ -138,6 +138,11 @@ public class TournamentFragment extends Fragment {
         viewPager_tournament.setAdapter(adapter);
     }
 
+    /**
+     * defines the onBackPressed behavior for TournamentFragment
+     * navigate back to previous tab if the first tab is not being displayed
+     * @return if the onBackPressed event is handled by this fragment
+     */
     public boolean onBackPressed(){
         int position = tab_tournament.getSelectedTabPosition();
         if ( position > 0 ) {
