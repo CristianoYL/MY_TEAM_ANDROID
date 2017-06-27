@@ -418,7 +418,6 @@ public class ClubListFragment extends Fragment {
         lv_searchResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(TAG,"Selected!");
                 btn_join.setVisibility(View.VISIBLE);
             }
         });
@@ -439,6 +438,11 @@ public class ClubListFragment extends Fragment {
                     @Override
                     public void actOnPost(int responseCode, String response) {
                         if ( responseCode == 201 ) {
+                            Club club = searchResultList.get(lv_searchResult.getCheckedItemPosition());
+                            club.priority = 0;
+                            clubs.add(club);
+                            onClubListChangeListener.addNewClub(club);
+                            showClub();
                             Toast.makeText(getContext(), "Join club request sent. Please wait for club admins to handle the request.", Toast.LENGTH_SHORT).show();
                         } else {
                             try {

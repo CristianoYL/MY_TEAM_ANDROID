@@ -172,14 +172,6 @@ public class PlayerProfileFragment extends Fragment {
                             myClubs.add(club);
                         }
                         onClubListLoadedListener.setClubs(myClubs);
-//                        int defaultClubID = sharedPreferences.getInt(Constant.CACHE_DEFAULT_CLUB_ID,0);
-//                        if ( defaultClubID != 0 ) { // if default club has been set
-//                            for ( Club club : myClubs ) {
-//                                if ( club.id == defaultClubID ) {
-//                                    club.isDefault = true;
-//                                }
-//                            }
-//                        }
                         JSONObject jsonPlayerTotalStats = jsonPlayerInfo.getJSONObject(Constant.PLAYER_INFO_TOTAL_STATS);
                         int tournamentID = -1;
                         clubID = Constant.ALL_STATS;
@@ -251,7 +243,10 @@ public class PlayerProfileFragment extends Fragment {
         clubNames = new ArrayList<>(playerInfo.getClubs().size());
         clubNames.add(Constant.OPTION_ALL_CLUBS);
         for ( int i = 0; i < playerInfo.getClubs().size(); i++ ) {
-            clubNames.add(playerInfo.getClubs().get(i).name);
+            Club club = playerInfo.getClubs().get(i);
+            if ( club.priority > 0 ) {
+                clubNames.add(club.name);
+            }
         }
         sp_playerClub.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_spinner_dropdown_item,clubNames));
 
