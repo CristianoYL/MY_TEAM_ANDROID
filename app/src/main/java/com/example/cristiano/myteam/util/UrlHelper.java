@@ -62,6 +62,10 @@ public class UrlHelper {
         return FLASK_URL + "/club_info/id/" + clubID;
     }
 
+    public static String urlEventByClub(int clubID, int limit, int offset){
+        return FLASK_URL + "/event/club/" + clubID + "/limit/" + limit + "/offset/" + offset;
+    }
+
     public static String urlMemberRequest(int clubID) {
         return FLASK_URL + "/member/request/" + clubID;
     }

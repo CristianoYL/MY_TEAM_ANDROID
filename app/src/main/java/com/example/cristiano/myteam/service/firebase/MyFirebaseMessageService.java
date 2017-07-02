@@ -1,4 +1,4 @@
-package com.example.cristiano.myteam.service;
+package com.example.cristiano.myteam.service.firebase;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;

@@ -47,17 +47,21 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <service
-            android:name=".service.MyFirebaseInstanceIDService">
+            android:name=".service.firebase.MyFirebaseInstanceIDService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
             </intent-filter>
         </service>
 
         <service
-            android:name=".service.MyFirebaseMessageService">
+            android:name=".service.firebase.MyFirebaseMessageService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
+
+        <service
+            android:name=".service.location.FetchAddressIntentService"
+            android:exported="false" />
     </application>
 </manifest>

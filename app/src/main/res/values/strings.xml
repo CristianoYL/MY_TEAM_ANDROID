@@ -73,6 +73,14 @@
     <string name="set_club_as_default">New default club set!</string>
     <string name="unset_default_club">Default club unset!</string>
     <string name="error_view_pending_club">Your application to this club is still pending.Please wait for captain\'s approval.</string>
+    <string name="prompt_share_location">Are you sure to share your check-in location with your teammates?</string>
+    <string name="prompt_share_location_fail">No location data available. Please try to locate yourself first.</string>
+    <string name="status_locating">Locating&#8230;</string>
+    <string name="address_found">Requested address found.</string>
+    <string name="no_address_found">Requested address not found.</string>
+    <string name="invalid_lat_long_used">The input latitude/longitude is invalid.</string>
+    <string name="location_service_not_available">The location service is not available.</string>
+    <string name="no_location_data_provided">No location data provided.</string>
 
     <!-- labels-->
     <string name="label_cancel">Cancel</string>
@@ -90,6 +98,18 @@
     <string name="label_active">Active</string>
     <string name="label_name">Name</string>
     <string name="label_description">Description</string>
+    <string name="label_my_location">My Location</string>
+    <string name="label_location_as_of">as of:</string>
+    <string name="label_event_address">Event address</string>
+    <string name="label_event_title">Event title</string>
+    <string name="label_event_info">Event info</string>
+    <string name="label_event_date">Event date</string>
+    <string name="label_event_time">Event time</string>
+    <string name="label_create_event">Create a new event</string>
+    <string name="label_event_confirm">Create event</string>
+    <string name="label_specify_event_time">Specify event time</string>
+
+
 
 
     <!-- Dialog titles -->
@@ -106,6 +126,7 @@
     <string name="prompt_promote">Are you sure to promote this player?</string>
     <string name="prompt_demote">Are you sure to demote this player?</string>
     <string name="prompt_logout">Are you sure to log out?</string>
+    <string name="prompt_quit">Are you sure to quit?</string>
 
     <!-- firebase notifications -->
     <string name="fcm_club_application_approved">Club application approved!</string>
@@ -143,7 +164,7 @@
     </string-array>
 
 
-    <!-- menu_player positions -->
+    <!-- player positions -->
     <string name="position_gk">Goalkeeper</string>
     <string name="position_cb">Center Back</string>
     <string name="position_rb">Right Back</string>

@@ -71,7 +71,7 @@ public class PlayerProfileFragment extends Fragment {
     OnClubListLoadedListener onClubListLoadedListener;
 
     public interface OnClubListLoadedListener{
-        public void setClubs(ArrayList<Club> clubList);
+        void setClubs(ArrayList<Club> clubList);
     }
 
     public PlayerProfileFragment() {

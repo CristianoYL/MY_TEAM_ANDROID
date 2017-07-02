@@ -1,4 +1,4 @@
-package com.example.cristiano.myteam.service;
+package com.example.cristiano.myteam.service.firebase;
 
 import android.content.SharedPreferences;
 import android.util.Log;

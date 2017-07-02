@@ -3,6 +3,7 @@ package com.example.cristiano.myteam.activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Address;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -20,6 +21,7 @@ import android.view.MenuItem;
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.fragment.ClubFragment;
 import com.example.cristiano.myteam.fragment.ClubListFragment;
+import com.example.cristiano.myteam.fragment.MapFragment;
 import com.example.cristiano.myteam.fragment.PlayerProfileFragment;
 import com.example.cristiano.myteam.fragment.TournamentFragment;
 import com.example.cristiano.myteam.fragment.TournamentListFragment;
@@ -51,7 +53,8 @@ import java.util.ArrayList;
  */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        ClubListFragment.OnClubListChangeListener, PlayerProfileFragment.OnClubListLoadedListener{
+        ClubListFragment.OnClubListChangeListener, PlayerProfileFragment.OnClubListLoadedListener,
+        MapFragment.OnCreateEventRequestListener{
 
     private final static String TAG = "MainActivity";
 
@@ -169,7 +172,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_player, menu);
+        getMenuInflater().inflate(R.menu.menu_player_options, menu);
         return true;
     }
 
@@ -182,7 +185,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            showSettingsPage();
+//            showSettingsPage();
             return true;
         } else if (id == R.id.action_logout) {
             showLogoutPage();
@@ -375,5 +378,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void selectClub(Club club) {
         this.club = club;
+    }
+
+    @Override
+    public void createEvent(Address address) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        ClubFragment clubFragment = (ClubFragment) fragmentManager.findFragmentByTag(Constant.FRAGMENT_CLUB);
+        if ( clubFragment != null ) {
+            clubFragment.createEvent(address);
+        }
     }
 }

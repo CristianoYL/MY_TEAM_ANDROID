@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="popupMenuStyle">@style/CustomMenuStyle</item>
+        <item name="android:popupMenuStyle">@style/CustomMenuStyle</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -93,6 +95,18 @@
         <item name="android:layout_marginLeft">5dp</item>
         <item name="android:scaleType">center</item>
         <item name="android:tint">@android:color/white</item>
+    </style>
+
+    <style name="CustomMenuStyle">
+        <item name="android:textColor">@color/colorBlue</item>
+        <item name="android:textSize">8sp</item>
+        <item name="android:popupBackground">@drawable/map_search_background</item>
+    </style>
+
+    <style name="CustomSpinnerStyle">
+        <item name="android:textColor">@color/colorBlue</item>
+        <item name="android:textSize">8sp</item>
+        <item name="android:popupBackground">@drawable/map_search_background</item>
     </style>
 
 </resources>

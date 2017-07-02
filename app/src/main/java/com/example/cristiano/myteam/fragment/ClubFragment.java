@@ -2,10 +2,12 @@ package com.example.cristiano.myteam.fragment;
 
 
 import android.graphics.Color;
+import android.location.Address;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,13 +26,14 @@ import com.google.gson.Gson;
  * this fragment shows the club page
  */
 
-public class ClubFragment extends Fragment {
+public class ClubFragment extends Fragment implements MapFragment.OnCreateEventRequestListener {
 
     private static final String ARG_CLUB = "club";
     private static final String ARG_PLAYER = "player";
 
     private TabLayout tab_club;
     public ViewPager viewPager_club;
+    private EventFragment eventFragment;
 
     private Club club;
     private Player player;
@@ -124,18 +127,21 @@ public class ClubFragment extends Fragment {
         tab_club.addTab(tab_club.newTab().setText("Chat"));
         tab_club.addTab(tab_club.newTab().setText("Members"));
         tab_club.addTab(tab_club.newTab().setText("Map"));
+        tab_club.addTab(tab_club.newTab().setText("Events"));
         tab_club.addTab(tab_club.newTab().setText("Profile"));
-        tab_club.setTabMode(TabLayout.MODE_FIXED);
+        tab_club.setTabMode(TabLayout.MODE_SCROLLABLE);
         // set fragments into view pagers
-        Fragment[] fragments = new Fragment[4];
+        Fragment[] fragments = new Fragment[5];
         ChatFragment chatFragment = ChatFragment.newInstance(null, club,null,player);
         fragments[0] = chatFragment;
         ClubMemberFragment memberFragment = ClubMemberFragment.newInstance(club,player);
         fragments[1] = memberFragment;
-        ClubMapFragment mapFragment = ClubMapFragment.newInstance(club,player);
+        MapFragment mapFragment = MapFragment.newInstance(club,player);
         fragments[2] = mapFragment;
+        eventFragment = EventFragment.newInstance(club,player);
+        fragments[3] = eventFragment;
         ClubProfileFragment clubProfileFragment = ClubProfileFragment.newInstance(club,player);
-        fragments[3] = clubProfileFragment;
+        fragments[4] = clubProfileFragment;
 
         CustomFragmentAdapter adapter = new CustomFragmentAdapter(getChildFragmentManager());
         adapter.setFragments(fragments);
@@ -157,5 +163,14 @@ public class ClubFragment extends Fragment {
             }
         }
         return false;
+    }
+
+    @Override
+    public void createEvent(Address eventAddress) {
+        TabLayout.Tab tab = tab_club.getTabAt(3);
+        if ( tab != null ) {
+            tab.select();
+            eventFragment.showCreateEventDialog(eventAddress);
+        }
     }
 }
