@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
+import com.example.cristiano.myteam.structure.Event;
 
 import java.util.List;
 
@@ -23,7 +24,7 @@ import java.util.List;
 
 public class EventListAdapter extends BaseAdapter{
 
-    private List<String> events;
+    private List<Event> events;
     private Context context;
 
     private class ViewHolder{
@@ -37,17 +38,16 @@ public class EventListAdapter extends BaseAdapter{
     }
 
     @Override
-    public String getItem(int position) {
+    public Event getItem(int position) {
         return events.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-//        return events.get(position).id;
-        return 0;
+        return events.get(position).id;
     }
 
-    public EventListAdapter(@NonNull Context context, @NonNull List<String> events) {
+    public EventListAdapter(@NonNull Context context, @NonNull List<Event> events) {
         this.events = events;
         this.context = context;
     }
@@ -59,7 +59,9 @@ public class EventListAdapter extends BaseAdapter{
         }
         @Override
         public void onClick(View v) {
-            Toast.makeText(context, "show on map " + position, Toast.LENGTH_SHORT).show();
+            Event event = getItem(position);
+            Toast.makeText(context, "show on map(" +
+                    event.latitude + "," + event.longitude +")", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -67,7 +69,7 @@ public class EventListAdapter extends BaseAdapter{
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         ViewHolder viewHolder;
-        String event = events.get(position);
+        Event event = getItem(position);
         if ( convertView == null ) {
             viewHolder = new ViewHolder();
             convertView = LayoutInflater.from(context).inflate(R.layout.layout_card_event,null);
@@ -79,12 +81,12 @@ public class EventListAdapter extends BaseAdapter{
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-//        String eventTitle = event.title;
-//        String eventTime = event.time;
-//        String eventAddress = event.address;
-        viewHolder.tv_eventTitle.setText(event);
-        viewHolder.tv_eventTime.setText("2017/07/01");
-        viewHolder.tv_eventAddress.setText("203 Penn Ave, Edison, NJ 08817");
+        String eventTitle = event.eventTitle;
+        String eventTime = event.eventTime;
+        String eventAddress = event.eventAddress;
+        viewHolder.tv_eventTitle.setText(eventTitle);
+        viewHolder.tv_eventTime.setText(eventTime);
+        viewHolder.tv_eventAddress.setText(eventAddress);
         viewHolder.fab_viewOnMap.setOnClickListener(new OnViewMapListener(position));
         return convertView;
     }

@@ -12,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SwitchCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,18 +28,28 @@ import android.widget.Toast;
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.adapter.EventListAdapter;
 import com.example.cristiano.myteam.request.RequestAction;
+import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.service.location.FetchAddressIntentService;
 import com.example.cristiano.myteam.structure.Club;
+import com.example.cristiano.myteam.structure.Event;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
 import com.google.gson.Gson;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * Created by Cristiano on 2017/4/18.
@@ -50,15 +61,17 @@ public class EventFragment extends Fragment {
 
     private static final String ARG_CLUB = "club";
     private static final String ARG_PLAYER = "player";
+    private static final String TAG = "EventFragment";
 
     private static final int EVENTS_PER_REQUEST = 5;   // load 5 events per request
 
     private Club club;
     private Player player;
     private int offset;
-    private List<String> events;
+    private List<Event> events;
     private AddressResultReceiver mResultReceiver;
     private Address eventAddress;
+    private String eventAddressStr;
 
     private View view;
     private FloatingActionButton fab_addEvent;
@@ -114,11 +127,6 @@ public class EventFragment extends Fragment {
      * send a GET request to retrieve the club's events
      */
     private void getEvents(){
-        events = new ArrayList<>();
-        events.add("event 1");
-        events.add("event 2");
-        events.add("event 3");
-        showEvents();
         RequestAction actionGetEvents = new RequestAction() {
             @Override
             public void actOnPre() {
@@ -129,10 +137,30 @@ public class EventFragment extends Fragment {
                 if ( responseCode == 200 ) {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
+                        JSONArray jsonEventList = jsonObject.getJSONArray(Constant.KEY_EVENT_LIST);
+                        events = new ArrayList<>(jsonEventList.length());
+                        for ( int i = 0; i < jsonEventList.length(); i++ ) {
+                            JSONObject jsonEvent = jsonEventList.getJSONObject(i);
+                            int id = jsonEvent.getInt(Constant.EVENT_ID);
+                            int clubID = jsonEvent.getInt(Constant.EVENT_C_ID);
+                            String eventTitle = jsonEvent.getString(Constant.EVENT_TITLE);
+                            String eventAddress = jsonEvent.getString(Constant.EVENT_ADDRESS);
+                            String latitude = jsonEvent.getString(Constant.EVENT_LATITUDE);
+                            String longitude = jsonEvent.getString(Constant.EVENT_LONGITUDE);
+                            String eventTime = jsonEvent.getString(Constant.EVENT_DATETIME);
+                            Date date = Constant.getServerDateFormat().parse(eventTime);
+                            eventTime = Constant.EVENT_DATE_FORMAT.format(date);
+                            Event event = new Event(id,clubID,eventTitle,eventAddress,latitude,longitude,eventTime);
+                            events.add(event);
+                        }
                         showEvents();
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(getActivity(),response,Toast.LENGTH_LONG).show();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
                     }
                 } else {
                     try {
@@ -146,12 +174,13 @@ public class EventFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlEventByClub(club.id,EVENTS_PER_REQUEST,offset);
-//        RequestHelper.sendGetRequest(url,actionGetEvents);
+//        String url = UrlHelper.urlEventByClub(club.id,EVENTS_PER_REQUEST,offset);
+        String url = UrlHelper.urlEventByClub(club.id);
+        RequestHelper.sendGetRequest(url,actionGetEvents);
     }
 
     /**
-     * after retrieving the club's events, call this method to display it into the timeline
+     *  After retrieving the club's events, call this method to display it into the timeline
      */
     private void showEvents() {
         adapter = new EventListAdapter(getContext(),events);
@@ -162,7 +191,7 @@ public class EventFragment extends Fragment {
         showCreateEventDialog(null);
     }
 
-    public void showCreateEventDialog(Address eventAddress){
+    public void showCreateEventDialog(Address address){
         View eventView = LayoutInflater.from(getContext()).inflate(R.layout.layout_dialog_add_event,null);
         et_eventTitle = (EditText) eventView.findViewById(R.id.et_eventTitle);
         sv_address = (SearchView) eventView.findViewById(R.id.sv_address);
@@ -170,16 +199,17 @@ public class EventFragment extends Fragment {
         datePicker = (DatePicker) eventView.findViewById(R.id.datePicker);
         timePicker = (TimePicker) eventView.findViewById(R.id.timePicker);
         sw_time = (SwitchCompat) eventView.findViewById(R.id.sw_time);
+        this.eventAddress = null;
+        this.eventAddressStr = null;
 
-        if ( eventAddress != null ) {
-            this.eventAddress = eventAddress;
-            String strAddress;
+        if ( address != null ) {
+            this.eventAddress = address;
             ArrayList<String> addressLines = new ArrayList<>();
             for ( int i = 0; i <= eventAddress.getMaxAddressLineIndex(); i++ ) {
                 addressLines.add(eventAddress.getAddressLine(i));
             }
-            strAddress = TextUtils.join(System.getProperty("line.separator"),addressLines);
-            sv_address.setQuery(strAddress,false);
+            this.eventAddressStr = TextUtils.join(System.getProperty("line.separator"),addressLines);
+            sv_address.setQuery(this.eventAddressStr,false);
         }
 
         sw_time.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -217,6 +247,8 @@ public class EventFragment extends Fragment {
                 int year = datePicker.getYear();
                 int month = datePicker.getMonth() + 1;
                 int day = datePicker.getDayOfMonth();
+                String time;
+                Date date;
                 if ( sw_time.isChecked() ) {
                     int hour, minute;
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
@@ -226,12 +258,20 @@ public class EventFragment extends Fragment {
                         hour = timePicker.getCurrentHour();
                         minute = timePicker.getCurrentMinute();
                     }
+                    Log.d("YEAR",":"+year);
+                    Calendar calendar = new GregorianCalendar(year, month, day, hour,minute);
+                    calendar.setTimeZone(TimeZone.getDefault());
+                    date = calendar.getTime();
                 } else {
-//                    Toast.makeText(getActivity(), "Event<"+et_eventTitle.getText()+"> at " +
-//                            year +"/"+month+"/"+day, Toast.LENGTH_SHORT).show();
+                    Calendar calendar = new GregorianCalendar(year, month, day);
+                    calendar.setTimeZone(TimeZone.getDefault());
+                    date = calendar.getTime();
                 }
-                events.add(et_eventTitle.getText().toString());
-                adapter.notifyDataSetChanged();
+                DateFormat dateFormat = Constant.EVENT_DATE_FORMAT;
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                time = dateFormat.format(date);
+                Event event = new Event(0,club.id,et_eventTitle.getText().toString(),eventAddressStr,eventAddress.getLatitude(),eventAddress.getLongitude(),time);
+                postEvent(event);
             }
         });
         builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
@@ -264,9 +304,10 @@ public class EventFragment extends Fragment {
     }
 
     /**
-     * send a post request to create a new event
+     *  Send a post request to create a new event
+     *  the eventTime must be converted to UTC before uploading to server
      */
-    private void postEvent(){
+    private void postEvent(Event event){
         RequestAction actionPostEvents = new RequestAction() {
             @Override
             public void actOnPre() {
@@ -276,11 +317,34 @@ public class EventFragment extends Fragment {
             public void actOnPost(int responseCode, String response) {
                 if ( responseCode == 201 ) {
                     try {
-                        JSONObject jsonObject = new JSONObject(response);
-                        showEvents();
+                        JSONObject jsonEvent = new JSONObject(response);
+                        int id = jsonEvent.getInt(Constant.EVENT_ID);
+                        int clubID = jsonEvent.getInt(Constant.EVENT_C_ID);
+                        String eventTitle = jsonEvent.getString(Constant.EVENT_TITLE);
+                        String eventAddress = jsonEvent.getString(Constant.EVENT_ADDRESS);
+                        String latitude = jsonEvent.getString(Constant.EVENT_LATITUDE);
+                        String longitude = jsonEvent.getString(Constant.EVENT_LONGITUDE);
+                        String eventTime = jsonEvent.getString(Constant.EVENT_DATETIME);
+                        Log.d("EVENT","retrieved event time:"+eventTime);
+                        Date date = Constant.getServerDateFormat().parse(eventTime);
+                        DateFormat localFormat = Constant.EVENT_DATE_FORMAT;
+                        localFormat.setTimeZone(TimeZone.getDefault());
+                        eventTime = localFormat.format(date);
+                        Log.d("EVENT","parsed event time:"+eventTime);
+                        Event event = new Event(id,clubID,eventTitle,eventAddress,latitude,longitude,eventTime);
+                        events.add(event);  // add to list
+                        adapter.notifyDataSetChanged();   // refresh list
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(getActivity(),response,Toast.LENGTH_LONG).show();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getActivity(),response,Toast.LENGTH_LONG).show();
+                        Log.e(TAG,"Error when parsing server time");
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                        Toast.makeText(getActivity(),response,Toast.LENGTH_LONG).show();
+                        Log.e(TAG,"Error when instantiating Event object");
                     }
                 } else {
                     try {
@@ -294,8 +358,8 @@ public class EventFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlEventByClub(club.id,EVENTS_PER_REQUEST,offset);
-//        RequestHelper.sendGetRequest(url,actionGetEvents);
+        String url = UrlHelper.urlEvent();
+        RequestHelper.sendPostRequest(url,event.toJson(),actionPostEvents);
     }
 
     /**

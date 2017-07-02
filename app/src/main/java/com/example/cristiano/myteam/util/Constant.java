@@ -62,6 +62,7 @@ public class Constant {
     }
     public static final DateFormat MARKER_DATE_FORMAT = new SimpleDateFormat("HH:mm MMM-dd", Locale.getDefault());
     public static final DateFormat DISPLAY_DATE_FORMAT = new SimpleDateFormat("MMM dd HH:mm",Locale.getDefault());
+    public static final DateFormat EVENT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm",Locale.getDefault());
     public static final String MESSAGE_TYPE_TEXT = "text";
     public static final String MESSAGE_TYPE_IMAGE = "image";
     public static final String MESSAGE_TYPE_VIDEO = "video";
@@ -179,6 +180,19 @@ public class Constant {
     public static final String LOCATION_LAT = "latitude";
     public static final String LOCATION_LNG = "longitude";
     public static final String LOCATION_LAST_UPDATE = "lastUpdate";
+
+    // table event
+    // table location
+    public static final String TABLE_EVENT = "event";
+    public static final String KEY_EVENT_LIST = "events";
+    // location columns
+    public static final String EVENT_ID = "id";
+    public static final String EVENT_C_ID = "clubID";
+    public static final String EVENT_TITLE = "eventTitle";
+    public static final String EVENT_ADDRESS = "eventAddress";
+    public static final String EVENT_LATITUDE = "latitude";
+    public static final String EVENT_LONGITUDE = "longitude";
+    public static final String EVENT_DATETIME = "eventTime";
 
     // event keys
     public static final String EVENT_TYPE = "type";

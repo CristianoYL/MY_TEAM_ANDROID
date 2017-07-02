@@ -28,7 +28,7 @@ import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Club;
-import com.example.cristiano.myteam.structure.Event;
+import com.example.cristiano.myteam.structure.GameEvent;
 import com.example.cristiano.myteam.structure.GameResultAndStats;
 import com.example.cristiano.myteam.structure.Result;
 import com.example.cristiano.myteam.structure.Squad;
@@ -280,10 +280,10 @@ public class TournamentResultFragment extends Fragment {
         }
         for ( int k = 0; k < eventList.size(); k++ ) {
             HashMap<String,Object> eventMap = new HashMap<>(3);
-            Event event = gson.fromJson(eventList.get(k),Event.class);
-            setEventIcon(eventMap,event.type);
-            eventMap.put(Constant.EVENT_PLAYER,event.player);
-            eventMap.put(Constant.EVENT_TIME,event.time);
+            GameEvent gameEvent = gson.fromJson(eventList.get(k),GameEvent.class);
+            setEventIcon(eventMap, gameEvent.type);
+            eventMap.put(Constant.EVENT_PLAYER, gameEvent.player);
+            eventMap.put(Constant.EVENT_TIME, gameEvent.time);
             eventListItems.add(eventMap);
         }
         return new SimpleAdapter(getContext(), eventListItems, R.layout.layout_event_detail,

@@ -42,11 +42,11 @@ public class Result {
     }
 
     public void addEvent(String eventType, String player, String time, boolean isHomeEvent){
-        Event event = new Event(eventType,player,time);
+        GameEvent gameEvent = new GameEvent(eventType,player,time);
         if ( isHomeEvent ) {
-            this.homeEvents.add(event.toJson());
+            this.homeEvents.add(gameEvent.toJson());
         } else {
-            this.awayEvents.add(event.toJson());
+            this.awayEvents.add(gameEvent.toJson());
         }
     }
 
