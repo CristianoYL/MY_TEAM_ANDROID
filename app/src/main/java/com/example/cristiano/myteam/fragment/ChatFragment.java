@@ -13,11 +13,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,10 +32,10 @@ import com.example.cristiano.myteam.structure.Chat;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.Tournament;
+import com.example.cristiano.myteam.util.AppController;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.FCMHelper;
 import com.example.cristiano.myteam.util.UrlHelper;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -53,6 +56,10 @@ public class ChatFragment extends Fragment {
     private static final String ARG_RECV = "receiver";
     private static final String ARG_SELF = "self";
 
+    private boolean isLoading = false;
+    private boolean isAllLoaded = false;
+    private boolean isOverScrolling = false;
+
     private static final String TAG = "ChatFragment";
 
     private final static int CHAT_LIMIT = 30;
@@ -69,6 +76,7 @@ public class ChatFragment extends Fragment {
     private View view_chat,view_functions;
     private FloatingActionButton fab_send,fab_more,fab_less,fab_gallery,fab_camera,fab_location;
     private ListView lv_chat;
+    private ProgressBar pb_loadChat;
     private EditText et_message;
     private ChatListAdapter adapter;
 
@@ -136,6 +144,7 @@ public class ChatFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        isAllLoaded = false;
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mMessageReceiver,
                 new IntentFilter(Constant.INTENT_NEW_MESSAGE));
         Log.d(TAG,"Register broadcast listener");
@@ -178,19 +187,50 @@ public class ChatFragment extends Fragment {
      */
     private void showChatPage(){
         lv_chat = (ListView) view_chat.findViewById(R.id.lv_chat);
+        pb_loadChat = (ProgressBar) view_chat.findViewById(R.id.pb_load_chat);
         adapter = new ChatListAdapter(getContext(), chatList, self.getId());
         lv_chat.setAdapter(adapter);
-        lv_chat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//        lv_chat.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                Log.d(TAG, "click");
+//                String message = adapter.getItem(position).messageContent;
+//                TextView textView = (TextView) view.findViewById(R.id.tv_otherText);
+//                int visibility = textView.getVisibility();
+//                if ( visibility == View.VISIBLE ) {
+//                    Log.d(TAG, "<" + message + "> is visible");
+//                } else {
+//                    Log.d(TAG, "<" + message + "> is invisible");
+//                }
+//            }
+//        });
+
+        lv_chat.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String message = adapter.getItem(position).messageContent;
-                TextView textView = (TextView) view.findViewById(R.id.tv_otherText);
-                int visibility = textView.getVisibility();
-                if ( visibility == View.VISIBLE ) {
-                    Log.d(TAG, "<" + message + "> is visible");
-                } else {
-                    Log.d(TAG, "<" + message + "> is invisible");
+            public boolean onTouch(View v, MotionEvent event) {
+                view_chat.requestFocus();   // remove focus from the EditText
+                return false;
+            }
+        });
+
+        lv_chat.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if ( scrollState == SCROLL_STATE_TOUCH_SCROLL ) {
+                    if ( lv_chat.getFirstVisiblePosition() == 0 && !isLoading && !isAllLoaded ){
+                        Log.d("ListView","load more history");
+                        loadMoreHistoryChat();
+                    }
                 }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+//                if ( firstVisibleItem == 0 && totalItemCount > 0 ) {
+//                    if ( !isLoading && !isAllLoaded && isOverScrolling) {
+//                        loadMoreHistoryChat();
+//                    }
+//                }
             }
         });
         loadChatHistory(CHAT_LIMIT,0,0);  // load most recent CHAT_LIMIT chats
@@ -204,8 +244,10 @@ public class ChatFragment extends Fragment {
             public void onFocusChange(View v, boolean hasFocus) {
                 if ( hasFocus ) {
                     if ( adapter != null ) {
-                        adapter.notifyDataSetChanged();
+                        lv_chat.setSelection(adapter.getCount()-1); // scroll to bottom when gaining focus
                     }
+                } else {
+                    AppController.hideKeyboard(getContext(),v); // hide keyboard when losing focus
                 }
             }
         });
@@ -254,13 +296,6 @@ public class ChatFragment extends Fragment {
     }
 
     /**
-     * refresh the chat list to show latest data
-     */
-    private void showMessages() {
-        adapter.notifyDataSetChanged();
-    }
-
-    /**
      * send a text chat message and post it to the server
      * @param message the message to be sent
      */
@@ -306,9 +341,12 @@ public class ChatFragment extends Fragment {
      * @param afterID  if afterID is 0, ignore this param; else load chat with ID > afterID
      */
     private void loadChatHistory(int limit, int beforeID, int afterID){
+        Log.d(TAG,"load chat. limit:" + limit + ",beforeID:" + beforeID + ",afterID:" + afterID);
         RequestAction actionGetChat = new RequestAction() {
             @Override
             public void actOnPre() {
+                isLoading = true;
+                pb_loadChat.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -317,6 +355,10 @@ public class ChatFragment extends Fragment {
                     try {
                         JSONObject jsonObject = new JSONObject(response);
                         JSONArray jsonArray = jsonObject.getJSONArray(Constant.TABLE_CHAT);
+                        if ( jsonArray.length() == 0 ) {
+                            Log.d(TAG,"All Chats loaded");
+                            isAllLoaded = true;
+                        }
                         Chat[] chats = new Chat[jsonArray.length()];
                         for ( int i = 0; i < jsonArray.length(); i++ ) {
                             JSONObject json = jsonArray.getJSONObject(i);
@@ -347,11 +389,12 @@ public class ChatFragment extends Fragment {
                                     senderName,messageType,messageContent,time);
                         }
                         addToChatList(chats);
-                        showMessages();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
+                isLoading = false;
+                pb_loadChat.setVisibility(View.GONE);
             }
         };
         String url = UrlHelper.urlChat(tournamentID,clubID,receiverID,selfID,limit,beforeID,afterID);
@@ -390,9 +433,14 @@ public class ChatFragment extends Fragment {
             tailIndex = newChats[newChats.length-1].id; // update the tail index
         } else if ( newChats[newChats.length-1].id < chatList.get(0).id ) {   // new.tail is prior to current.head
             // prepend the new chats to the head of the current chat
+            int selection = lv_chat.getFirstVisiblePosition();
+            selection += newChats.length;
             for ( int i = newChats.length-1; i >= 0; i-- ) {
                 chatList.push(newChats[i]);
             }
+            lv_chat.setSelection(selection);
+            adapter.notifyDataSetChanged();
+            Log.d(TAG,"select:"+selection);
             headIndex = newChats[0].id; // update the headIndex
         } else if ( newChats[0].id > chatList.get(chatList.size()-1).id ) {  // new.head is after current.tail
             // append the new chats to the tail of the current chat

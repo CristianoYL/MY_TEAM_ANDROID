@@ -16,8 +16,8 @@ public class Constant {
     public static final String SERVER_CHARSET = "UTF-8";
 
     public static final String MSG_TIME_OUT = "{ \"" + Constant.KEY_MSG + "\":\"Connection Timeout\"}";
-    public static final int CONN_TIME_OUT = 20000;
-    public static final int READ_TIME_OUT = 5000;
+    public static final int CONN_TIME_OUT = 10000;
+    public static final int READ_TIME_OUT = 10000;
 
     public static final String CLUB_LIST = "clubs";
     public static final String RESULT_LIST = "results";

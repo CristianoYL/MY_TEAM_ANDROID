@@ -332,7 +332,7 @@ public class EventFragment extends Fragment {
                         eventTime = localFormat.format(date);
                         Log.d("EVENT","parsed event time:"+eventTime);
                         Event event = new Event(id,clubID,eventTitle,eventAddress,latitude,longitude,eventTime);
-                        events.add(event);  // add to list
+                        events.add(0,event);  // add to list head
                         adapter.notifyDataSetChanged();   // refresh list
                     } catch (JSONException e) {
                         e.printStackTrace();

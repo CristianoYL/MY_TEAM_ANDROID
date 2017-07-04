@@ -30,7 +30,6 @@ public class ChatListAdapter extends BaseAdapter {
     private List<Chat> chatMessages;
     private Context context;
 
-
     public class ViewHolder {
         public ImageView iv_otherAvatar,iv_selfAvatar, iv_otherImage, iv_selfImage;
         public TextView tv_otherText, tv_selfText, tv_otherName ,tv_selfName, tv_time;
@@ -70,14 +69,18 @@ public class ChatListAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return position;
+        return this.chatMessages.get(position).id;
+    }
+
+    public int getFirstChatId() {
+        return this.chatMessages.get(0).id;
     }
 
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         ViewHolder viewHolder;
-        Chat chat = this.chatMessages.get(position);
+        Chat chat = getItem(position);
         boolean isSelf = (chat.senderID == this.selfID );
         if ( convertView == null ) {
             convertView = LayoutInflater.from(context).inflate(R.layout.layout_card_chat,null,false);

@@ -4,20 +4,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:descendantFocusability="beforeDescendants"
+    android:animateLayoutChanges="true"
     android:background="@color/colorLightGrey">
 
-    <ListView
-        android:id="@+id/lv_chat"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:stackFromBottom="true"
-        android:transcriptMode="normal"
-        android:divider="@android:color/transparent"
-        app:layout_constraintBottom_toTopOf="@+id/layout_input"
-        app:layout_constraintLeft_toLeftOf="parent"
+    <LinearLayout
+        android:id="@+id/layout_progress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintLeft_toLeftOf="parent">
+
+        <ProgressBar
+            android:id="@+id/pb_load_chat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center" />
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layout_input"
@@ -26,11 +35,11 @@
         android:animateLayoutChanges="true"
         android:background="@drawable/layout_border"
         android:orientation="horizontal"
+        android:gravity="bottom"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:gravity="bottom"
-        app:layout_constraintVertical_bias="1.0">
+        >
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_more"
@@ -94,4 +103,19 @@
             android:visibility="gone"
             app:backgroundTint="@color/colorBlue" />
     </LinearLayout>
+
+    <ListView
+        android:id="@+id/lv_chat"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:stackFromBottom="true"
+        android:transcriptMode="normal"
+        android:descendantFocusability="beforeDescendants"
+        android:divider="@android:color/transparent"
+        app:layout_constraintTop_toBottomOf="@id/layout_progress"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/layout_input"
+        />
+
 </android.support.constraint.ConstraintLayout>
