@@ -156,7 +156,7 @@ public class MemberListAdapter extends BaseAdapter {
             convertView.setBackgroundResource(R.drawable.card_border_light_green);
             viewHolder.view_admin.setVisibility(View.GONE);
         } else {
-            convertView.setBackgroundResource(R.drawable.card_border_light_grey);
+            convertView.setBackgroundResource(R.drawable.background_light_grey_square);
         }
         String roleTag = getAbbreviatedRole(player.getRole());
         viewHolder.tv_position.setText(roleTag);

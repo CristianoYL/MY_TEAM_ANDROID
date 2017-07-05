@@ -1,9 +1,7 @@
 package com.example.cristiano.myteam.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,7 +14,6 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -64,7 +61,7 @@ public class ClubListFragment extends Fragment {
     private ArrayList<Club> searchResultList;
     private ArrayList<Club> clubs;
     private Player player;
-    private View clubView;
+    private View rootView, searchResultView;
 
     OnClubListChangeListener onClubListChangeListener;
 
@@ -117,14 +114,14 @@ public class ClubListFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        clubView = inflater.inflate(R.layout.fragment_player_club_list, container, false);
-        btn_createClub = (Button) clubView.findViewById(R.id.btn_createClub);
-        btn_joinClub = (Button) clubView.findViewById(R.id.btn_joinClub);
-        lv_club = (ListView) clubView.findViewById(R.id.lv_club);
+        rootView = inflater.inflate(R.layout.fragment_player_club_list, container, false);
+        btn_createClub = (Button) rootView.findViewById(R.id.btn_createClub);
+        btn_joinClub = (Button) rootView.findViewById(R.id.btn_joinClub);
+        lv_club = (ListView) rootView.findViewById(R.id.lv_club);
         NavigationView navigationView = (NavigationView) getActivity().findViewById(R.id.nav_view_player);
         navigationView.setCheckedItem(R.id.nav_club_list);
         showClub();
-        return clubView;
+        return rootView;
     }
 
     /**
@@ -263,7 +260,8 @@ public class ClubListFragment extends Fragment {
         dialogBuilder.setTitle("Join Club");
         dialogBuilder.setView(view_search);
         dialogBuilder.setCancelable(true);
-        lv_searchResult = (ListView) view_search.findViewById(R.id.lv_searchResult);
+        lv_searchResult = (ListView) view_search.findViewById(R.id.lv_search_result);
+        searchResultView = view_search.findViewById(R.id.layout_search_result);
 
         String[] keys = {"Club ID", "Club Name"};
         sp_searchKey.setAdapter(new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_1,keys));
@@ -291,6 +289,7 @@ public class ClubListFragment extends Fragment {
                 if (TextUtils.isEmpty(query)) {
                     return false;
                 }
+                searchResultView.setVisibility(View.VISIBLE);
                 btn_join.setVisibility(View.INVISIBLE);
                 // hide keyboard
                 AppController.hideKeyboard(getContext(),sv_club);
@@ -411,6 +410,7 @@ public class ClubListFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                searchResultView.setVisibility(View.GONE);
                 return false;
             }
         });

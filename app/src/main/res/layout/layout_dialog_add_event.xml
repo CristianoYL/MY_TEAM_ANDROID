@@ -46,7 +46,7 @@
         android:id="@+id/lv_address"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:listSelector="@drawable/card_border_light_grey"
+        android:listSelector="@drawable/background_light_grey_square"
         app:layout_constraintTop_toBottomOf="@id/sv_address"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

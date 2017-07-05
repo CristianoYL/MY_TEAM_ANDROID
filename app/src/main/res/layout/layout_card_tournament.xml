@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/card_border_light_grey">
+    android:background="@drawable/background_light_grey_square">
 
     <TextView
         android:id="@+id/tv_tournamentName"

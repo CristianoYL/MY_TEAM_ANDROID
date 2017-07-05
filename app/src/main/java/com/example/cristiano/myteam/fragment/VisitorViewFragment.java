@@ -1,17 +1,11 @@
 package com.example.cristiano.myteam.fragment;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -26,7 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
-import com.example.cristiano.myteam.activity.MainActivity;
 import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
@@ -35,7 +28,6 @@ import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.PlayerInfo;
 import com.example.cristiano.myteam.structure.Stats;
 import com.example.cristiano.myteam.structure.Tournament;
-import com.example.cristiano.myteam.util.AppController;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
 
@@ -473,7 +465,7 @@ public class VisitorViewFragment extends Fragment {
     private void showStats(Stats stats) {
         Log.d(TAG,"show stats:"+stats.toJson());
         tabLayout.removeAllTabs();
-        tabLayout.setBackgroundResource(R.drawable.card_border_light_grey);
+        tabLayout.setBackgroundResource(R.drawable.background_light_grey_square);
         // initialize stats views
         Fragment[] fragments = new Fragment[4];
         String[] dataX;

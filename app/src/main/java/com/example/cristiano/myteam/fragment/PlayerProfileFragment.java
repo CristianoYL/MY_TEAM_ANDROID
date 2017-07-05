@@ -483,7 +483,7 @@ public class PlayerProfileFragment extends Fragment {
     private void showStats(Stats stats) {
         Log.d(TAG,"show stats:"+stats.toJson());
         tabLayout.removeAllTabs();
-        tabLayout.setBackgroundResource(R.drawable.card_border_light_grey);
+        tabLayout.setBackgroundResource(R.drawable.background_light_grey_square);
         // initialize stats views
         Fragment[] fragments = new Fragment[4];
         String[] dataX;
