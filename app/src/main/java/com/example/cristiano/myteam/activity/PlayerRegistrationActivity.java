@@ -181,10 +181,23 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                 } else if ( responseCode == 201 ){  // created new player profile
                     Toast.makeText(PlayerRegistrationActivity.this,R.string.player_profile_created,Toast.LENGTH_SHORT).show();
                     try {
-                        JSONObject jsonObject = new JSONObject(response);
-                        int playerID = jsonObject.getInt(Constant.PLAYER_ID);
+                        JSONObject jsonPlayer = new JSONObject(response);
+                        int playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
+                        int userID = jsonPlayer.getInt(Constant.PLAYER_USER_ID);
+                        String firstName = jsonPlayer.getString(Constant.PLAYER_FIRST_NAME);
+                        String lastName = jsonPlayer.getString(Constant.PLAYER_LAST_NAME);
+                        String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
+                        String role = jsonPlayer.getString(Constant.PLAYER_ROLE);
+                        String phone = jsonPlayer.getString(Constant.PLAYER_PHONE);
+                        int age = jsonPlayer.getInt(Constant.PLAYER_AGE);
+                        float weight = (float) jsonPlayer.getDouble(Constant.PLAYER_WEIGHT);
+                        float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
+                        boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
+                        int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
+                        // use the retrieve info to create a Player instance
+                        Player player = new Player(playerID,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
                         Intent intent = new Intent(PlayerRegistrationActivity.this,MainActivity.class);
-                        intent.putExtra(Constant.KEY_PLAYER_ID, playerID);
+                        intent.putExtra(Constant.TABLE_PLAYER, player.toJson());
                         startActivity(intent);  // start the MainActivity with the created player's ID
                     } catch (JSONException e) {
                         e.printStackTrace();

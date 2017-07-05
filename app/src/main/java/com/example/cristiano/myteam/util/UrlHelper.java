@@ -8,14 +8,14 @@ package com.example.cristiano.myteam.util;
 
 public class UrlHelper {
     //AWS URL
-    private static final String AWS_URL = "https://my-team-rest-api.herokuapp.com";
+    private static final String AWS_URL = "http://ec2-52-90-49-22.compute-1.amazonaws.com:5000";
     // Heroku URL
     private static final String FLASK_URL = "https://my-team-rest-api.herokuapp.com";
     //local testing URL
     private static final String HOME_URL = "http://192.168.1.11:5000";
 
-//    private static final String URL = AWS_URL;
-    private static final String URL = FLASK_URL;
+    private static final String URL = AWS_URL;
+//    private static final String URL = FLASK_URL;
 //    private static final String URL = HOME_URL;
 
     public static String urlLogin(){

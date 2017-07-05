@@ -643,6 +643,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+                } else {    // if failed to load club
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt(Constant.CACHE_DEFAULT_CLUB_ID,0);    // clear cached clubID
+                    editor.apply();
+                    showPlayerPage(player); // go to the player's profile page instead
                 }
             }
         };

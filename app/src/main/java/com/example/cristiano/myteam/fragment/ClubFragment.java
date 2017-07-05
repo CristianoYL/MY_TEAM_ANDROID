@@ -128,10 +128,10 @@ public class ClubFragment extends Fragment implements MapFragment.OnCreateEventR
         tab_club.addTab(tab_club.newTab().setText("Members"));
         tab_club.addTab(tab_club.newTab().setText("Map"));
         tab_club.addTab(tab_club.newTab().setText("Events"));
-        tab_club.addTab(tab_club.newTab().setText("Profile"));
-        tab_club.setTabMode(TabLayout.MODE_SCROLLABLE);
+//        tab_club.addTab(tab_club.newTab().setText("Profile"));
+        tab_club.setTabMode(TabLayout.MODE_FIXED);
         // set fragments into view pagers
-        Fragment[] fragments = new Fragment[5];
+        Fragment[] fragments = new Fragment[4];
         ChatFragment chatFragment = ChatFragment.newInstance(null, club,null,player);
         fragments[0] = chatFragment;
         ClubMemberFragment memberFragment = ClubMemberFragment.newInstance(club,player);
@@ -140,8 +140,8 @@ public class ClubFragment extends Fragment implements MapFragment.OnCreateEventR
         fragments[2] = mapFragment;
         eventFragment = EventFragment.newInstance(club,player);
         fragments[3] = eventFragment;
-        ClubProfileFragment clubProfileFragment = ClubProfileFragment.newInstance(club,player);
-        fragments[4] = clubProfileFragment;
+//        ClubProfileFragment clubProfileFragment = ClubProfileFragment.newInstance(club,player);
+//        fragments[4] = clubProfileFragment;
 
         CustomFragmentAdapter adapter = new CustomFragmentAdapter(getChildFragmentManager());
         adapter.setFragments(fragments);
