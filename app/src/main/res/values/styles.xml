@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="popupMenuStyle">@style/CustomMenuStyle</item>
+        <item name="android:popupMenuStyle">@style/CustomMenuStyle</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -22,6 +24,89 @@
         <item name="android:background">@drawable/edge_blue</item>
         <item name="android:paddingLeft">5dp</item>
         <item name="android:paddingRight">5dp</item>
+    </style>
+
+    <style name="GreyButton">
+        <item name="android:textColor">@color/colorGrey</item>
+        <item name="android:background">@drawable/edge_thin_grey</item>
+        <item name="android:paddingLeft">5dp</item>
+        <item name="android:paddingRight">5dp</item>
+    </style>
+
+    <style name="RedButton">
+        <item name="android:textColor">@color/colorRed</item>
+        <item name="android:background">@drawable/edge_red</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+    </style>
+
+    <style name="SignInButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginTop">15dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:text">@string/action_sign_in</item>
+        <item name="android:textColor">@color/colorGreen</item>
+        <item name="android:background">@drawable/edge_green</item>
+    </style>
+
+    <style name="RegisterButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginTop">15dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:text">@string/action_register</item>
+        <item name="android:textColor">@color/colorBlue</item>
+        <item name="android:background">@drawable/edge_blue</item>
+    </style>
+
+
+
+    <style name="SentChatStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/balloon_outgoing_normal</item>
+        <item name="android:maxWidth">250dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">15dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+    </style>
+
+    <style name="ReceivedChatStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/balloon_incoming_normal</item>
+        <item name="android:maxWidth">250dp</item>
+        <item name="android:paddingLeft">15dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+    </style>
+
+    <style name="InputMenuFabStyle">
+        <item name="android:layout_width">30dp</item>
+        <item name="android:layout_height">30dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginLeft">5dp</item>
+        <item name="android:scaleType">center</item>
+        <item name="android:tint">@android:color/white</item>
+    </style>
+
+    <style name="CustomMenuStyle">
+        <item name="android:textColor">@color/colorBlue</item>
+        <item name="android:textSize">8sp</item>
+        <item name="android:popupBackground">@drawable/map_search_background</item>
+    </style>
+
+    <style name="CustomSpinnerStyle">
+        <item name="android:textColor">@color/colorBlue</item>
+        <item name="android:textSize">8sp</item>
+        <item name="android:popupBackground">@drawable/map_search_background</item>
     </style>
 
 </resources>

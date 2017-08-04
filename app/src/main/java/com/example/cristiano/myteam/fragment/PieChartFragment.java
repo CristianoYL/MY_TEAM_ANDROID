@@ -1,10 +1,7 @@
 package com.example.cristiano.myteam.fragment;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +10,9 @@ import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.chart.PieChartHelper;
 import com.github.mikephil.charting.charts.PieChart;
 
+/**
+ * this fragment renders a Pie chart
+ */
 public class PieChartFragment extends Fragment {
 
     private static final String ARG_TITLE = "title";

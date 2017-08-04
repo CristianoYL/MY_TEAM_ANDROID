@@ -1,6 +1,7 @@
 package com.example.cristiano.myteam.activity;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -20,19 +21,27 @@ import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Locale;
+
+
+/**
+ *  This activity handles the player profile registration/update requests
+ */
 public class PlayerRegistrationActivity extends AppCompatActivity {
 
-    private String email;
+    private String jwt;
     private Player player;
 
     private EditText et_firstName, et_lastName, et_displayName, et_age, et_phone, et_height, et_weight;
     private Switch sw_unit, sw_leftFooted;
     private Spinner sp_role, sp_position;
     private ArrayAdapter<String> roleAdapter,positionAdapter;
+    private Resources resources;
 
 
     @Override
@@ -50,15 +59,18 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
         sw_leftFooted = (Switch) findViewById(R.id.sw_leftFooted);
         sp_role = (Spinner) findViewById(R.id.sp_role);
         sp_position = (Spinner) findViewById(R.id.sp_position);
+        resources = getResources();
         this.roleAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_dropdown_item, Constant.roles);
+                android.R.layout.simple_spinner_dropdown_item,
+                resources.getStringArray(R.array.array_user_roles));
         sp_role.setAdapter(this.roleAdapter);
         this.positionAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_dropdown_item, Constant.positions);
+                android.R.layout.simple_spinner_dropdown_item,
+                resources.getStringArray(R.array.array_player_positions));
         sp_role.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if ( (sp_role.getItemAtPosition(i)).equals(Constant.ROLE_PLAYER)){
+                if ( (sp_role.getItemAtPosition(i)).equals(resources.getString(R.string.role_player))){
                     sp_position.setVisibility(View.VISIBLE);
                 } else {
                     sp_position.setVisibility(View.GONE);
@@ -78,21 +90,21 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             Log.e("PlayerRegActivity","Missing player bundle");
             return;
         }
-        this.email = bundle.getString(Constant.PLAYER_EMAIL,null);
-        if ( bundle.containsKey(Constant.KEY_PLAYER_INFO) ) {
+        this.jwt = bundle.getString(Constant.USER_ACCESS_TOKEN,null);  // creating the player for the first time
+        if ( bundle.containsKey(Constant.KEY_PLAYER) ) {    // updating an existing player
             setTitle("Update Profile");
-            this.player = (Player) bundle.get(Constant.KEY_PLAYER_INFO);
+            this.player = new Gson().fromJson(bundle.getString(Constant.KEY_PLAYER),Player.class);
             if ( this.player == null ) {
-                Log.e("PlayerRegActivity","Missing player info bundle");
+                Log.e("PlayerRegActivity","Missing player info");
                 return;
             }
             et_firstName.setText(this.player.getFirstName());
             et_lastName.setText(this.player.getLastName());
             et_displayName.setText(this.player.getDisplayName());
-            et_age.setText(player.getAge()+"");
+            et_age.setText(String.format(Locale.US,"%d",player.getAge()));
             et_phone.setText(this.player.getPhone());
-            et_height.setText(player.getHeight()+"");
-            et_weight.setText(player.getWeight()+"");
+            et_height.setText(String.format(Locale.US,"%f",player.getHeight()));
+            et_weight.setText(String.format(Locale.US,"%f",player.getWeight()));
             sw_leftFooted.setChecked(this.player.isLeftFooted());
             if ( this.player.getRole().equals(Constant.ROLE_MANAGER) ) {
                 sp_role.setSelection(roleAdapter.getPosition(Constant.ROLE_MANAGER));
@@ -112,11 +124,20 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * send a PUT request to register/update the player's profile
+     */
     private void uploadPlayerInfo() {
         int id = 0;
         String firstName = et_firstName.getText().toString();
         String lastName = et_lastName.getText().toString();
         String displayName = et_displayName.getText().toString();
+        // firstname and lastname cannot be empty
+        if ( firstName.length() == 0 || lastName.length() == 0 ) {
+            Toast.makeText(PlayerRegistrationActivity.this,R.string.empty_name_msg,Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // display name is full name by default
         if ( displayName.length() == 0 ) {
             displayName = firstName + " " + lastName;
         }
@@ -138,14 +159,15 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             height = Float.parseFloat(et_height.getText().toString());
         }
         if ( sw_unit.isChecked() ) {
-            weight = (weight / 1.6f);
-            height = height * 30.3f;
+            weight = weight * 0.45359237f;  // convert lbs to kg
+            height = height * 30.48f;   // convert ft to cm
         }
         boolean leftFooted = sw_leftFooted.isChecked();
+        int userID = 0;
         int avatar = 0;
 
-        Player player = new Player(id,email,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
-        RequestAction actionPutPlayer = new RequestAction() {
+        Player player = new Player(id,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+        RequestAction actionRegPlayer = new RequestAction() {
             @Override
             public void actOnPre() {
 
@@ -153,37 +175,54 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
 
             @Override
             public void actOnPost(int responseCode, String response) {
-                if ( responseCode == 201 || responseCode == 200 ) {    // player created or updated
-                    if ( responseCode == 200 ) {
-                        Toast.makeText(PlayerRegistrationActivity.this,"Profile updated!",Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(PlayerRegistrationActivity.this,"Profile created!",Toast.LENGTH_SHORT).show();
-                    }
+                if ( responseCode == 200 ) {    // player profile updated
+                    // simply finish the registration activity and go back to previous activity
+                    Toast.makeText(PlayerRegistrationActivity.this,R.string.player_profile_updated,Toast.LENGTH_SHORT).show();
+                } else if ( responseCode == 201 ){  // created new player profile
+                    Toast.makeText(PlayerRegistrationActivity.this,R.string.player_profile_created,Toast.LENGTH_SHORT).show();
                     try {
-                        JSONObject jsonObject = new JSONObject(response);
-                        String email = jsonObject.getString(Constant.PLAYER_EMAIL);
-                        Intent intent = new Intent(PlayerRegistrationActivity.this,PlayerActivity.class);
-                        intent.putExtra(Constant.PLAYER_EMAIL, email);
-                        startActivity(intent);
-
+                        JSONObject jsonPlayer = new JSONObject(response);
+                        int playerID = jsonPlayer.getInt(Constant.PLAYER_ID);
+                        int userID = jsonPlayer.getInt(Constant.PLAYER_USER_ID);
+                        String firstName = jsonPlayer.getString(Constant.PLAYER_FIRST_NAME);
+                        String lastName = jsonPlayer.getString(Constant.PLAYER_LAST_NAME);
+                        String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
+                        String role = jsonPlayer.getString(Constant.PLAYER_ROLE);
+                        String phone = jsonPlayer.getString(Constant.PLAYER_PHONE);
+                        int age = jsonPlayer.getInt(Constant.PLAYER_AGE);
+                        float weight = (float) jsonPlayer.getDouble(Constant.PLAYER_WEIGHT);
+                        float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
+                        boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
+                        int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
+                        // use the retrieve info to create a Player instance
+                        Player player = new Player(playerID,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+                        Intent intent = new Intent(PlayerRegistrationActivity.this,MainActivity.class);
+                        intent.putExtra(Constant.TABLE_PLAYER, player.toJson());
+                        startActivity(intent);  // start the MainActivity with the created player's ID
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                } else {    // unknown error
+                } else {    // error
                     try {
                         JSONObject jsonObject = new JSONObject(response);
-                        String message = jsonObject.getString("message");
+                        String message = jsonObject.getString(Constant.KEY_MSG);
                         Toast.makeText(PlayerRegistrationActivity.this,message,Toast.LENGTH_LONG).show();
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(PlayerRegistrationActivity.this,response,Toast.LENGTH_LONG).show();
                     }
-                    Log.e("PlayerActivity","Error in loading player profile.\nError Message:\n" + response);
+                    Log.e("MainActivity","Error in loading player profile.\nError Message:\n" + response);
                 }
+                finish();   // finish PlayerRegistration activity after request sent, clear it in stack to prevent navigate back to it
             }
         };
-        String url = UrlHelper.urlPutPlayer(email);
-        RequestHelper.sendPutRequest(url, player.toJson() ,actionPutPlayer);
-        finish();
+        String url;
+        if ( this.player != null ) {
+            url = UrlHelper.urlPlayerByID(this.player.getId());
+            RequestHelper.sendPutRequest(url, player.toJson() ,actionRegPlayer);
+        } else if ( this.jwt != null ){
+            url = UrlHelper.urlPlayerByToken();
+            RequestHelper.sendPostRequest(url, player.toJson(), jwt ,actionRegPlayer);
+        }
     }
 }

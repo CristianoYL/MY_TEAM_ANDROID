@@ -7,10 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.cristiano.myteam.R;
-import com.example.cristiano.myteam.activity.PlayerActivity;
 import com.example.cristiano.myteam.chart.BarChartHelper;
 import com.github.mikephil.charting.charts.BarChart;
 
+/**
+ * this fragment renders a BarChart
+ */
 public class BarChartFragment extends Fragment {
 
     private static final String ARG_TITLE = "title";

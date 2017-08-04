@@ -166,9 +166,10 @@ public class PieChartHelper {
         pieDataSet.setColors(colors);
 
         PieData pieData = new PieData(pieDataSet);
-        pieData.setValueFormatter(new PercentFormatter());
+        pieData.setValueFormatter(new PercentPieValueFormatter(pieDataSet));
         pieData.setValueTextSize(this.valueTextSize);
         pieData.setValueTextColor(this.valueColor);
+
         this.pieChart.setData(pieData);
         this.pieChart.highlightValues(null);
         this.pieChart.invalidate();

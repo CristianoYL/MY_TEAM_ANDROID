@@ -17,35 +17,47 @@ import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.ClubInfo;
-import com.example.cristiano.myteam.structure.Teamsheet;
+import com.example.cristiano.myteam.structure.Member;
+import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.Tournament;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Cristiano on 2017/4/18.
+ *
+ * this fragment presents the club profile page,
+ * and offer the user access to teamsheet page and tournament page
  */
 
 public class ClubProfileFragment extends Fragment {
 
-    private int clubID, playerID;
+    private static final String ARG_CLUB = "club";
+    private static final String ARG_PLAYER = "player";
+
+    private Club club;
+    private Player player;
     private ClubInfo clubInfo;
+
     private View view;
 
     public ClubProfileFragment() {
     }
 
-    public static ClubProfileFragment newInstance(int clubID, int playerID){
+    public static ClubProfileFragment newInstance(Club club, Player player){
         ClubProfileFragment fragment = new ClubProfileFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(Constant.KEY_CLUB_ID,clubID);
-        bundle.putInt(Constant.KEY_PLAYER_ID,playerID);
+        bundle.putString(ARG_CLUB,club.toJson());
+        bundle.putString(ARG_PLAYER,player.toJson());
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -55,8 +67,9 @@ public class ClubProfileFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            clubID = bundle.getInt(Constant.KEY_CLUB_ID);
-            playerID = bundle.getInt(Constant.KEY_PLAYER_ID);
+            Gson gson = new Gson();
+            club = gson.fromJson(bundle.getString(ARG_CLUB),Club.class);
+            player = gson.fromJson(bundle.getString(ARG_PLAYER),Player.class);
         }
     }
 
@@ -68,6 +81,9 @@ public class ClubProfileFragment extends Fragment {
         return view;
     }
 
+    /**
+     * send a GET request to retrieve the club's basic info
+     */
     private void getProfile(){
         RequestAction actionGetClubInfo = new RequestAction() {
             @Override
@@ -88,27 +104,27 @@ public class ClubProfileFragment extends Fragment {
                         Club club = new Club(id,name,info);
                         // get club's tournaments
                         JSONArray tournamentList = jsonClubInfo.getJSONArray(Constant.TOURNAMENT_LIST);
-                        Tournament[] tournaments = new Tournament[tournamentList.length()];
+                        List<Tournament> tournaments = new ArrayList<>(tournamentList.length());
                         for ( int i = 0; i < tournamentList.length(); i++ ) {
                             JSONObject jsonTournament = tournamentList.getJSONObject(i);
                             int tournamentID = jsonTournament.getInt(Constant.TOURNAMENT_ID);
                             String tournamentName = jsonTournament.getString(Constant.TOURNAMENT_NAME);
                             String tournamentInfo = jsonTournament.getString(Constant.TOURNAMENT_INFO);
-                            tournaments[i] = new Tournament(tournamentID,tournamentName,tournamentInfo);
+                            tournaments.add(new Tournament(tournamentID,tournamentName,tournamentInfo));
                         }
-                        // get club's teamsheet
-                        JSONArray teamsheetList = jsonClubInfo.getJSONArray(Constant.TABLE_TEAMSHEET);
-                        Teamsheet[] teamsheet = new Teamsheet[teamsheetList.length()];
-                        for ( int i = 0; i < teamsheetList.length(); i++ ) {
-                            JSONObject jsonTeamsheet = teamsheetList.getJSONObject(i);
-                            int playerID = jsonTeamsheet.getInt(Constant.TEAMSHEET_P_ID);
-                            int clubID = jsonTeamsheet.getInt(Constant.TEAMSHEET_C_ID);
-                            String memberSince = jsonTeamsheet.getString(Constant.TEAMSHEET_MEMBER_SINCE);
-                            boolean isActive = jsonTeamsheet.getBoolean(Constant.TEAMSHEET_IS_ACTIVE);
-                            boolean isAdmin = jsonTeamsheet.getBoolean(Constant.TEAMSHEET_IS_ADMIN);
-                            teamsheet[i] = new Teamsheet(playerID,clubID,memberSince,isActive,isAdmin);
+                        // get club's member
+                        JSONArray memberList = jsonClubInfo.getJSONArray(Constant.TABLE_MEMBER);
+                        List<Member> member = new ArrayList<>(memberList.length());
+                        for ( int i = 0; i < memberList.length(); i++ ) {
+                            JSONObject jsonMember = memberList.getJSONObject(i);
+                            int playerID = jsonMember.getInt(Constant.MEMBER_P_ID);
+                            int clubID = jsonMember.getInt(Constant.MEMBER_C_ID);
+                            String memberSince = jsonMember.getString(Constant.MEMBER_SINCE);
+                            boolean isActive = jsonMember.getBoolean(Constant.MEMBER_IS_ACTIVE);
+                            int priority = jsonMember.getInt(Constant.MEMBER_PRIORITY);
+                            member.add(new Member(playerID,clubID,memberSince,isActive,priority));
                         }
-                        clubInfo = new ClubInfo(club,tournaments,teamsheet);
+                        clubInfo = new ClubInfo(club,tournaments, member);
                         showProfile();
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -125,51 +141,71 @@ public class ClubProfileFragment extends Fragment {
                 }
             }
         };
-        String url = UrlHelper.urlGetClubInfo(clubID);
+        String url = UrlHelper.urlClubInfoByID(club.id);
         RequestHelper.sendGetRequest(url,actionGetClubInfo);
     }
 
+    /**
+     * after retrieving the club info, call this method to display it
+     */
     private void showProfile() {
         TextView tv_clubName = (TextView) view.findViewById(R.id.tv_clubName);
         TextView tv_clubInfo = (TextView) view.findViewById(R.id.tv_clubInfo);
         TextView tv_totalPlayerCount = (TextView) view.findViewById(R.id.tv_totalCount);
-        final TextView tv_activePlayerCount = (TextView) view.findViewById(R.id.tv_activeCount);
+        TextView tv_activePlayerCount = (TextView) view.findViewById(R.id.tv_activeCount);
         TextView tv_tournamentCount = (TextView) view.findViewById(R.id.tv_tournamentCount);
         Button btn_viewTeamsheet = (Button) view.findViewById(R.id.btn_teamsheet);
         Button btn_viewTournaments = (Button) view.findViewById(R.id.btn_tournament);
 
+        getActivity().setTitle(clubInfo.getClub().name);
+
         tv_clubName.setText(clubInfo.getClub().name);
         tv_clubInfo.setText(clubInfo.getClub().info);
-        tv_totalPlayerCount.setText(clubInfo.getTeamsheet().length+"");
+        tv_totalPlayerCount.setText(String.format(Locale.US,"%d",clubInfo.getMember().size()));
         int count = 0;
-        for ( Teamsheet teamsheet : clubInfo.getTeamsheet() ) {
-            if ( teamsheet.isActive() ) {
+        for ( Member member : clubInfo.getMember() ) {
+            if ( member.isActive() ) {
                 count++;
             }
         }
-        tv_activePlayerCount.setText(count+"");
-        tv_tournamentCount.setText(clubInfo.getTournaments().length+"");
+        tv_activePlayerCount.setText(String.format(Locale.US,"%d",count));
+        tv_tournamentCount.setText(String.format(Locale.US,"%d",clubInfo.getTournaments().size()));
 
         btn_viewTournaments.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TournamentListFragment fragment = TournamentListFragment.newInstance(clubInfo.getTournaments(),clubInfo.getClub(),playerID);
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.fragment_content,fragment);
-                transaction.commit();
+                viewTournamentList();
             }
         });
 
         btn_viewTeamsheet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TeamsheetFragment fragment = TeamsheetFragment.newInstance(clubID);
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.replace(R.id.fragment_content,fragment);
-                transaction.commit();
+                viewTeamsheet();
             }
         });
+    }
+
+    /**
+     * replace the current fragment with teamsheet fragment
+     */
+    private void viewTeamsheet() {
+        ClubMemberFragment fragment = ClubMemberFragment.newInstance(club,player);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.frame_content,fragment,Constant.FRAGMENT_CLUB_MEMBER);
+        transaction.commit();
+    }
+
+    /**
+     * view tournament list fragment
+     */
+    private void viewTournamentList() {
+        TournamentListFragment fragment = TournamentListFragment.newInstance(clubInfo.getClub(),player);
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.frame_content,fragment,Constant.FRAGMENT_CLUB_TOURNAMENT_LIST);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }

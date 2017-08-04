@@ -46,7 +46,8 @@
                         android:id="@+id/et_email"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/prompt_email"
+                        android:hint="@string/hint_email"
+                        android:imeOptions="actionNext"
                         android:inputType="textEmailAddress"
                         android:maxLines="1" />
 
@@ -60,10 +61,7 @@
                         android:id="@+id/et_password"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/prompt_password"
-                        android:imeActionId="@+id/login"
-                        android:imeActionLabel="@string/action_sign_in_short"
-                        android:imeOptions="actionUnspecified"
+                        android:hint="@string/hint_password"
                         android:inputType="textPassword"
                         android:maxLines="1"/>
 
@@ -71,16 +69,18 @@
 
                 <android.support.design.widget.TextInputLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:id="@+id/layout_passwordConfirm"
+                    android:visibility="gone">
 
                     <EditText
                         android:id="@+id/et_confirm"
-                        android:visibility="gone"
-                        android:hint="@string/prompt_password_confirm"
+                        android:hint="@string/hint_password_confirm"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:inputType="textPassword"
+                        android:imeOptions="actionGo"
                         android:maxLines="1"/>
 
                 </android.support.design.widget.TextInputLayout>
@@ -116,31 +116,11 @@
                 android:layout_marginTop="10dp">
                 <Button
                     android:id="@+id/email_sign_in_button"
-                    style="?android:textAppearanceSmall"
-                    android:background="@drawable/edge_green"
-                    android:textColor="@color/colorGreen"
-                    android:layout_width="match_parent"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="10sp"
-                    android:layout_marginRight="10sp"
-                    android:text="@string/action_sign_in"
-                    android:textStyle="bold" />
+                    style="@style/SignInButton" />
 
                 <Button
                     android:id="@+id/email_register_button"
-                    style="?android:textAppearanceSmall"
-                    android:background="@drawable/edge_blue"
-                    android:textColor="@color/colorBlue"
-                    android:layout_width="match_parent"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginStart="10sp"
-                    android:layout_marginLeft="10sp"
-                    android:text="@string/action_register"
-                    android:textStyle="bold" />
+                    style="@style/RegisterButton" />
 
             </LinearLayout>
 

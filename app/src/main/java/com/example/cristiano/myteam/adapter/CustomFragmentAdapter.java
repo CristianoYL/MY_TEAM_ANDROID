@@ -1,5 +1,6 @@
 package com.example.cristiano.myteam.adapter;
 
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -34,5 +35,10 @@ public class CustomFragmentAdapter extends FragmentStatePagerAdapter {
     @Override
     public int getCount() {
         return fragments.length;
+    }
+
+    @Override
+    public Parcelable saveState() {
+        return null;
     }
 }

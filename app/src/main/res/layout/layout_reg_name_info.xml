@@ -19,10 +19,12 @@
         android:id="@+id/textInputLayout">
 
         <EditText
-            android:id="@+id/tv_name"
+            android:id="@+id/et_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Club Name"
+            android:hint="@string/label_name"
+            android:inputType="textCapWords|textAutoComplete|textAutoCorrect"
+            android:imeOptions="actionNext"
             android:maxLines="1"/>
     </android.support.design.widget.TextInputLayout>
 
@@ -37,10 +39,12 @@
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout">
 
         <EditText
-            android:id="@+id/tv_info"
+            android:id="@+id/et_info"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="clip_vertical"
-            android:hint="Description on this club" />
+            android:hint="@string/label_description"
+            android:inputType="textCapSentences|textAutoComplete|textAutoCorrect|textMultiLine"
+            android:imeOptions="actionDone"/>
     </android.support.design.widget.TextInputLayout>
 </android.support.constraint.ConstraintLayout>

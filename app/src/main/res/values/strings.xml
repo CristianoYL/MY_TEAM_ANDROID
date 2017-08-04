@@ -8,17 +8,16 @@
     <string name="action_logout">Log Out</string>
 
     <string name="title_activity_profile">Profile</string>
-    <string name="cancel">Cancel</string>
-    <string name="confirm">Confirm</string>
+
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="prompt_password_confirm">Confirm Password</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_password_confirm">Confirm Password</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_register">Register</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_invalid_password">Password length should be from 6 to 20.</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
@@ -26,11 +25,16 @@
 
     <!--Strings related to registration -->
     <string name="error_match_failed">Password does not match</string>
+
+    <!--Strings related to connection -->
+    <string name="error_no_connection">Connection failed!</string>
+
     <!-- Strings related to user profile page -->
     <string name="player_first_name">First Name</string>
     <string name="player_last_name">Last Name</string>
     <string name="player_display_name">Display Name</string>
     <string name="player_role">Role</string>
+    <string name="player_position">Position</string>
     <string name="player_age">Age</string>
     <string name="player_phone">Phone</string>
     <string name="player_height">Height</string>
@@ -44,7 +48,166 @@
     <string name="title_activity_player_registration">Create Your Profile</string>
     <string name="title_activity_club">ClubActivity</string>
 
+    <!-- Button text -->
+    <string name="btn_share_location">Share My Location</string>
     <string name="btn_edit_squad">Edit Squad</string>
     <string name="btn_cancel_edit_squad">Done</string>
+
+    <!-- Menu text -->
+    <string name="menu_my_profile">My Profile</string>
+    <string name="menu_my_clubs">My Clubs</string>
+    <string name="menu_my_club">My Club</string>
+    <string name="menu_my_tournaments">My Tournaments</string>
+    <string name="menu_log_out">Log Out</string>
+    <string name="menu_settings">Settings</string>
+
+    <!-- Toast messages -->
+    <string name="empty_name_msg">Player firstname and lastname cannot be empty!</string>
+    <string name="player_profile_created">Player profile created!</string>
+    <string name="player_profile_updated">Player profile updated!</string>
+    <string name="error_empty_club_name">Club name cannot be empty!</string>
+    <string name="error_empty_club_info">Club description cannot be empty!</string>
+    <string name="error_empty_tour_name">Tournament name cannot be empty!</string>
+    <string name="error_empty_tour_info">Tournament description cannot be empty!</string>
+    <string name="error_pending_club_as_default">Your application to this club is still pending. You can only set your active club as default.</string>
+    <string name="set_club_as_default">New default club set!</string>
+    <string name="unset_default_club">Default club unset!</string>
+    <string name="error_view_pending_club">Your application to this club is still pending.Please wait for captain\'s approval.</string>
+    <string name="prompt_share_location">Are you sure to share your check-in location with your teammates?</string>
+    <string name="prompt_share_location_fail">No location data available. Please try to locate yourself first.</string>
+    <string name="status_locating">Locating&#8230;</string>
+    <string name="address_found">Requested address found.</string>
+    <string name="no_address_found">Requested address not found.</string>
+    <string name="invalid_lat_long_used">The input latitude/longitude is invalid.</string>
+    <string name="location_service_not_available">The location service is not available.</string>
+    <string name="no_location_data_provided">No location data provided.</string>
+
+    <!-- labels-->
+    <string name="label_cancel">Cancel</string>
+    <string name="label_confirm">Confirm</string>
+    <string name="label_ok">OK</string>
+    <string name="label_save">Save</string>
+    <string name="label_yes">Yes</string>
+    <string name="label_no">No</string>
+    <string name="label_abb_yes">Y</string>
+    <string name="label_abb_no">N</string>
+    <string name="label_abb_home">H</string>
+    <string name="label_abb_away">A</string>
+    <string name="label_status">Status:</string>
+    <string name="label_pending">Pending</string>
+    <string name="label_active">Active</string>
+    <string name="label_name">Name</string>
+    <string name="label_description">Description</string>
+    <string name="label_my_location">My Location</string>
+    <string name="label_location_as_of">as of:</string>
+    <string name="label_event_address">Event address</string>
+    <string name="label_event_title">Event title</string>
+    <string name="label_event_info">Event info</string>
+    <string name="label_event_date">Event date</string>
+    <string name="label_event_time">Event time</string>
+    <string name="label_create_event">Create a new event</string>
+    <string name="label_event_confirm">Create event</string>
+    <string name="label_specify_event_time">Specify event time</string>
+
+
+
+
+    <!-- Dialog titles -->
+    <string name="notice">Notice</string>
+    <string name="attention">Attention</string>
+    <string name="warning">Warning</string>
+    <string name="create_club">Create a new club</string>
+    <string name="create_tournament">Create a new tournament</string>
+
+    <!-- Dialog prompt messages -->
+    <string name="prompt_kick">Are you sure to kick this player out from the club?</string>
+    <string name="prompt_reject">Are you sure to reject this player\'s application to the club?</string>
+    <string name="prompt_accept">Are you sure to accept this player\'s application to the club?</string>
+    <string name="prompt_promote">Are you sure to promote this player?</string>
+    <string name="prompt_demote">Are you sure to demote this player?</string>
+    <string name="prompt_logout">Are you sure to log out?</string>
+    <string name="prompt_quit">Are you sure to quit?</string>
+
+    <!-- firebase notifications -->
+    <string name="fcm_club_application_approved">Club application approved!</string>
+    <string name="fcm_club_application_approved_detail">You\'re now a member of %1$s!</string>
+    <string name="fcm_tap_to_view">Tap here to view.</string>
+
+    <!-- content description -->
+    <string name="desc_club_icon">badge of the club</string>
+
+    <!-- goal types -->
+    <string name="goal_type">Goal Type</string>
+    <string name="goal_method">Scoring Method</string>
+    <string name="goal_action">Action</string>
+    <string name="goal_penalty">Penalty</string>
+    <string name="goal_freekick">Freekick</string>
+    <string name="goal_strong_foot">Strong foot</string>
+    <string name="goal_weak_foot">Weak foot</string>
+    <string name="goal_header">Header</string>
+    <string name="goal_other">Other</string>
+
+    <!-- member priority types -->
+    <string name="priority_applicant">applicant</string>
+    <string name="priority_member">member</string>
+    <string name="priority_co_cap">co-captain</string>
+    <string name="priority_captain">captain</string>
+
+    <!-- user roles -->
+    <string name="role_manager">Manager</string>
+    <string name="role_player">Player</string>
+
+    <string-array
+        name="array_user_roles">
+        <item>@string/role_player</item>
+        <item>@string/role_manager</item>
+    </string-array>
+
+
+    <!-- player positions -->
+    <string name="position_gk">Goalkeeper</string>
+    <string name="position_cb">Center Back</string>
+    <string name="position_rb">Right Back</string>
+    <string name="position_lb">Left Back</string>
+    <string name="position_cm">Center Midfielder</string>
+    <string name="position_cdm">Defensive Midfielder</string>
+    <string name="position_cam">Attacking Midfielder</string>
+    <string name="position_lm">Left Midfielder</string>
+    <string name="position_rm">Right Midfielder</string>
+    <string name="position_lw">Left Winger</string>
+    <string name="position_rw">Right Winger</string>
+    <string name="position_st">Striker</string>
+    <string name="position_cf">Center Forward</string>
+
+    <string name="position_abbr_gk">GK</string>
+    <string name="position_abbr_cb">CB</string>
+    <string name="position_abbr_rb">RB</string>
+    <string name="position_abbr_lb">LB</string>
+    <string name="position_abbr_cm">CM</string>
+    <string name="position_abbr_cdm">CDM</string>
+    <string name="position_abbr_cam">CAM</string>
+    <string name="position_abbr_lm">LM</string>
+    <string name="position_abbr_rm">RM</string>
+    <string name="position_abbr_lw">LW</string>
+    <string name="position_abbr_rw">RW</string>
+    <string name="position_abbr_st">ST</string>
+    <string name="position_abbr_cf">CF</string>
+
+    <string-array
+        name="array_player_positions">
+        <item>@string/position_gk</item>
+        <item>@string/position_cb</item>
+        <item>@string/position_rb</item>
+        <item>@string/position_lb</item>
+        <item>@string/position_cm</item>
+        <item>@string/position_cdm</item>
+        <item>@string/position_cam</item>
+        <item>@string/position_rm</item>
+        <item>@string/position_lm</item>
+        <item>@string/position_lw</item>
+        <item>@string/position_rw</item>
+        <item>@string/position_st</item>
+        <item>@string/position_cf</item>
+    </string-array>
 
 </resources>
