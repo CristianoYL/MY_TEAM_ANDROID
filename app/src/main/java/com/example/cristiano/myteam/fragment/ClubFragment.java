@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +16,7 @@ import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Player;
-import com.example.cristiano.myteam.util.AppController;
+import com.example.cristiano.myteam.util.AppUtils;
 import com.google.gson.Gson;
 
 /**
@@ -63,7 +62,7 @@ public class ClubFragment extends Fragment implements MapFragment.OnCreateEventR
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         clubView = inflater.inflate(R.layout.fragment_club, container, false);
-        AppController.setNavigationMenu(getActivity(),AppController.MENU_CLUB);
+        AppUtils.setNavigationMenu(getActivity(), AppUtils.MENU_CLUB);
         return clubView;
     }
 
@@ -104,7 +103,7 @@ public class ClubFragment extends Fragment implements MapFragment.OnCreateEventR
         viewPager_club.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                AppController.hideKeyboard(getContext(),clubView);
+                AppUtils.hideKeyboard(getContext(),clubView);
             }
 
             @Override
@@ -113,7 +112,7 @@ public class ClubFragment extends Fragment implements MapFragment.OnCreateEventR
                 if ( tab != null ) {
                     tab.select();
                 }
-                AppController.hideKeyboard(getContext(),clubView);
+                AppUtils.hideKeyboard(getContext(),clubView);
             }
 
             @Override

@@ -23,6 +23,7 @@ import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.adapter.CustomFragmentAdapter;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
+import com.example.cristiano.myteam.service.image.ImageLoader;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.PlayerInfo;
@@ -146,7 +147,7 @@ public class VisitorViewFragment extends Fragment {
                         float weight = (float) jsonPlayer.getDouble(Constant.PLAYER_WEIGHT);
                         float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
                         boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
-                        int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
+                        String avatar = jsonPlayer.getString(Constant.PLAYER_AVATAR);
                         // use the retrieve info to create a Player instance
                         Player player = new Player(playerID,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
 
@@ -302,14 +303,12 @@ public class VisitorViewFragment extends Fragment {
 
         // initialize avatar
         switch ( playerInfo.getPlayer().getAvatar() ) {
-            case 0:
+            case "default":
                 iv_avatar.setImageResource(R.drawable.avatar_scholes);
                 break;
-            case 1:
-                iv_avatar.setImageResource(R.drawable.avatar_rooney);
-                break;
             default:
-                iv_avatar.setImageResource(R.drawable.avatar_peter);
+                ImageLoader imageLoader = new ImageLoader(iv_avatar,playerInfo.getPlayer().getAvatar(),null,getContext());
+                imageLoader.execute();
                 break;
         }
         showStats(playerInfo.getTotalStats());

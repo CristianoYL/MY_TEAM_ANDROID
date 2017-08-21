@@ -7,9 +7,18 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.example.cristiano.myteam.util.AppUtils;
+import com.example.cristiano.myteam.util.Constant;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by Cristiano on 2017/6/8.
@@ -17,24 +26,36 @@ import java.io.ByteArrayOutputStream;
 
 public class LocalDBHelper extends SQLiteOpenHelper {
 
+    public static final String TAG = "LocalDBHelper";
+
     public static final String LOCAL_DATABASE_NAME = "MY_TEAM_DB.db";
     public static final String TABLE_IMAGE = "IMAGE_CACHE";
-    public static final String IMAGE_COL_URL = "url";
-    public static final String IMAGE_COL_BITMAP = "bitmap";
+    public static final String IMAGE_COL_URL = "url";   // the url of the image
+    public static final String IMAGE_COL_LOCAL_PATH = "path";   // the local absolute path
+
+    private static LocalDBHelper instance;
 
     Context context;
     SQLiteDatabase db;
 
-    public LocalDBHelper(Context context) {
+    private LocalDBHelper(Context context) {
         super(context, LOCAL_DATABASE_NAME, null, 1);
         this.db = this.getWritableDatabase();
         this.context = context;
     }
+
+    public static LocalDBHelper getInstance(Context context){
+        if ( instance == null ) {
+            instance = new LocalDBHelper(context.getApplicationContext());
+        }
+        return instance;
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + TABLE_IMAGE + " ("
                 + IMAGE_COL_URL + " TEXT PRIMARY KEY, "
-                + IMAGE_COL_BITMAP + " BLOB)");
+                + IMAGE_COL_LOCAL_PATH + " TEXT)");
     }
 
     @Override
@@ -44,34 +65,80 @@ public class LocalDBHelper extends SQLiteOpenHelper {
     }
 
     public Bitmap getCachedImage(String url) {
-        Cursor cursor = db.rawQuery("select * from "+ TABLE_IMAGE + " where "
+        Cursor cursor = db.rawQuery("SELECT * FROM "+ TABLE_IMAGE + " WHERE "
                 + IMAGE_COL_URL + "=?",new String[] {url});
         if ( cursor.getCount() == 1 ) {
-            cursor.moveToNext();
-            byte[] bytes = cursor.getBlob(1);  // col 1 is bitmap
-            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            cursor.moveToFirst();
+            String localPath = cursor.getString(1);  // col 1 is bitmap
+            cursor.close();
+            Log.d(TAG,"Use cache:" + localPath);
+            return BitmapFactory.decodeFile(localPath);
         } else {
+            Log.d(TAG,"No cached result");
             return null;
         }
     }
 
-    public boolean cacheImage(String url, Bitmap bitmap) {
-        byte[] image;
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        if ( bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream) ) {
-            image = stream.toByteArray();
-            ContentValues cv = new  ContentValues();
-            cv.put(IMAGE_COL_URL,url);
-            cv.put(IMAGE_COL_BITMAP,image);
+    /**
+     *  Cache the web image to local DB.
+     * @param url the web url of the image
+     * @param localPath the local path to cache the image
+     * @return whether the operation is successful
+     */
+    public boolean cacheImage(String url, String localPath) {
+        ContentValues cv = new  ContentValues();
+        cv.put(IMAGE_COL_URL,url);
+        cv.put(IMAGE_COL_LOCAL_PATH,localPath);
+        if ( db.update(TABLE_IMAGE,cv,IMAGE_COL_URL+"=?",new String[]{url}) != 1 ) {    // there should be only 1 affected entry if update successfully
+            Log.d(TAG,"Image cached for " + url +" does not exist, try to insert");
             if ( db.insert(TABLE_IMAGE, null, cv) != -1 ) {
+                Log.d(TAG,"Image "+url+" cached at " + localPath);
                 return true;
             }
+        } else {    // update success
+            Log.d(TAG,"Update image "+url+" cache to " + localPath);
+            return true;
         }
+        Log.e(TAG,"Failed to cache image "+url+" cached at " + localPath);
         return false;
     }
 
-    public void clearImageCache(){
-        SQLiteDatabase db = this.getWritableDatabase();
+    /**
+     * clear all cached images files and DB entries
+     */
+    public void clearAllImageCache(){
+        clearImageCache(null);
+    }
+
+    /**
+     *  clear the local cached image file as well as local DB entry.
+     *  If no url specified, clear all caches
+     * @param url the url of the cached image to clear
+     */
+    public void clearImageCache(String url){
+        Cursor cursor;
+        if ( url == null ) {    // delete all cached images
+            cursor = db.rawQuery("SELECT * FROM "+ TABLE_IMAGE,null);
+        } else {    // delete specified cache
+            cursor = db.rawQuery("SELECT * FROM "+ TABLE_IMAGE +" WHERE " + IMAGE_COL_URL + "=?",new String[]{url});
+        }
+        // delete local files
+        if ( cursor != null && cursor.getCount() > 0 ) {
+            for ( int i = 0; i < cursor.getCount(); i++ ) {
+                cursor.moveToNext();
+                String path = cursor.getString(1);
+                File file = new File(path);
+                if ( file.exists() ) {
+                    if ( !file.delete() ) {
+                        Log.e(TAG,"Delete file<"+path+"> failed.");
+                    } else {
+                        Log.d(TAG,"Delete file<"+path+">.");
+                    }
+                }
+            }
+            cursor.close();
+        }
+        // delete DB entries
         Toast.makeText(context, "Cleared " + db.delete(TABLE_IMAGE,"1",null) +
                 "  cached image(s)", Toast.LENGTH_SHORT).show();
     }

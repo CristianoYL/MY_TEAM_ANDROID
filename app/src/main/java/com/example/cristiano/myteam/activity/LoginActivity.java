@@ -591,7 +591,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         float weight = (float) jsonPlayer.getDouble(Constant.PLAYER_WEIGHT);
                         float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
                         boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
-                        int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
+                        String avatar = jsonPlayer.getString(Constant.PLAYER_AVATAR);
                         // use the retrieve info to create a Player instance
                         Player player = new Player(playerID,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
                         JSONArray jsonTopics = jsonObject.getJSONArray(Constant.KEY_TOPICS);

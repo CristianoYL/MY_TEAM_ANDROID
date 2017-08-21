@@ -1,23 +1,34 @@
 package com.example.cristiano.myteam.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.media.ExifInterface;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.cristiano.myteam.R;
+import com.example.cristiano.myteam.database.LocalDBHelper;
 import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.request.RequestHelper;
+import com.example.cristiano.myteam.service.aws.MyAmazonS3Service;
+import com.example.cristiano.myteam.service.image.ImageLoader;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
@@ -26,6 +37,11 @@ import com.google.gson.Gson;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.Locale;
 
 
@@ -34,20 +50,32 @@ import java.util.Locale;
  */
 public class PlayerRegistrationActivity extends AppCompatActivity {
 
+    private static final int REQUEST_PICK_IMAGE = 1;
+    private static final String TAG = "PlayerRegActivity";
+
     private String jwt;
     private Player player;
+
+    private String avatarUrl = "default";
+    private Bitmap avatarBitmap;
 
     private EditText et_firstName, et_lastName, et_displayName, et_age, et_phone, et_height, et_weight;
     private Switch sw_unit, sw_leftFooted;
     private Spinner sp_role, sp_position;
+    private Button btn_selectAvatar;
+    private ImageView iv_avatar;
     private ArrayAdapter<String> roleAdapter,positionAdapter;
     private Resources resources;
+    private MyAmazonS3Service s3Service;
+    private MyAmazonS3Service.OnUploadResultListener onUploadResultListener;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player_registration);
+        iv_avatar = (ImageView) findViewById(R.id.iv_avatar);
+        btn_selectAvatar = (Button) findViewById(R.id.btn_select_avatar);
         et_firstName = (EditText) findViewById(R.id.et_firstName);
         et_lastName = (EditText) findViewById(R.id.et_lastName);
         et_displayName = (EditText) findViewById(R.id.et_displayName);
@@ -115,6 +143,12 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                 sp_position.setSelection(positionAdapter.getPosition(this.player.getRole()));
             }
         }
+        btn_selectAvatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectAvatar();
+            }
+        });
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab_upload);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,6 +156,32 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                 uploadPlayerInfo();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if ( onUploadResultListener == null ) {
+            onUploadResultListener= new MyAmazonS3Service.OnUploadResultListener() {
+                @Override
+                public void onFinished(int responseCode, String message) {
+                    Log.d(TAG,"responseCode=" + responseCode + ", message=" + message);
+                    if ( responseCode == 200 ) { // upload image to S3 succeeded
+                        avatarUrl = message;
+                        ImageLoader loader = new ImageLoader(iv_avatar,message,null,
+                                PlayerRegistrationActivity.this);
+                        loader.loadImage();
+                        LocalDBHelper.getInstance(PlayerRegistrationActivity.this).clearImageCache(message);
+                    } else {    // upload image to S3 failed
+                        Toast.makeText(PlayerRegistrationActivity.this, message, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            };
+        }
+        if ( s3Service == null ) {
+            s3Service = new MyAmazonS3Service(PlayerRegistrationActivity.this,onUploadResultListener);
+        }
+        Log.d(TAG,"Register upload result listener");
     }
 
     /**
@@ -164,9 +224,8 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
         }
         boolean leftFooted = sw_leftFooted.isChecked();
         int userID = 0;
-        int avatar = 0;
 
-        Player player = new Player(id,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
+        Player player = new Player(id,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatarUrl);
         RequestAction actionRegPlayer = new RequestAction() {
             @Override
             public void actOnPre() {
@@ -193,7 +252,7 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
                         float weight = (float) jsonPlayer.getDouble(Constant.PLAYER_WEIGHT);
                         float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
                         boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
-                        int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
+                        String avatar = jsonPlayer.getString(Constant.PLAYER_AVATAR);
                         // use the retrieve info to create a Player instance
                         Player player = new Player(playerID,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
                         Intent intent = new Intent(PlayerRegistrationActivity.this,MainActivity.class);
@@ -224,5 +283,60 @@ public class PlayerRegistrationActivity extends AppCompatActivity {
             url = UrlHelper.urlPlayerByToken();
             RequestHelper.sendPostRequest(url, player.toJson(), jwt ,actionRegPlayer);
         }
+    }
+
+    private void selectAvatar(){
+        Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        getIntent.setType("image/*");
+
+        Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        pickIntent.setType("image/*");
+
+        Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
+
+        startActivityForResult(chooserIntent, REQUEST_PICK_IMAGE);
+    }
+
+    /**
+     *  After user selecting the image from gallery, this method will be called with the
+     *  selection result. Use the selection to create a InputStream and use the InputStream
+     *  to upload the selected image to S3 asynchronously.
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if ( requestCode == REQUEST_PICK_IMAGE && resultCode == Activity.RESULT_OK
+                && data != null ) {
+            AsyncUploadAvatar asyncUploadAvatar = new AsyncUploadAvatar(data.getData());
+            asyncUploadAvatar.upload();
+        }
+    }
+    private class AsyncUploadAvatar extends AsyncTask<Void,Void,Void>{
+        Uri uri;
+
+        AsyncUploadAvatar(Uri uri) {
+            this.uri = uri;
+        }
+
+        public void upload(){
+            execute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            s3Service.uploadAvatar(uri,player.getId());
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            avatarBitmap = null;
+        }
+
     }
 }

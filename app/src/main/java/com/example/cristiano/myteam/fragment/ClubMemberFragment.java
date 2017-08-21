@@ -121,7 +121,7 @@ public class ClubMemberFragment extends Fragment{
                                 e.printStackTrace();
                             }
                             int age = jsonPlayer.getInt(Constant.PLAYER_AGE);
-                            int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
+                            String avatar = jsonPlayer.getString(Constant.PLAYER_AVATAR);
                             float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
                             float weight = (float) jsonPlayer.getDouble(Constant.PLAYER_WEIGHT);
                             boolean leftFooted = jsonPlayer.getBoolean(Constant.PLAYER_FOOT);
@@ -289,7 +289,7 @@ public class ClubMemberFragment extends Fragment{
         boolean leftFooted = sw_leftFooted.isChecked();
         int id = 0;
         int userID = 0;
-        int avatar = 0;
+        String avatar = "";
         Player player = new Player(id,userID,firstName,lastName,displayName,role,phone,age,weight,height,leftFooted,avatar);
         RequestAction actionPostRegPlayer = new RequestAction() {
             @Override
@@ -310,7 +310,7 @@ public class ClubMemberFragment extends Fragment{
                         String displayName = jsonPlayer.getString(Constant.PLAYER_DISPLAY_NAME);
                         String phone = jsonPlayer.getString(Constant.PLAYER_PHONE);
                         String role = jsonPlayer.getString(Constant.PLAYER_ROLE);
-                        int avatar = jsonPlayer.getInt(Constant.PLAYER_AVATAR);
+                        String avatar = jsonPlayer.getString(Constant.PLAYER_AVATAR);
                         int age = jsonPlayer.getInt(Constant.PLAYER_AGE);
                         float height = (float) jsonPlayer.getDouble(Constant.PLAYER_HEIGHT);
                         float weight = (float) jsonPlayer.getDouble(Constant.PLAYER_WEIGHT);

@@ -16,6 +16,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
@@ -63,7 +65,7 @@ public class EventFragment extends Fragment {
     private static final String ARG_PLAYER = "player";
     private static final String TAG = "EventFragment";
 
-    private static final int EVENTS_PER_REQUEST = 5;   // load 5 events per request
+//    private static final int EVENTS_PER_REQUEST = 5;   // load 5 events per request
 
     private Club club;
     private Player player;
@@ -71,7 +73,9 @@ public class EventFragment extends Fragment {
     private List<Event> events;
     private AddressResultReceiver mResultReceiver;
     private Address eventAddress;
+    private List<Address> addressList;
     private String eventAddressStr;
+    private ArrayAdapter<String> addressListAdapter;
 
     private View view;
     private FloatingActionButton fab_addEvent;
@@ -196,13 +200,14 @@ public class EventFragment extends Fragment {
         et_eventTitle = (EditText) eventView.findViewById(R.id.et_eventTitle);
         sv_address = (SearchView) eventView.findViewById(R.id.sv_address);
         lv_address = (ListView) eventView.findViewById(R.id.lv_address);
+        lv_address.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         datePicker = (DatePicker) eventView.findViewById(R.id.datePicker);
         timePicker = (TimePicker) eventView.findViewById(R.id.timePicker);
         sw_time = (SwitchCompat) eventView.findViewById(R.id.sw_time);
         this.eventAddress = null;
         this.eventAddressStr = null;
 
-        if ( address != null ) {
+        if ( address != null ) {    // address is specified by MapFragment
             this.eventAddress = address;
             ArrayList<String> addressLines = new ArrayList<>();
             for ( int i = 0; i <= eventAddress.getMaxAddressLineIndex(); i++ ) {
@@ -210,6 +215,9 @@ public class EventFragment extends Fragment {
             }
             this.eventAddressStr = TextUtils.join(System.getProperty("line.separator"),addressLines);
             sv_address.setQuery(this.eventAddressStr,false);
+            addressListAdapter = new ArrayAdapter<String>(
+                    getContext(),android.R.layout.simple_list_item_single_choice,new String[]{eventAddressStr});
+            lv_address.setAdapter(addressListAdapter);
         }
 
         sw_time.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -226,6 +234,8 @@ public class EventFragment extends Fragment {
         sv_address.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
+                eventAddress = null;
+                eventAddressStr = null;
                 mResultReceiver = new AddressResultReceiver(new Handler());
                 startIntentService(query);
                 return false;
@@ -236,6 +246,20 @@ public class EventFragment extends Fragment {
                 return false;
             }
         });
+
+        lv_address.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                eventAddress = addressList.get(position);
+                ArrayList<String> addressLines = new ArrayList<>();
+                for ( int i = 0; i <= eventAddress.getMaxAddressLineIndex(); i++ ) {
+                    addressLines.add(eventAddress.getAddressLine(i));
+                }
+                eventAddressStr = TextUtils.join(System.getProperty("line.separator"),addressLines);
+            }
+        });
+
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setCancelable(false);
         builder.setView(eventView);
@@ -244,6 +268,19 @@ public class EventFragment extends Fragment {
         builder.setPositiveButton(R.string.label_event_confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        eventDialog = builder.show();
+
+        // override positive button
+        eventDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 int year = datePicker.getYear();
                 int month = datePicker.getMonth() + 1;
                 int day = datePicker.getDayOfMonth();
@@ -270,16 +307,17 @@ public class EventFragment extends Fragment {
                 DateFormat dateFormat = Constant.EVENT_DATE_FORMAT;
                 dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                 time = dateFormat.format(date);
-                Event event = new Event(0,club.id,et_eventTitle.getText().toString(),eventAddressStr,eventAddress.getLatitude(),eventAddress.getLongitude(),time);
-                postEvent(event);
+                if ( eventAddress != null && eventAddressStr != null ) {
+                    Event event = new Event(0,club.id,et_eventTitle.getText().toString(),eventAddressStr,eventAddress.getLatitude(),eventAddress.getLongitude(),time);
+                    postEvent(event);
+                    eventDialog.dismiss();
+                } else {
+                    Toast.makeText(getContext(), "event Address cannot be null!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
-        builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-        eventDialog = builder.show();
+
+        // override negative button
         eventDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -394,7 +432,7 @@ public class EventFragment extends Fragment {
         protected void onReceiveResult(int resultCode, Bundle resultData) {
 
             if (resultCode == Constant.SUCCESS_RESULT) {
-                ArrayList<Address> addressList = resultData.getParcelableArrayList(Constant.RESULT_DATA_KEY);
+                addressList = resultData.getParcelableArrayList(Constant.RESULT_DATA_KEY);
                 if ( addressList == null ) {
                     return;
                 }
@@ -407,9 +445,9 @@ public class EventFragment extends Fragment {
                     String addressName = TextUtils.join(System.getProperty("line.separator"),addressLines);
                     addresses.add(addressName);
                 }
-                lv_address.setAdapter(new ArrayAdapter<String>(
-                        getContext(),android.R.layout.simple_list_item_single_choice,addresses
-                ));
+                addressListAdapter = new ArrayAdapter<>(
+                        getContext(),android.R.layout.simple_list_item_single_choice,addresses);
+                lv_address.setAdapter(addressListAdapter);
             } else {
                 String errorMessage = resultData.getString(Constant.RESULT_DATA_KEY);
                 Toast.makeText(getContext(), errorMessage, Toast.LENGTH_SHORT).show();

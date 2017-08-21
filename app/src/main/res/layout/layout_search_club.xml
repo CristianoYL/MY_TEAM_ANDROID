@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp"
-            android:text="Search By:"/>
+            android:text="@string/label_search_by"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -63,7 +63,7 @@
             android:id="@+id/tv_clubListTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="search result:"
+            android:text="@string/label_search_result"
             android:layout_marginLeft="10dp"
             android:layout_marginStart="10dp"
             android:layout_marginRight="10dp"

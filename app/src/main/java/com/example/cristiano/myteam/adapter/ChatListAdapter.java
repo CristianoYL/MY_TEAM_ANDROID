@@ -18,7 +18,7 @@ import android.widget.TextView;
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.structure.Chat;
 import com.example.cristiano.myteam.util.Constant;
-import com.example.cristiano.myteam.request.ImageLoader;
+import com.example.cristiano.myteam.service.image.ImageLoader;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -102,16 +102,29 @@ public class ChatListAdapter extends BaseAdapter {
                 setVisibility(isSelf,true,viewHolder);
                 if ( isSelf ) {
                     viewHolder.tv_selfText.setText(chat.messageContent);
+                    viewHolder.tv_otherText.setText("");
+                    viewHolder.iv_otherImage.setImageBitmap(null);
+                    viewHolder.iv_selfImage.setImageBitmap(null);
                 } else {
+                    viewHolder.tv_selfText.setText("");
                     viewHolder.tv_otherText.setText(chat.messageContent);
+                    viewHolder.iv_otherImage.setImageBitmap(null);
+                    viewHolder.iv_selfImage.setImageBitmap(null);
+
                 }
                 break;
             case Constant.MESSAGE_TYPE_IMAGE:
                 setVisibility(isSelf,false,viewHolder);
                 ImageLoader imageLoader;
                 if ( isSelf ) {
+                    viewHolder.tv_selfText.setText("");
+                    viewHolder.tv_otherText.setText("");
+                    viewHolder.iv_otherImage.setImageBitmap(null);
                     imageLoader = new ImageLoader(viewHolder.iv_selfImage,chat.messageContent,viewHolder.pb_loadChat,context);
                 } else {
+                    viewHolder.tv_selfText.setText("");
+                    viewHolder.tv_otherText.setText("");
+                    viewHolder.iv_selfImage.setImageBitmap(null);
                     imageLoader = new ImageLoader(viewHolder.iv_otherImage,chat.messageContent,viewHolder.pb_loadChat,context);
                 }
                 imageLoader.execute();

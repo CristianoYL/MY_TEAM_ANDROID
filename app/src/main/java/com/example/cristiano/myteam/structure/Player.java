@@ -20,10 +20,10 @@ public class Player {
     private float weight;
     private float height;
     private boolean leftFooted;
-    private int avatar;
+    private String avatar;
 
     public Player(int id, int userID, String firstName, String lastName, String displayName, String role,
-                  String phone, int age, float weight, float height, boolean leftFooted, int avatar) {
+                  String phone, int age, float weight, float height, boolean leftFooted, String avatar) {
         this.id = id;
         this.userID = userID;
         this.firstName = firstName;
@@ -87,7 +87,7 @@ public class Player {
         return leftFooted;
     }
 
-    public int getAvatar() {
+    public String getAvatar() {
         return avatar;
     }
 }

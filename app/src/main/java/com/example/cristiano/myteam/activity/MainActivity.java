@@ -30,7 +30,7 @@ import com.example.cristiano.myteam.request.RequestAction;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Player;
 import com.example.cristiano.myteam.structure.Token;
-import com.example.cristiano.myteam.util.AppController;
+import com.example.cristiano.myteam.util.AppUtils;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.util.UrlHelper;
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) { // if the drawer menu is open
             drawer.closeDrawer(GravityCompat.START);    // close menu
         } else {
-//            AppController.minimizeOnDoubleBack(this);    // minimizeOnDoubleBack the app on double click
+//            AppUtils.minimizeOnDoubleBack(this);    // minimizeOnDoubleBack the app on double click
             FragmentManager fragmentManager = getSupportFragmentManager();
             PlayerProfileFragment playerProfileFragment =
                     (PlayerProfileFragment) fragmentManager.findFragmentByTag(Constant.FRAGMENT_PLAYER_PROFILE);
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity
             }
             int count = fragmentManager.getBackStackEntryCount();
             if ( count == 1 ) {
-                AppController.minimizeOnDoubleBack(MainActivity.this);
+                AppUtils.minimizeOnDoubleBack(MainActivity.this);
             } else {
                 super.onBackPressed();
             }
@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity
         builder.setPositiveButton(R.string.label_confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                AppController.logOut(MainActivity.this);
+                AppUtils.logOut(MainActivity.this);
             }
         });
         builder.setNegativeButton(R.string.label_cancel, new DialogInterface.OnClickListener() {

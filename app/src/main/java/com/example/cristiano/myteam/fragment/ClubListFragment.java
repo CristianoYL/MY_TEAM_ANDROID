@@ -32,7 +32,7 @@ import com.example.cristiano.myteam.request.RequestHelper;
 import com.example.cristiano.myteam.structure.Club;
 import com.example.cristiano.myteam.structure.Member;
 import com.example.cristiano.myteam.structure.Player;
-import com.example.cristiano.myteam.util.AppController;
+import com.example.cristiano.myteam.util.AppUtils;
 import com.example.cristiano.myteam.util.Constant;
 import com.example.cristiano.myteam.util.UrlHelper;
 import com.google.gson.Gson;
@@ -292,7 +292,7 @@ public class ClubListFragment extends Fragment {
                 searchResultView.setVisibility(View.VISIBLE);
                 btn_join.setVisibility(View.INVISIBLE);
                 // hide keyboard
-                AppController.hideKeyboard(getContext(),sv_club);
+                AppUtils.hideKeyboard(getContext(),sv_club);
 
                 RequestAction actionGetClubByID = new RequestAction() {
                     @Override

@@ -31,7 +31,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -84,7 +83,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
     private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 10086;
 
     private GoogleMap mMap;
-    private Marker selfMarker,eventMarker;
+    private Marker selfMarker, searchMarker,eventMarker;
     private HashMap<Integer,Marker> teammateMarkerMap; // map teammate's playerID to marker
     private ArrayList<Address> addressList;
     private Address eventAddress;
@@ -164,6 +163,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
             throw new ClassCastException(context.toString()
                     + "must implement OnCreateEventRequestListener");
         }
+        locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
     }
 
     @Override
@@ -177,7 +177,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
         super.onDetach();
         locationManager.removeUpdates(locationListener);
         selfMarker = null;
-        eventMarker = null;
+        searchMarker = null;
         if ( teammateMarkerMap != null ) {
             teammateMarkerMap.clear();
         }
@@ -535,13 +535,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
                 btn_more.setVisibility(View.VISIBLE);
                 if ( position < addressList.size() ) {
                     eventAddress = addressList.get(position);
-                    if ( eventMarker == null ) {
-                        eventMarker = addMarkerOnMap(eventAddress.getLatitude(),eventAddress.getLongitude(),"Event Location",null);
+                    if ( searchMarker == null ) {
+                        searchMarker = addMarkerOnMap(eventAddress.getLatitude(),eventAddress.getLongitude(),"Event Location",null);
                     } else {
-                        eventMarker.setPosition(new LatLng(eventAddress.getLatitude(),eventAddress.getLongitude()));
-                        eventMarker.setVisible(true);
+                        searchMarker.setPosition(new LatLng(eventAddress.getLatitude(),eventAddress.getLongitude()));
+                        searchMarker.setVisible(true);
                     }
-                    mMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(eventMarker.getPosition(),9)));
+                    mMap.moveCamera(CameraUpdateFactory.newCameraPosition(CameraPosition.fromLatLngZoom(searchMarker.getPosition(),9)));
                 } else {
                     Log.e(TAG,"Address result list index out of bound.");
                 }
@@ -576,8 +576,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
                 btn_more.setVisibility(View.VISIBLE);
             }
         });
-
-        locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
         startLocating();
     }
 
@@ -764,7 +762,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleMa
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if ( eventMarker != null && marker.equals(eventMarker) ) {
+        if ( searchMarker != null && marker.equals(searchMarker) ) {
             fab_addEvent.setVisibility(View.VISIBLE);
             Log.d(TAG,"onMarkerClick:"+marker.getTitle());
         }

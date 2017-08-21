@@ -4,7 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -18,12 +24,14 @@ import android.widget.Toast;
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.activity.LoginActivity;
 
+import java.io.File;
+
 /**
  * Created by Cristiano on 2017/6/24.
  */
 
-public class AppController {
-    private static final String TAG = "AppController";
+public class AppUtils {
+    private static final String TAG = "AppUtils";
 
     private static boolean isBackPressed = false;
     /**
@@ -106,4 +114,60 @@ public class AppController {
                 break;
         }
     }
+
+    /**
+     *  Get the available cache directory on the device.
+     *  Always prefer to store on external cache than memory
+     * @param context the application context
+     * @return the available cache dir
+     */
+    public static String getDiskCacheDir(Context context) {
+        String cachePath = null;
+        File file;
+        if ( (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
+                || !Environment.isExternalStorageRemovable() )
+                && (file = context.getExternalCacheDir()) != null ) {    // external cache available
+            cachePath = file.getPath();
+        } else {
+            cachePath = context.getCacheDir().getPath();
+        }
+        return cachePath;
+    }
+
+    /**
+     *  Get the available file directory on the device.
+     *  Always prefer to store on external storage than memory
+     * @param context the application context
+     * @return the available file dir
+     */
+    public static String getDiskFileDir(Context context) {
+        String cachePath = null;
+        File file;
+        if ( ( Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
+                || !Environment.isExternalStorageRemovable() )
+                && (file = context.getExternalFilesDir(null)) != null ) {    // external storage available
+            cachePath = file.getPath();
+        } else {
+            cachePath = context.getFilesDir().getPath();
+        }
+        return cachePath;
+    }
+
+    public static Bitmap getRotatedBitmap(Context context, Uri photoUri, Bitmap bitmap){
+        Cursor cursor = context.getContentResolver().query(photoUri,
+                new String[]{MediaStore.Images.ImageColumns.ORIENTATION}, null, null, null);
+        int orientation = -1;
+        if ( cursor != null && cursor.getCount() == 1) {
+            cursor.moveToFirst();
+            orientation = cursor.getInt(0);
+            cursor.close();
+        }
+        Log.d(TAG,"media orientation:"+orientation);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(orientation);
+        bitmap = Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,false);
+        return bitmap;
+
+    }
+
 }

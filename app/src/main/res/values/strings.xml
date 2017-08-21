@@ -108,6 +108,8 @@
     <string name="label_create_event">Create a new event</string>
     <string name="label_event_confirm">Create event</string>
     <string name="label_specify_event_time">Specify event time</string>
+    <string name="label_search_result">Search Result:</string>
+    <string name="label_search_by">Search By:</string>
 
 
 
@@ -210,4 +212,18 @@
         <item>@string/position_cf</item>
     </string-array>
 
+
+    <!-- AWS s3 related strings -->
+    <string name="error_no_intent">Bad request, no intent specified.</string>
+    <string name="error_intent_incomplete">Info incomplete, please specify upload type, bitmap and callback in the intent</string>
+    <string name="error_missing_sender">Info incomplete, please specify senderID.</string>
+    <string name="error_avatar_info_incomplete">Info incomplete, please specify player ID.</string>
+    <string name="error_tournament_chat_info_incomplete">Info incomplete, please specify tournamentId, clubID and senderID.</string>
+    <string name="error_club_chat_info_incomplete">Info incomplete, please specify clubID and senderID.</string>
+    <string name="error_private_chat_info_incomplete">Info incomplete, please specify receiverID and senderID.</string>
+    <string name="error_unknown_instruction">Unknown upload type, upload aborted.</string>
+    <string name="error_unknown_chat_type">Unknown chat type, upload aborted.</string>
+    <string name="error_upload_failed">Upload failed!</string>
+    <string name="prompt_upload_canceled">Upload canceled.</string>
+    <string name="prompt_upload_completed">Upload completed.</string>
 </resources>

@@ -31,15 +31,12 @@ public class Constant {
     public static final String KEY_MSG = "message";
     public static final String KEY_CLUB_ID = "clubID";
     public static final String KEY_PLAYER_ID = "playerID";
-    public static final String KEY_RECEIVER_ID = "receiverID";
-    public static final String KEY_SENDER_ID = "senderID";
     public static final String KEY_PLAYER = "player";
     public static final String KEY_TOURNAMENT_ID= "tournamentID";
-    public static final String KEY_IS_VISITOR = "isVisitor";
-    public static final String KEY_PLAYER_INFO = "playerInfo";
     public static final String KEY_CLUB_INFO = "clubInfo";
     public static final String KEY_GAME_PERFORMANCE = "gamePerformance";
-    public static final String KEY_DEFAULT_CLUB_ID = "defaultClubID";
+    public static final String KEY_CONTEXT = "context";
+
 
     public static final String INTENT_NEW_MESSAGE = "new message";
 
@@ -308,4 +305,19 @@ public class Constant {
     public static final String RESULT_DATA_KEY = "RESULT_DATA_KEY";
     public static final String LOCATION_DATA_EXTRA = "LOCATION_DATA_EXTRA";
     public static final String ADDRESS_DATA_EXTRA = "ADDRESS_DATA_EXTRA";
+
+    // AWS S3 related constants
+    public static final String S3_BUCKET = "s3-test-jian";
+    public static final String S3_ROOT_FOLDER = "https://s3.amazonaws.com/s3-test-jian/";
+    public static final String S3_IDENTITY_POOL_ID = "us-west-2:9f75cf75-db5b-4d31-88a4-67889bdf82c9";
+    public static final String S3_UPLOAD_RESULT_LISTENER = "onUploadResultListener";
+    public static final String S3_UPLOAD_BITMAP = "bitmap";
+    public static final String S3_SHOULD_COMPRESS = "shouldCompress";
+    public static final String S3_UPLOAD_TYPE = "uploadType";
+    public static final int S3_UPLOAD_AVATAR = 0;
+    public static final int S3_UPLOAD_CHAT_IMAGE = 1;
+    public static final String IMAGE_FORMAT = ".jpg";
+    public static final int IMAGE_COMPRESS_RATE = 60;
+    public static final int IMAGE_NO_COMPRESS_RATE = 100;
+
 }

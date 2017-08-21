@@ -10,12 +10,12 @@ public class UrlHelper {
     //AWS URL
     private static final String AWS_URL = "http://ec2-52-90-49-22.compute-1.amazonaws.com:5000";
     // Heroku URL
-    private static final String FLASK_URL = "https://my-team-rest-api.herokuapp.com";
+    private static final String HEROKU_URL = "https://my-team-rest-api.herokuapp.com";
     //local testing URL
-    private static final String HOME_URL = "http://192.168.1.11:5000";
+    private static final String HOME_URL = "http://192.168.1.4:5000";
 
-    private static final String URL = AWS_URL;
-//    private static final String URL = FLASK_URL;
+//    private static final String URL = AWS_URL;
+    private static final String URL = HEROKU_URL;
 //    private static final String URL = HOME_URL;
 
     public static String urlLogin(){
@@ -152,4 +152,32 @@ public class UrlHelper {
         return URL + "/location/club/" + clubID;
     }
 
+    public static String s3PlayerAvatarFolder(int playerID) {
+        return "image/avatar/avatar_player_" + playerID;
+    }
+
+    /**
+     *  store chat images in dedicated folders, use current time and sender to create unique filename
+     */
+    public static String s3ClubChatFolder(int clubID, int senderID) {
+        return "image/chat/club/clubID_"+clubID+"/"
+                + System.currentTimeMillis() + "_senderID_" + senderID;
+    }
+
+    public static String s3TournamentChatFolder(int tournamentID, int clubID, int senderID) {
+        return "image/chat/tournament/tournamentID_" + tournamentID
+                + "/club/clubID_" + clubID + "/"
+                + System.currentTimeMillis() + "_senderID_" + senderID;
+    }
+
+    /**
+     * Use folder /player1ID_player2ID/ to store private chat between player1 and player2,
+     * where player1's ID is always smaller than player2's ID, so that we only need one folder
+     * to store mutual messages between these two players
+     */
+    public static String s3PrivateChatFolder(int receiverID, int senderID) {
+        return "image/chat/private/"
+                + Math.min(receiverID,senderID) + "_" + Math.max(receiverID,senderID)
+                + "/" + System.currentTimeMillis() + "_senderID_" + senderID;
+    }
 }
