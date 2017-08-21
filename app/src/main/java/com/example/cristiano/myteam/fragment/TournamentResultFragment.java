@@ -210,7 +210,7 @@ public class TournamentResultFragment extends Fragment {
                 resultMap.put(Constant.RESULT_KEY_SCORE,results[i].extraScore);
             }
             resultMap.put(Constant.RESULT_KEY_PEN,"");
-            if ( results[i].penScore != null && results[i].penScore != "" && results[i].penScore != "null" ) {
+            if ( results[i].penScore != null && !results[i].penScore.equals("null" )) {
                 resultMap.put(Constant.RESULT_KEY_PEN,results[i].penScore);
             }
             // initialize homeID event list for this game result[i]
