@@ -193,7 +193,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:id="@+id/et_height"
-                    android:inputType="numberDecimal|"
+                    android:inputType="numberDecimal"
                     android:imeOptions="actionNext"
                     android:hint="@string/player_height"/>
             </android.support.design.widget.TextInputLayout>
