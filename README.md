@@ -28,7 +28,7 @@ Since **Android Studio** uses **gradle build**, you don't need to worry about de
 # User Guide
 
 ## Login/Register
-<img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-233611.png" width="320">
+<img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-233611.png" width="200">
 
 User will first be prompt with a login/register page, just like any other app will do. After one has logged in, a profile page will appear and ask for your basic info which will be presented as your profile.
 
@@ -49,10 +49,10 @@ A player's profile page will show his basic info stats. The stats are visualized
 
 The Club Page contains all the functionalities related to player's clubs, which includes chat, roster, map and event pages. The sub-pages are also embedded in a Tabbed ViewPager which allows the user navigating through them easily using swiping as well as tapping the tabs.
 
-<img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-234116.png" width="200"> <img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-234138.png" width="200"> <img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-234417.png" width="200">
-
 ### Chat
 The Chat Page allow players within the same club talking and sharing images.
+
+<img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-234116.png" width="200"> 
 
 ### Member
 The Member Page shows the roster information. And if a user has admin privilege, such as Captains and Co-caps, he can manage the clubs through this page, including promoting members as admins, kicking member out and accepting new applicants to club.
@@ -64,8 +64,12 @@ The user may search for an address in the search bar as well. The admins can use
 
 Another important feature of the Map Page is online check-in. If you've played amateur football, it is quite often the case that people won't show up on time as they said to. The online check-in feature allows the captains to have some prevision how his squad would turn up on a chilling Sunday game, and whether John Doe is indeed "5 minutes away" or just still in bed.
 
+<img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-234138.png" width="200"> 
+
 ### Event
-The Event Page will present all the events of the clubs. The latest posting from the captains will show up here.
+The Event Page will present all the events of the clubs. The latest posting from the captains will show up here. Captains can post events from here too.
+
+<img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-234417.png" width="200">
 
 ## Tournament
 For the Club Page, you can also view all the tournaments your club is participating. Once you select a particular tournament, you'll navigate to the Tournament Page which is very similar to the Club Page, but only reflects the info in this particular tournament. The Tournament Page also contains several sub-pages in its Tabbed ViewPager, which includes Result, Squad, Stats and Chat pages.
@@ -73,7 +77,7 @@ For the Club Page, you can also view all the tournaments your club is participat
 ### Result
 The Result page shows the club's game results in this tournament, which include the score, game events and players (goal and goal scorer for example).
 
-<img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-234442.png" width="320">
+<img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-234442.png" width="200">
 
 ### Squad
 The Squad Page is similar as the club's Member Page, however, not all club member may be playing this particular Tournament. Thus you may view the Squad as a sub-set of the Member of your club. The Captains also have admin privilege in the Squad Page.
@@ -81,4 +85,4 @@ The Squad Page is similar as the club's Member Page, however, not all club membe
 ### Stats
 The Stats page shows the club's overall performance in this tournament.
 
-<img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-234452.png" width="320">
+<img src="https://github.com/CristianoYL/MY_TEAM_ANDROID/blob/master/sample/Screenshot_20171116-234452.png" width="200">
