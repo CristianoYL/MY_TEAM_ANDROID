@@ -6,7 +6,6 @@ package com.example.cristiano.myteam.service.image;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
@@ -17,11 +16,6 @@ import android.widget.Toast;
 import com.example.cristiano.myteam.R;
 import com.example.cristiano.myteam.database.LocalDBHelper;
 import com.example.cristiano.myteam.service.aws.MyAmazonS3Service;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 
 public class ImageLoader extends AsyncTask<Void, Void, Bitmap> {
 
